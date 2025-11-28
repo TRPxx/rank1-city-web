@@ -1,46 +1,46 @@
-# 🏙️ Rank1 City - Premium FiveM Roleplay Website
+# 🏙️ Rank1 City - เว็บไซต์ FiveM Roleplay ระดับพรีเมียม
 
 ![Rank1 City Banner](/public/images/hero-bg-fivem.webp)
 
-The official web application for **Rank1 City**, Thailand's premier FiveM Roleplay server. This project is a high-performance, visually stunning, and feature-rich platform designed to engage players and manage server activities.
+เว็บไซต์อย่างเป็นทางการสำหรับ **Rank1 City** เซิร์ฟเวอร์ FiveM Roleplay ชั้นนำของประเทศไทย โปรเจกต์นี้ถูกออกแบบมาให้มีประสิทธิภาพสูง สวยงามทันสมัย และอัดแน่นด้วยฟีเจอร์เพื่อรองรับผู้เล่นและจัดการกิจกรรมภายในเซิร์ฟเวอร์
 
-## ✨ Key Features
+## ✨ ฟีเจอร์เด่น
 
-### 🎨 **Immersive UI/UX**
-- **Modern Design:** Built with a "Cyberpunk/Premium" aesthetic using **Tailwind CSS**.
-- **Smooth Animations:** Powered by **Framer Motion** for complex entrance effects, scroll reveals, and micro-interactions.
-- **Parallax Scrolling:** Engaging landing page experience with scroll-snap sections.
+### 🎨 **UI/UX ที่เหนือระดับ**
+- **ดีไซน์ทันสมัย:** ออกแบบในธีม "Cyberpunk/Premium" โดยใช้ **Tailwind CSS**
+- **Animation ลื่นไหล:** ขับเคลื่อนด้วย **Framer Motion** สำหรับเอฟเฟกต์เปิดตัว การเลื่อนหน้าจอ และลูกเล่นต่างๆ
+- **Parallax Scrolling:** ประสบการณ์หน้า Landing Page ที่น่าตื่นตาตื่นใจ พร้อมระบบ Scroll-snap
 
-### 🎰 **Interactive Lucky Draw (Gachapon)**
-- **Real-time Probability:** Server-side logic for fair item distribution.
-- **Premium Animations:** Custom "tape-roll" animation, rotating sunburst effects, and rarity-based glows.
-- **Responsive Layout:** Adaptive grid/stack layout for mobile and desktop.
-- **History Tracking:** Users can view their past spin results instantly.
+### 🎰 **ระบบสุ่มรางวัล (Lucky Draw / Gachapon)**
+- **คำนวณเรทจริง:** ใช้ Logic ฝั่ง Server เพื่อความยุติธรรมในการแจกไอเทม
+- **Animation สุดพรีเมียม:** เอฟเฟกต์หมุนวงล้อแบบเทป (Tape-roll), แสง Sunburst หมุนวน และแสง Glow ตามระดับความหายาก (Rarity)
+- **รองรับทุกหน้าจอ:** ปรับ Layout อัตโนมัติทั้งบนมือถือและคอมพิวเตอร์
+- **ประวัติการสุ่ม:** ผู้เล่นสามารถดูประวัติการได้รับของรางวัลย้อนหลังได้ทันที
 
-### 🚀 **High Performance (Lighthouse 98/100)**
-- **Optimized Assets:** All major images converted to **WebP** for lightning-fast loads.
-- **Lazy Loading:** Heavy components (News, Feature Tabs) are lazy-loaded to reduce initial bundle size.
-- **Code Splitting:** Efficient Next.js App Router implementation.
-- **Animation Optimization:** Usage of `will-change` and hardware acceleration for 60fps performance on mobile.
+### 🚀 **ประสิทธิภาพสูง (Lighthouse 98/100)**
+- **Optimized Assets:** แปลงรูปภาพหลักเป็น **WebP** เพื่อการโหลดที่รวดเร็วที่สุด
+- **Lazy Loading:** โหลด Component หนักๆ (เช่น ข่าวสาร, แท็บฟีเจอร์) เฉพาะเมื่อจำเป็น
+- **Code Splitting:** ใช้ Next.js App Router เพื่อแยกส่วนโค้ดอย่างมีประสิทธิภาพ
+- **Animation Optimization:** ใช้ `will-change` และ Hardware Acceleration เพื่อให้ได้ 60fps แม้บนมือถือ
 
-### 🔍 **SEO & Social Ready**
-- **Structured Data (JSON-LD):** Marked up as a `VideoGame` for rich search results.
-- **Open Graph:** Fully configured metadata for beautiful link previews on Discord and Facebook.
-- **Semantic HTML:** Proper heading hierarchy and accessible structure.
+### 🔍 **รองรับ SEO & Social Media**
+- **Structured Data (JSON-LD):** ระบุข้อมูลเว็บเป็น `VideoGame` เพื่อผลการค้นหาที่ดีบน Google
+- **Open Graph:** ตั้งค่า Metadata ครบถ้วน แสดงผลรูปภาพและข้อความสวยงามเมื่อแชร์ลง Discord หรือ Facebook
+- **Semantic HTML:** โครงสร้างเว็บถูกต้องตามหลักมาตรฐาน
 
 ### 📱 **PWA & Mobile First**
-- **Installable:** Progressive Web App (PWA) support with `manifest.js`. Users can install the site to their home screen.
-- **Touch Optimized:** Disable scroll-snap on small screens for better usability.
-- **Responsive Navigation:** Mobile-friendly hamburger menu and touch-friendly targets.
+- **ติดตั้งได้ (Installable):** รองรับ Progressive Web App (PWA) ผู้ใช้สามารถติดตั้งเว็บลงหน้าจอหลักได้เหมือนแอป
+- **Touch Optimized:** ปรับแต่งการสัมผัสและปิด Scroll-snap บนมือถือเพื่อการใช้งานที่ลื่นไหล
+- **Responsive Navigation:** เมนูแบบ Hamburger และปุ่มกดที่ออกแบบมาสำหรับนิ้วมือ
 
-### ♿ **Accessibility (WCAG AA)**
-- **High Contrast:** Colors tuned for readability in Dark Mode.
-- **Keyboard Navigation:** Full focus management and visible focus rings.
-- **Screen Reader Friendly:** ARIA labels and semantic tags throughout.
+### ♿ **การเข้าถึง (Accessibility / WCAG AA)**
+- **High Contrast:** ปรับจูนสีให้อ่านง่ายสบายตาในโหมดกลางคืน (Dark Mode)
+- **Keyboard Navigation:** รองรับการใช้งานด้วยคีย์บอร์ดเต็มรูปแบบ พร้อม Focus Ring ที่ชัดเจน
+- **Screen Reader Friendly:** มี ARIA labels และ Semantic tags ครบถ้วน
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ เทคโนโลยีที่ใช้ (Tech Stack)
 
 - **Framework:** [Next.js 14](https://nextjs.org/) (App Router)
 - **Styling:** [Tailwind CSS](https://tailwindcss.com/) + [Shadcn UI](https://ui.shadcn.com/)
@@ -51,21 +51,21 @@ The official web application for **Rank1 City**, Thailand's premier FiveM Rolepl
 
 ---
 
-## 🚀 Getting Started
+## 🚀 การเริ่มต้นใช้งาน (Getting Started)
 
-1. **Clone the repository:**
+1. **Clone โปรเจกต์:**
    ```bash
    git clone https://github.com/TRPxx/rank1-city-web.git
    cd rank1-city-web
    ```
 
-2. **Install dependencies:**
+2. **ติดตั้ง Dependencies:**
    ```bash
    npm install
    ```
 
-3. **Configure Environment:**
-   Create a `.env` file in the root directory:
+3. **ตั้งค่า Environment Variables:**
+   สร้างไฟล์ `.env` ในโฟลเดอร์หลัก:
    ```env
    DB_HOST=localhost
    DB_USER=root
@@ -79,28 +79,28 @@ The official web application for **Rank1 City**, Thailand's premier FiveM Rolepl
    NEXTAUTH_URL=http://localhost:3000
    ```
 
-4. **Run Development Server:**
+4. **รันเซิร์ฟเวอร์ (Development Mode):**
    ```bash
    npm run dev
    ```
 
-5. **Open Browser:**
-   Visit [http://localhost:3000](http://localhost:3000) to see the application.
+5. **เปิดเบราว์เซอร์:**
+   ไปที่ [http://localhost:3000](http://localhost:3000) เพื่อดูผลลัพธ์
 
 ---
 
-## 📂 Project Structure
+## 📂 โครงสร้างโปรเจกต์
 
-- `app/`: Next.js App Router pages and layouts.
-- `components/`: Reusable UI components (Navbar, Footer, LuckyDraw, etc.).
-- `lib/`: Utility functions and configuration files (`preregister-config.js`).
-- `public/`: Static assets (images, icons).
-- `styles/`: Global styles and Tailwind configuration.
-
----
-
-## 👨‍💻 Developed By
-**Rank1 Development Team**
+- `app/`: หน้าเว็บและ Layout ต่างๆ (Next.js App Router)
+- `components/`: UI Components ที่ใช้ซ้ำได้ (Navbar, Footer, LuckyDraw ฯลฯ)
+- `lib/`: ฟังก์ชัน Utility และไฟล์ตั้งค่า (`preregister-config.js`)
+- `public/`: ไฟล์ Static (รูปภาพ, ไอคอน)
+- `styles/`: ไฟล์ CSS หลักและการตั้งค่า Tailwind
 
 ---
-*Last Updated: November 2025*
+
+## 👨‍💻 พัฒนาโดย
+**ทีมงาน Rank1 Development**
+
+---
+*อัปเดตล่าสุด: พฤศจิกายน 2025*
