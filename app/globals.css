@@ -5,74 +5,83 @@
 @layer base {
   :root {
     /* 
-      🎨 THEME CUSTOMIZATION GUIDE
-      Change these HSL values to customize your site's color scheme.
-      Format: Hue Saturation% Lightness% (e.g., 222.2 47.4% 11.2%)
+      🎨 THEME CUSTOMIZATION: RANK1 PREMIUM (Based on Logo)
+      Concept: Royal Electric Blue + Metallic Silver + Deep Abyss
     */
 
-    --background: 0 0% 100%;
-    /* สีพื้นหลังหลัก (Light Mode) */
-    --foreground: 240 10% 3.9%;
-    /* สีตัวอักษรหลัก */
+    /* Light Mode: Clean, Silver-White Base with Royal Blue Accents */
+    --background: 210 20% 98%;
+    /* Silver White */
+    --foreground: 222.2 84% 4.9%;
 
     --card: 0 0% 100%;
-    /* สีพื้นหลัง Card */
-    --card-foreground: 240 10% 3.9%;
+    --card-foreground: 222.2 84% 4.9%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 3.9%;
+    --popover-foreground: 222.2 84% 4.9%;
 
-    /* 🔥 PRIMARY COLOR (สีหลักของแบรนด์) */
-    --primary: 240 5.9% 10%;
-    /* สีปุ่มหลัก, icon สำคัญ */
-    --primary-foreground: 0 0% 98%;
-    /* สีตัวอักษรบนปุ่มหลัก */
+    /* 🔥 PRIMARY: ROYAL ELECTRIC BLUE (จากโลโก้ Rank1) */
+    --primary: 225 85% 55%;
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 240 4.8% 95.9%;
-    /* สีรอง */
-    --secondary-foreground: 240 5.9% 10%;
+    --secondary: 210 20% 90%;
+    /* Metallic Silver Light */
+    --secondary-foreground: 222.2 47.4% 11.2%;
 
-    --muted: 240 4.8% 95.9%;
-    /* สีเทาๆ สำหรับของที่ไม่เด่น */
-    --muted-foreground: 240 3.8% 46.1%;
+    --muted: 210 20% 90%;
+    --muted-foreground: 215.4 16.3% 46.9%;
 
-    --accent: 240 4.8% 95.9%;
-    /* สีเมื่อ Hover */
-    --accent-foreground: 240 5.9% 10%;
+    --accent: 210 20% 90%;
+    --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
-    /* สีแดง (Error/Delete) */
-    --destructive-foreground: 0 0% 98%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 240 5.9% 90%;
-    /* สีเส้นขอบ */
-    --input: 240 5.9% 90%;
-    --ring: 240 5.9% 10%;
+    --border: 214.3 31.8% 85%;
+    /* Silver Border */
+    --input: 214.3 31.8% 85%;
+    --ring: 225 85% 55%;
 
     --radius: 0.5rem;
-    /* ความโค้งของมุมปุ่ม/กล่อง */
+    /* Sharp but slightly rounded for modern feel */
   }
 
   .dark {
-    --background: 240 10% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 240 10% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 240 5.9% 10%;
-    --secondary: 240 3.7% 15.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 240 3.7% 15.9%;
-    --accent-foreground: 0 0% 98%;
+    /* Dark Mode: Deep Abyss Background (ดำเหลือบน้ำเงิน) */
+    --background: 230 35% 7%;
+    --foreground: 210 20% 98%;
+    /* Silver White Text */
+
+    --card: 230 30% 10%;
+    /* Lighter Abyss for Cards */
+    --card-foreground: 210 20% 98%;
+
+    --popover: 230 30% 10%;
+    --popover-foreground: 210 20% 98%;
+
+    /* 🔥 PRIMARY: ROYAL ELECTRIC BLUE (Glows on dark bg) */
+    --primary: 225 85% 55%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 225 20% 15%;
+    /* Dark Silver/Grey */
+    --secondary-foreground: 210 20% 98%;
+
+    --muted: 225 20% 15%;
+    --muted-foreground: 215 15% 70%;
+    /* Silver Grey Text */
+
+    --accent: 225 25% 20%;
+    /* Hover State */
+    --accent-foreground: 210 20% 98%;
+
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 15.9%;
-    --ring: 240 4.9% 83.9%;
+    --destructive-foreground: 210 20% 98%;
+
+    --border: 225 20% 20%;
+    /* Dark Metallic Border */
+    --input: 225 20% 20%;
+    --ring: 225 85% 55%;
   }
 }
 
@@ -80,16 +89,101 @@
   * {
     @apply border-border;
   }
+
+  body {
+    @apply bg-background text-foreground;
+  }
 }
 
-/* Global Scrollbar Hide */
+/* Custom Scrollbar - Metallic Style */
 ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-700/50 rounded-full hover:bg-primary/80 transition-colors;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 
-* {
+.scrollbar-hide {
   -ms-overflow-style: none;
-  /* IE and Edge */
   scrollbar-width: none;
-  /* Firefox */
+}
+
+/* Animation Utilities */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-float-slow {
+  animation: float 5s ease-in-out infinite;
+}
+
+.animate-float-slower {
+  animation: float 7s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 8s linear infinite;
+}
+
+@keyframes gradient-x {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 3s ease infinite;
 }

@@ -1,0 +1,104 @@
+import { NextResponse } from 'next/server';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import pool from '@/lib/db';
+import { PREREGISTER_CONFIG } from '@/lib/preregister-config';
+
+export async function POST(request) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        const discordId = session.user.id;
+
+        const connection = await pool.getConnection();
+        await connection.beginTransaction();
+
+        try {
+            // 1. Check Ticket Balance
+            const [userRows] = await connection.query(
+                'SELECT ticket_count FROM preregistrations WHERE discord_id = ? FOR UPDATE',
+                [discordId]
+            );
+
+            if (userRows.length === 0) throw new Error('User not found');
+            const currentTickets = userRows[0].ticket_count;
+
+            if (currentTickets < 1) {
+                throw new Error('Not enough tickets');
+            }
+
+            // 2. Randomize Reward
+            const items = PREREGISTER_CONFIG.luckyDraw.items;
+            const totalChance = items.reduce((sum, item) => sum + item.chance, 0);
+            let random = Math.random() * totalChance;
+            let selectedItem = items[items.length - 1];
+
+            for (const item of items) {
+                if (random < item.chance) {
+                    selectedItem = item;
+                    break;
+                }
+                random -= item.chance;
+            }
+
+            // 3. Deduct Ticket & Log History
+            await connection.query(
+                'UPDATE preregistrations SET ticket_count = ticket_count - 1 WHERE discord_id = ?',
+                [discordId]
+            );
+
+            // FIX: Use 'item_id' and 'item_name' to match DB schema
+            await connection.query(
+                'INSERT INTO lucky_draw_history (discord_id, item_id, item_name, created_at) VALUES (?, ?, ?, NOW())',
+                [discordId, selectedItem.id, selectedItem.name]
+            );
+
+            // PHASE 5: Add to Claim Queue
+            await connection.query(
+                'INSERT INTO claim_queue (discord_id, item_id, item_name, amount, status) VALUES (?, ?, ?, 1, "pending")',
+                [discordId, selectedItem.id, selectedItem.name]
+            );
+
+            await connection.commit();
+
+            return NextResponse.json({
+                success: true,
+                reward: selectedItem,
+                remainingTickets: currentTickets - 1
+            });
+
+        } catch (err) {
+            await connection.rollback();
+            return NextResponse.json({ error: err.message }, { status: 400 });
+        } finally {
+            connection.release();
+        }
+
+    } catch (error) {
+        console.error('Lucky Draw Error:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+}
+
+export async function GET(request) {
+    try {
+        const session = await getServerSession(authOptions);
+        if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        const discordId = session.user.id;
+
+        // Get History (Last 10 items)
+        // FIX: Select 'item_name' as 'reward_name' for frontend compatibility
+        const [history] = await pool.query(
+            'SELECT item_name as reward_name, created_at FROM lucky_draw_history WHERE discord_id = ? ORDER BY created_at DESC LIMIT 10',
+            [discordId]
+        );
+
+        return NextResponse.json({ history });
+
+    } catch (error) {
+        console.error('Lucky Draw GET Error:', error);
+        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    }
+}
