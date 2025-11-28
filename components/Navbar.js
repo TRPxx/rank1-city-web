@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import ThemeToggle from './ThemeToggle';
 import { Button } from '@/components/ui/button';
-import { Gamepad2, ChevronDown, Globe, Menu, X, User } from 'lucide-react';
+import { Gamepad2, ChevronDown, Globe, Menu, X, User, Gift, Newspaper } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import siteConfig from '@/lib/config';
 import { useSession, signIn } from "next-auth/react";
@@ -32,11 +32,17 @@ export default function Navbar() {
 
                 {/* Desktop Menu */}
                 <nav className="hidden md:flex items-center space-x-6 text-sm font-medium">
-                    {siteConfig.navItems.map((item, index) => (
-                        <Link key={index} href={item.href} className="transition-colors hover:text-primary">
-                            {item.label}
-                        </Link>
-                    ))}
+                    {/* Activity & Gachapon Link (Simple Style) */}
+                    <Link href="/preregister" className="flex items-center gap-2 transition-colors hover:text-primary">
+                        <Gift className="w-4 h-4" />
+                        หน้ากิจกรรม & กาชาปอง
+                    </Link>
+
+                    {/* News Link */}
+                    <Link href="/news" className="flex items-center gap-2 transition-colors hover:text-primary">
+                        <Newspaper className="w-4 h-4" />
+                        ข่าวสาร
+                    </Link>
 
                     {/* Community Dropdown */}
                     <div className="relative group cursor-pointer flex items-center gap-1 hover:text-primary transition-colors">
@@ -109,11 +115,16 @@ export default function Navbar() {
                         aria-label="Mobile Navigation"
                     >
                         <div className="container py-4 flex flex-col gap-4">
-                            {siteConfig.navItems.map((item, index) => (
-                                <Link key={index} href={item.href} className="text-sm font-medium hover:text-primary px-2 py-1" onClick={toggleMobileMenu}>
-                                    {item.label}
-                                </Link>
-                            ))}
+                            {/* Mobile Custom Menu */}
+                            <Link href="/preregister" className="flex items-center gap-2 text-sm font-medium hover:text-primary px-2 py-1" onClick={toggleMobileMenu}>
+                                <Gift className="w-4 h-4" />
+                                หน้ากิจกรรม & กาชาปอง
+                            </Link>
+
+                            <Link href="/news" className="flex items-center gap-2 text-sm font-medium hover:text-primary px-2 py-1" onClick={toggleMobileMenu}>
+                                <Newspaper className="w-4 h-4" />
+                                ข่าวสาร
+                            </Link>
 
                             <div className="border-t pt-4 mt-2">
                                 <p className="text-xs text-muted-foreground mb-2 px-2">คอมมูนิตี้</p>
