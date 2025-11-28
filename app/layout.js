@@ -25,11 +25,12 @@ export const metadata = {
   icons: {
     icon: '/favicon.svg',
   },
+  metadataBase: new URL('https://rank1city.com'),
 };
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="th" suppressHydrationWarning>
+    <html lang="th">
       <body className={`${inter.className} ${kanit.variable} font-sans`}>
         <SessionProviderWrapper>
           <ThemeProvider

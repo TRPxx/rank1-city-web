@@ -86,13 +86,29 @@ export default function Home() {
   const progressPercent = Math.min(100, (totalRegistrations / maxCount) * 100);
 
   return (
-    <section className="w-full h-dvh overflow-y-auto snap-y snap-mandatory scroll-smooth scrollbar-hide bg-background text-foreground">
+    <section className="w-full h-dvh overflow-y-auto md:snap-y snap-mandatory scroll-smooth scrollbar-hide bg-background text-foreground">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "VideoGame",
+            "name": "Rank1 City",
+            "description": "The best FiveM Roleplay experience in Thailand",
+            "genre": ["Roleplay", "Simulation"],
+            "playMode": "MultiPlayer",
+            "url": "https://rank1city.com",
+            "applicationCategory": "Game",
+            "operatingSystem": "Windows"
+          })
+        }}
+      />
 
       {/* Slide 1: Hero Section */}
       <div className="w-full h-dvh snap-start flex flex-col relative overflow-hidden">
         <div className="absolute inset-0 opacity-20">
           <Image
-            src="/images/hero-bg-fivem.png"
+            src="/images/hero-bg-fivem.webp"
             alt="Hero Background"
             fill
             className="object-cover object-center"
@@ -114,6 +130,7 @@ export default function Home() {
               whileInView="visible"
               viewport={{ once: true }}
               variants={staggerContainer}
+              style={{ willChange: 'opacity, transform' }}
               className="space-y-6 md:space-y-8 text-center lg:text-left"
             >
               <motion.div variants={fadeInUp} className="space-y-2 md:space-y-4">
