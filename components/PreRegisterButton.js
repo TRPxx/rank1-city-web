@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useSession, signIn } from 'next-auth/react';
@@ -13,6 +14,11 @@ export default function PreRegisterButton({ onRegisterSuccess }) {
     const [referralCode, setReferralCode] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const handleRegister = async () => {
         setIsLoading(true);
@@ -81,55 +87,65 @@ export default function PreRegisterButton({ onRegisterSuccess }) {
                 ลงทะเบียนรับของรางวัล
             </Button>
 
-            <AnimatePresence>
-                {isOpen && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.9 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            exit={{ opacity: 0, scale: 0.9 }}
-                            className="bg-card border border-border p-6 rounded-xl w-full max-w-md shadow-2xl relative"
-                        >
-                            <h2 className="text-2xl font-bold mb-4 text-center flex items-center justify-center gap-2">
-                                <Gift className="text-primary" /> ยืนยันการลงทะเบียน
-                            </h2>
+            {mounted && createPortal(
+                <AnimatePresence>
+                    {isOpen && (
+                        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+                            <motion.div
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+                                onClick={() => setIsOpen(false)}
+                            />
+                            <motion.div
+                                initial={{ opacity: 0, scale: 0.9, y: 20 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.9, y: 20 }}
+                                className="bg-card border border-border p-6 rounded-xl w-full max-w-md shadow-2xl relative z-10"
+                            >
+                                <h2 className="text-2xl font-bold mb-4 text-center flex items-center justify-center gap-2">
+                                    <Gift className="text-primary" /> ยืนยันการลงทะเบียน
+                                </h2>
 
-                            <div className="space-y-4">
-                                <div className="text-center">
-                                    <p className="text-muted-foreground">สวัสดี, <span className="text-foreground font-semibold">{session.user.name}</span></p>
-                                    <p className="text-sm text-muted-foreground">คุณกำลังจะลงทะเบียน ID นี้เข้าสู่ระบบ</p>
-                                </div>
-
-                                <div>
-                                    <label className="text-sm font-medium mb-1 block">รหัสแนะนำเพื่อน (ถ้ามี)</label>
-                                    <Input
-                                        placeholder="เช่น R1-A8B2"
-                                        value={referralCode}
-                                        onChange={(e) => setReferralCode(e.target.value)}
-                                        className="text-center uppercase tracking-widest"
-                                    />
-                                    <p className="text-xs text-muted-foreground mt-1 text-center">ใส่รหัสเพื่อนเพื่อรับ Starter Pack เพิ่มเติม!</p>
-                                </div>
-
-                                {error && (
-                                    <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md text-center border border-destructive/20">
-                                        {error}
+                                <div className="space-y-4">
+                                    <div className="text-center">
+                                        <p className="text-muted-foreground">สวัสดี, <span className="text-foreground font-semibold">{session.user.name}</span></p>
+                                        <p className="text-sm text-muted-foreground">คุณกำลังจะลงทะเบียน ID นี้เข้าสู่ระบบ</p>
                                     </div>
-                                )}
 
-                                <div className="flex gap-3 pt-2">
-                                    <Button variant="outline" className="flex-1" onClick={() => setIsOpen(false)} disabled={isLoading}>
-                                        ยกเลิก
-                                    </Button>
-                                    <Button className="flex-1" onClick={handleRegister} disabled={isLoading}>
-                                        {isLoading ? <Loader2 className="animate-spin" /> : 'ยืนยันลงทะเบียน'}
-                                    </Button>
+                                    <div>
+                                        <label className="text-sm font-medium mb-1 block">รหัสแนะนำเพื่อน (ถ้ามี)</label>
+                                        <Input
+                                            placeholder="เช่น R1-A8B2"
+                                            value={referralCode}
+                                            onChange={(e) => setReferralCode(e.target.value)}
+                                            className="text-center uppercase tracking-widest"
+                                        />
+                                        <p className="text-xs text-muted-foreground mt-1 text-center">ใส่รหัสเพื่อนเพื่อรับ Starter Pack เพิ่มเติม!</p>
+                                    </div>
+
+                                    {error && (
+                                        <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-md text-center border border-destructive/20">
+                                            {error}
+                                        </div>
+                                    )}
+
+                                    <div className="flex gap-3 pt-2">
+                                        <Button variant="outline" className="flex-1" onClick={() => setIsOpen(false)} disabled={isLoading}>
+                                            ยกเลิก
+                                        </Button>
+                                        <Button className="flex-1" onClick={handleRegister} disabled={isLoading}>
+                                            {isLoading ? <Loader2 className="animate-spin" /> : 'ยืนยันลงทะเบียน'}
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
-                        </motion.div>
-                    </div>
-                )}
-            </AnimatePresence>
+                            </motion.div>
+                        </div>
+                    )}
+                </AnimatePresence>,
+                document.body
+            )}
         </>
     );
 }

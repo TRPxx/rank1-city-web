@@ -11,8 +11,10 @@ import dynamic from 'next/dynamic';
 import siteConfig from '@/lib/config';
 import { useSession, signIn } from 'next-auth/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import PreRegisterButton from '@/components/PreRegisterButton';
 import GlobalRegisCounter from '@/components/GlobalRegisCounter';
+import RecentRegistrations from '@/components/RecentRegistrations';
 import { PREREGISTER_CONFIG } from '@/lib/preregister-config';
 import { m, LazyMotion, domAnimation } from 'framer-motion';
 import { usePreregisterStatus } from '@/hooks/usePreregisterStatus';
@@ -53,6 +55,26 @@ const scaleIn = {
 export default function HomeClient({ initialFeatures }) {
     const { data: session } = useSession();
     const { isRegistered, isLoading, totalRegistrations, refetch } = usePreregisterStatus();
+    const router = useRouter();
+
+    // Check user registration status on login
+    useEffect(() => {
+        const checkUserRegistration = async () => {
+            if (session?.user) {
+                try {
+                    const res = await fetch('/api/user/check');
+                    const data = await res.json();
+                    if (data.status === 'not_found') {
+                        router.push('/register');
+                    }
+                } catch (error) {
+                    console.error("Failed to check registration status:", error);
+                }
+            }
+        };
+
+        checkUserRegistration();
+    }, [session, router]);
 
     const fetchStatus = async () => {
         // Trigger a re-fetch of the data without reloading the page
@@ -163,15 +185,7 @@ export default function HomeClient({ initialFeatures }) {
                                 className="hidden lg:flex relative lg:h-[500px] items-center justify-center"
                             >
                                 <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent rounded-full blur-3xl opacity-30 animate-pulse" />
-                                <div className="relative w-full max-w-xs md:max-w-sm lg:max-w-md aspect-square bg-gradient-to-b from-muted/50 to-muted/10 rounded-3xl border border-border/50 flex items-center justify-center shadow-2xl rotate-3 hover:rotate-0 transition-transform duration-500">
-                                    <div className="text-center p-6">
-                                        <Gamepad2 className="w-16 h-16 text-primary mx-auto mb-4 opacity-50" />
-                                        <span className="text-muted-foreground font-medium text-sm md:text-base block mb-6">Character Art / Gameplay Video</span>
-                                        <Button variant="secondary" className="gap-2 bg-background/80 backdrop-blur hover:bg-background text-sm md:text-base">
-                                            <PlayCircle className="h-4 w-4 md:h-5 md:w-5 text-primary" /> รับชมตัวอย่าง
-                                        </Button>
-                                    </div>
-                                </div>
+                                <RecentRegistrations />
                             </m.div>
                         </div>
                     </div>
