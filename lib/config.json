@@ -1,0 +1,37 @@
+{
+    "name": "Website",
+    "description": "The Ultimate FiveM Experience. Roleplay, Action, and Community.",
+    "links": {
+        "discord": "https://discord.gg/your-invite-link",
+        "facebook": "https://facebook.com/your-page",
+        "youtube": "https://youtube.com/your-channel",
+        "tiktok": "https://tiktok.com/@your-account",
+        "download": "#",
+        "topup": "#"
+    },
+    "navItems": [
+        {
+            "label": "สมัครสมาชิก",
+            "href": "#"
+        },
+        {
+            "label": "ดาวน์โหลด",
+            "href": "#"
+        },
+        {
+            "label": "เติมเงิน",
+            "href": "#"
+        },
+        {
+            "label": "ข่าวสาร",
+            "href": "/news"
+        }
+    ],
+    "footer": {
+        "copyright": "© 2024 Published by RANK1 Development Co., Ltd. All Rights Reserved.",
+        "developer": {
+            "name": "RANK1",
+            "sub": "DEVELOPMENT"
+        }
+    }
+}

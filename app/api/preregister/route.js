@@ -94,16 +94,13 @@ export async function POST(request) {
 }
 
 export async function GET(request) {
-    console.log("API: /api/preregister GET called");
     try {
         const session = await getServerSession(authOptions);
         if (!session) {
-            console.log("API: No session found");
             return NextResponse.json({ isRegistered: false });
         }
 
         const discordId = session.user.id;
-        console.log("API: Session found for user", discordId);
 
         // Try simple query first to isolate issue
         // const [rows] = await pool.query('SELECT * FROM preregistrations WHERE discord_id = ?', [discordId]);
@@ -116,9 +113,7 @@ export async function GET(request) {
             WHERE p.discord_id = ?
         `;
 
-        console.log("API: Executing query...");
         const [rows] = await pool.query(query, [discordId]);
-        console.log("API: Query result rows:", rows.length);
 
         if (rows.length === 0) {
             return NextResponse.json({ isRegistered: false });

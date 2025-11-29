@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,7 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Ticket, Sparkles, Gift, Zap, Loader2, History, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
-import { PREREGISTER_CONFIG } from '@/lib/preregister-config';
+import { useLuckyDraw } from '@/hooks/useLuckyDraw';
 
 // Rarity Colors & Styles (Subtle & Clean for Shadcn)
 const getRarityColor = (rarity) => {
@@ -22,102 +21,23 @@ const getRarityColor = (rarity) => {
 };
 
 export default function LuckyDraw({ ticketCount, onDrawComplete }) {
-    const [isSpinning, setIsSpinning] = useState(false);
-    const [tapeItems, setTapeItems] = useState([]);
-    const [winItem, setWinItem] = useState(null);
-    const [showWinnerModal, setShowWinnerModal] = useState(false);
-    const [history, setHistory] = useState([]);
-    const tapeRef = useRef(null);
+    const {
+        isSpinning,
+        tapeItems,
+        winItem,
+        showWinnerModal,
+        setShowWinnerModal,
+        history,
+        tapeRef,
+        spin
+    } = useLuckyDraw({ onDrawComplete });
 
-    // Config for tape animation
-    const CARD_WIDTH = 140;
     const CARD_GAP = 16;
-    const WIN_INDEX = 40;
-
-    useEffect(() => {
-        const initialItems = Array(15).fill(null).map(() => getRandomItem());
-        setTapeItems(initialItems);
-        fetchHistory();
-    }, []);
-
-    const fetchHistory = async () => {
-        try {
-            const res = await fetch('/api/luckydraw');
-            const data = await res.json();
-            if (data.history) setHistory(data.history);
-        } catch (err) {
-            console.error(err);
-        }
-    };
-
-    const getRandomItem = () => {
-        const items = PREREGISTER_CONFIG.luckyDraw.items;
-        const rand = Math.random() * 100;
-        let cumulative = 0;
-        for (const item of items) {
-            cumulative += item.chance;
-            if (rand <= cumulative) return item;
-        }
-        return items[0];
-    };
-
-    const spin = async () => {
-        if (isSpinning || ticketCount <= 0) return;
-        setIsSpinning(true);
-        setWinItem(null);
-        setShowWinnerModal(false);
-
-        try {
-            const res = await fetch('/api/luckydraw', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' }
-            });
-            const data = await res.json();
-            if (!data.reward) throw new Error(data.error);
-
-            const result = data.reward;
-            const newTape = [];
-            for (let i = 0; i < WIN_INDEX + 5; i++) {
-                newTape.push(i === WIN_INDEX ? result : getRandomItem());
-            }
-            setTapeItems(newTape);
-
-            // Calculate random offset for "natural" feel
-            const randomOffset = (Math.random() * 0.6 - 0.3) * CARD_WIDTH;
-
-            setTimeout(() => {
-                if (tapeRef.current) {
-                    // Dynamic calculation based on current container width (Responsive!)
-                    const containerWidth = tapeRef.current.parentElement.offsetWidth;
-                    const itemTotalWidth = CARD_WIDTH + CARD_GAP;
-
-                    // Calculate exact position to center the winning item
-                    const targetPosition = (WIN_INDEX * itemTotalWidth) - (containerWidth / 2) + (CARD_WIDTH / 2) + randomOffset;
-
-                    // Reset position instantly
-                    tapeRef.current.style.transition = 'none';
-                    tapeRef.current.style.transform = 'translateX(0px)';
-                    tapeRef.current.offsetHeight; // Force reflow
-
-                    // Start animation
-                    tapeRef.current.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.2, 1)';
-                    tapeRef.current.style.transform = `translateX(-${targetPosition}px)`;
-
-                    setTimeout(() => {
-                        setIsSpinning(false);
-                        setWinItem(result);
-                        setShowWinnerModal(true);
-                        fetchHistory();
-                        if (onDrawComplete) onDrawComplete();
-                    }, 5000);
-                }
-            }, 50);
-
-        } catch (err) {
-            console.error(err);
-            setIsSpinning(false);
-        }
-    };
+    const WIN_INDEX = 40; // Needed for rendering logic if we want to highlight the winner during spin, though the hook handles the animation.
+    // Actually, the hook handles the ref manipulation, but we need to render the items.
+    // The original code used WIN_INDEX in the render loop to add a ring class.
+    // We should probably export WIN_INDEX from the hook or just hardcode it here too as it's a visual constant.
+    // Let's keep it consistent.
 
     return (
         <div className="w-full max-w-6xl mx-auto p-4 space-y-6 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6">
@@ -160,8 +80,8 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                                 <div className="relative flex flex-col items-center justify-center py-6">
                                     {/* Subtle Glow Background */}
                                     <div className={`absolute inset-0 rounded-full blur-3xl opacity-20 ${winItem.rarity === 'LEGENDARY' ? 'bg-yellow-500' :
-                                            winItem.rarity === 'EPIC' ? 'bg-purple-500' :
-                                                winItem.rarity === 'RARE' ? 'bg-blue-500' : 'bg-slate-500'
+                                        winItem.rarity === 'EPIC' ? 'bg-purple-500' :
+                                            winItem.rarity === 'RARE' ? 'bg-blue-500' : 'bg-slate-500'
                                         }`} />
 
                                     {/* Item Icon/Image */}
@@ -205,7 +125,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                                     <Button variant="outline" className="flex-1" onClick={() => setShowWinnerModal(false)}>
                                         ปิด
                                     </Button>
-                                    <Button className="flex-1" onClick={spin} disabled={ticketCount <= 0}>
+                                    <Button className="flex-1" onClick={() => spin(ticketCount)} disabled={ticketCount <= 0}>
                                         สุ่มอีกครั้ง
                                     </Button>
                                 </div>
@@ -247,7 +167,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                                             }`}
                                     >
                                         <div className={`flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-muted/50 p-2 ${item.rarity === 'LEGENDARY' ? 'text-yellow-500' :
-                                                item.rarity === 'EPIC' ? 'text-purple-500' : 'text-muted-foreground'
+                                            item.rarity === 'EPIC' ? 'text-purple-500' : 'text-muted-foreground'
                                             }`}>
                                             {item.image ? (
                                                 <div className="relative w-full h-full">
@@ -280,7 +200,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                         </div>
                         <Button
                             size="lg"
-                            onClick={spin}
+                            onClick={() => spin(ticketCount)}
                             disabled={isSpinning || ticketCount <= 0}
                             className="w-full sm:w-auto min-w-[160px]"
                         >
@@ -313,7 +233,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                                 <div key={index} className="flex items-center justify-between gap-4 text-sm">
                                     <div className="flex items-center gap-3 overflow-hidden">
                                         <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border bg-muted/50 p-1 ${item.rarity === 'LEGENDARY' ? 'text-yellow-500 border-yellow-500/20' :
-                                                item.rarity === 'EPIC' ? 'text-purple-500 border-purple-500/20' : 'text-muted-foreground'
+                                            item.rarity === 'EPIC' ? 'text-purple-500 border-purple-500/20' : 'text-muted-foreground'
                                             }`}>
                                             <Gift className="h-4 w-4" />
                                         </div>

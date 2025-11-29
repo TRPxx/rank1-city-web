@@ -15,6 +15,8 @@ import InviteEarn from './InviteEarn';
 import LuckyDraw from './LuckyDraw';
 import GangManager from './GangManager';
 
+import { PREREGISTER_CONFIG } from '@/lib/preregister-config';
+
 export default function PreRegisterDashboard({ userData }) {
     const [activeTab, setActiveTab] = useState('invite');
     const [mounted, setMounted] = useState(false);
@@ -62,24 +64,30 @@ export default function PreRegisterDashboard({ userData }) {
                             <Users className="w-4 h-4" />
                             ชวนเพื่อน
                         </Button>
-                        <Button
-                            variant={activeTab === 'luckydraw' ? 'secondary' : 'ghost'}
-                            size="sm"
-                            onClick={() => setActiveTab('luckydraw')}
-                            className="gap-2"
-                        >
-                            <Ticket className="w-4 h-4" />
-                            สุ่มรางวัล
-                        </Button>
-                        <Button
-                            variant={activeTab === 'gang' ? 'secondary' : 'ghost'}
-                            size="sm"
-                            onClick={() => setActiveTab('gang')}
-                            className="gap-2"
-                        >
-                            <Shield className="w-4 h-4" />
-                            ระบบแก๊ง
-                        </Button>
+
+                        {PREREGISTER_CONFIG.features.enableLuckyDraw && (
+                            <Button
+                                variant={activeTab === 'luckydraw' ? 'secondary' : 'ghost'}
+                                size="sm"
+                                onClick={() => setActiveTab('luckydraw')}
+                                className="gap-2"
+                            >
+                                <Ticket className="w-4 h-4" />
+                                สุ่มรางวัล
+                            </Button>
+                        )}
+
+                        {PREREGISTER_CONFIG.features.enableGang && (
+                            <Button
+                                variant={activeTab === 'gang' ? 'secondary' : 'ghost'}
+                                size="sm"
+                                onClick={() => setActiveTab('gang')}
+                                className="gap-2"
+                            >
+                                <Shield className="w-4 h-4" />
+                                ระบบแก๊ง
+                            </Button>
+                        )}
                     </div>
                 </div>
             </div>

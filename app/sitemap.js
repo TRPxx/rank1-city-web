@@ -9,11 +9,16 @@ export default function sitemap() {
             priority: 1,
         },
         {
-            url: `${baseUrl}/news`,
+            url: `${baseUrl}/preregister`,
             lastModified: new Date(),
             changeFrequency: 'daily',
+            priority: 0.9,
+        },
+        {
+            url: `${baseUrl}/news`,
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
             priority: 0.8,
         },
-        // Add more dynamic routes here if needed
-    ]
+    ];
 }

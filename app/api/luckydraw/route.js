@@ -9,6 +9,10 @@ export async function POST(request) {
         const session = await getServerSession(authOptions);
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+        if (!PREREGISTER_CONFIG.features.enableLuckyDraw) {
+            return NextResponse.json({ error: 'Lucky draw is disabled' }, { status: 403 });
+        }
+
         const discordId = session.user.id;
 
         const connection = await pool.getConnection();

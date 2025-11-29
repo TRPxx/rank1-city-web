@@ -1,23 +1,47 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { newsData, categories } from '@/lib/news-data';
+import { useState, useMemo, useEffect } from 'react';
+import { categories } from '@/lib/news-data';
 import Link from 'next/link';
-import { CalendarDays, Tag } from 'lucide-react';
+import { CalendarDays, Tag, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
 export default function NewsSection() {
     const [activeTab, setActiveTab] = useState('all');
+    const [news, setNews] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchNews = async () => {
+            try {
+                const res = await fetch('/api/news');
+                if (res.ok) {
+                    const data = await res.json();
+                    setNews(data);
+                }
+            } catch (error) {
+                console.error("Failed to fetch news:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        fetchNews();
+    }, []);
 
     // Filter ข่าวตาม Tab ที่เลือก
     const filteredNews = useMemo(() => {
+        if (!news) return [];
         const filtered = activeTab === 'all'
-            ? newsData
-            : newsData.filter(item => item.category === activeTab);
+            ? news
+            : news.filter(item => item.category === activeTab);
 
         return filtered;
-    }, [activeTab]);
+    }, [activeTab, news]);
+
+    if (isLoading) {
+        return <div className="w-full h-64 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>;
+    }
 
     return (
         <div className="w-full h-full flex flex-col">

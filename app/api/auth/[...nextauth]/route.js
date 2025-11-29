@@ -42,8 +42,38 @@ export const authOptions = {
             }
             return true;
         },
+        async jwt({ token, account }) {
+            // Initial sign in
+            if (account) {
+                const guildId = process.env.DISCORD_GUILD_ID;
+                const ADMIN_ROLE_ID = '1413968718840463527';
+
+                try {
+                    // Fetch member details using Bot Token to check roles
+                    const response = await fetch(`https://discord.com/api/guilds/${guildId}/members/${token.sub}`, {
+                        headers: {
+                            Authorization: `Bot ${process.env.DISCORD_BOT_TOKEN}`,
+                        },
+                    });
+
+                    if (response.ok) {
+                        const member = await response.json();
+                        const hasAdminRole = member.roles && member.roles.includes(ADMIN_ROLE_ID);
+                        token.isAdmin = hasAdminRole;
+                    } else {
+                        console.error("Failed to fetch guild member for role check:", await response.text());
+                        token.isAdmin = false;
+                    }
+                } catch (error) {
+                    console.error("Error checking admin role:", error);
+                    token.isAdmin = false;
+                }
+            }
+            return token;
+        },
         async session({ session, token }) {
             session.user.id = token.sub;
+            session.user.isAdmin = token.isAdmin || false;
             return session;
         },
     },

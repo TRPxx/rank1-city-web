@@ -19,6 +19,10 @@ export async function POST(request) {
         const session = await getServerSession(authOptions);
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
+        if (!PREREGISTER_CONFIG.features.enableGang) {
+            return NextResponse.json({ error: 'Gang system is disabled' }, { status: 403 });
+        }
+
         const discordId = session.user.id;
         const body = await request.json();
         const { action, name, gangCode } = body; // action: 'create' | 'join'

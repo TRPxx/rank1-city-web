@@ -2,17 +2,14 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import pool from '@/lib/db';
-import { PREREGISTER_CONFIG } from '@/lib/preregister-config';
 
 export async function GET(request) {
     try {
         const session = await getServerSession(authOptions);
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-        const discordId = session.user.id;
-
         // Check Admin Permission
-        if (!PREREGISTER_CONFIG.discord.admin_ids.includes(discordId)) {
+        if (!session.user.isAdmin) {
             return NextResponse.json({ error: 'Forbidden: Admin access only' }, { status: 403 });
         }
 

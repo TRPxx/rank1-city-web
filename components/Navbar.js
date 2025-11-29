@@ -4,10 +4,22 @@ import { useState } from 'react';
 import Link from 'next/link';
 import ThemeToggle from './ThemeToggle';
 import { Button } from '@/components/ui/button';
-import { Gamepad2, ChevronDown, Globe, Menu, X, User, Gift, Newspaper } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuGroup,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuShortcut,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Gamepad2, ChevronDown, Globe, Menu, X, User, Gift, Newspaper, LogOut, LayoutDashboard, Shield } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import siteConfig from '@/lib/config';
-import { useSession, signIn } from "next-auth/react";
+import { useSession, signIn, signOut } from "next-auth/react";
 import Image from 'next/image';
 
 export default function Navbar() {
@@ -68,23 +80,54 @@ export default function Navbar() {
 
                     {status === 'loading' ? (
                         <div className="hidden sm:flex items-center gap-2 pl-2 pr-4">
-                            <div className="w-6 h-6 rounded-full bg-muted animate-pulse" />
+                            <div className="w-8 h-8 rounded-full bg-muted animate-pulse" />
                             <div className="w-20 h-4 bg-muted rounded animate-pulse" />
                         </div>
                     ) : session ? (
-                        <Link href="/profile">
-                            <Button variant="ghost" className="hidden sm:flex items-center gap-2 pl-2 pr-4">
-                                <div className="relative w-6 h-6 rounded-full overflow-hidden">
-                                    <Image
-                                        src={session.user.image || "https://placehold.co/100x100"}
-                                        alt="Profile"
-                                        fill
-                                        className="object-cover"
-                                    />
-                                </div>
-                                <span>{session.user.name}</span>
-                            </Button>
-                        </Link>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="relative h-8 w-8 rounded-full">
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarImage src={session.user.image} alt={session.user.name} />
+                                        <AvatarFallback>{session.user.name?.charAt(0).toUpperCase()}</AvatarFallback>
+                                    </Avatar>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent className="w-56 mt-4" align="end">
+                                <DropdownMenuLabel className="font-normal">
+                                    <div className="flex flex-col space-y-1">
+                                        <p className="text-sm font-medium leading-none">{session.user.name}</p>
+                                        <p className="text-xs leading-none text-muted-foreground">
+                                            {session.user.isAdmin ? 'ผู้ดูแลระบบ' : 'สมาชิก'}
+                                        </p>
+                                    </div>
+                                </DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuGroup>
+                                    <DropdownMenuItem asChild>
+                                        <Link href="/profile" className="cursor-pointer w-full flex items-center">
+                                            <User className="mr-2 h-4 w-4" />
+                                            <span>ข้อมูลส่วนตัว</span>
+                                            {/* <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut> */}
+                                        </Link>
+                                    </DropdownMenuItem>
+                                    {session.user.isAdmin && (
+                                        <DropdownMenuItem asChild>
+                                            <Link href="/admin" className="cursor-pointer w-full flex items-center text-primary focus:text-primary">
+                                                <LayoutDashboard className="mr-2 h-4 w-4" />
+                                                <span>จัดการระบบ (Admin)</span>
+                                            </Link>
+                                        </DropdownMenuItem>
+                                    )}
+                                </DropdownMenuGroup>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => signOut({ callbackUrl: '/' })} className="cursor-pointer text-destructive focus:text-destructive">
+                                    <LogOut className="mr-2 h-4 w-4" />
+                                    <span>ออกจากระบบ</span>
+                                    {/* <DropdownMenuShortcut>⇧⌘Q</DropdownMenuShortcut> */}
+                                </DropdownMenuItem>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     ) : (
                         <Button className="hidden sm:flex" onClick={() => signIn('discord')}>เข้าสู่ระบบ</Button>
                     )}
@@ -138,11 +181,41 @@ export default function Navbar() {
 
                             <div className="border-t pt-4 flex flex-col gap-3">
                                 {session ? (
-                                    <Link href="/profile" onClick={toggleMobileMenu}>
-                                        <Button className="w-full flex items-center gap-2">
-                                            <User className="w-4 h-4" /> ข้อมูลส่วนตัว
+                                    <>
+                                        <div className="flex items-center gap-3 px-2 mb-2">
+                                            <div className="relative w-10 h-10 rounded-full overflow-hidden border">
+                                                <Image
+                                                    src={session.user.image || "https://placehold.co/100x100"}
+                                                    alt="Profile"
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            </div>
+                                            <div className="flex flex-col">
+                                                <span className="font-medium">{session.user.name}</span>
+                                                {session.user.isAdmin && (
+                                                    <span className="text-xs text-primary flex items-center gap-1">
+                                                        <Shield className="w-3 h-3" /> ผู้ดูแลระบบ
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <Link href="/profile" onClick={toggleMobileMenu}>
+                                            <Button variant="outline" className="w-full flex items-center gap-2 justify-start">
+                                                <User className="w-4 h-4" /> ข้อมูลส่วนตัว
+                                            </Button>
+                                        </Link>
+                                        {session.user.isAdmin && (
+                                            <Link href="/admin" onClick={toggleMobileMenu}>
+                                                <Button variant="outline" className="w-full flex items-center gap-2 justify-start text-primary border-primary/20 hover:bg-primary/10">
+                                                    <LayoutDashboard className="w-4 h-4" /> จัดการระบบ (Admin)
+                                                </Button>
+                                            </Link>
+                                        )}
+                                        <Button variant="destructive" className="w-full flex items-center gap-2" onClick={() => signOut({ callbackUrl: '/' })}>
+                                            <LogOut className="w-4 h-4" /> ออกจากระบบ
                                         </Button>
-                                    </Link>
+                                    </>
                                 ) : (
                                     <Button className="w-full" onClick={() => { toggleMobileMenu(); signIn('discord'); }}>เข้าสู่ระบบ</Button>
                                 )}

@@ -1,26 +1,41 @@
-import { useState } from 'react';
+'use client';
+
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
-import { features } from '@/lib/features-data';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Users, Shield, Zap, Car, Briefcase, Home, Star, Heart, Trophy, Target, Flag, MapPin, Gift, Activity, Settings, MessageCircle, PlayCircle, Gamepad2, Info, HelpCircle, Search } from 'lucide-react';
+
+// Icon mapping
+const iconMap = {
+    Users, Shield, Zap, Car, Briefcase, Home, Star, Heart, Trophy, Target, Flag, MapPin, Gift, Activity, Settings, MessageCircle, PlayCircle, Gamepad2, Info, HelpCircle, Search
+};
 
 const swipeConfidenceThreshold = 10000;
 const swipePower = (offset, velocity) => {
     return Math.abs(offset) * velocity;
 };
 
-export default function FeatureTabs() {
+export default function FeatureTabs({ features = [] }) {
     const [activeIndex, setActiveIndex] = useState(0);
-    const [activeTab, setActiveTab] = useState(features[0].id);
+    const [activeTab, setActiveTab] = useState('');
     const [[page, direction], setPage] = useState([0, 0]);
 
-    const activeFeature = features[activeIndex];
+    useEffect(() => {
+        if (features.length > 0 && !activeTab) {
+            setActiveTab(features[0].id);
+        }
+    }, [features, activeTab]);
+
+    if (!features || features.length === 0) return null;
+
+    const activeFeature = features[activeIndex] || features[0];
     const activeFeatureByTab = features.find(f => f.id === activeTab) || features[0];
+    const ActiveIcon = iconMap[activeFeatureByTab.icon] || Star;
+    const MobileIcon = iconMap[activeFeature.icon] || Star;
 
     const paginate = (newDirection) => {
         const newIndex = (activeIndex + newDirection + features.length) % features.length;
@@ -75,7 +90,7 @@ export default function FeatureTabs() {
                                 </div>
                                 <CardContent className="pt-6 relative">
                                     <div className="absolute -top-10 left-6 bg-background p-2 rounded-xl border shadow-sm">
-                                        <activeFeature.icon className="w-8 h-8 text-primary" />
+                                        <MobileIcon className="w-8 h-8 text-primary" />
                                     </div>
                                     <h3 className="text-2xl font-bold mb-2">{activeFeature.title}</h3>
                                     <p className="text-muted-foreground mb-6">{activeFeature.description}</p>
@@ -105,22 +120,25 @@ export default function FeatureTabs() {
                     </div>
                     <ScrollArea className="flex-1">
                         <div className="p-4 space-y-2">
-                            {features.map((feature) => (
-                                <button
-                                    key={feature.id}
-                                    onClick={() => setActiveTab(feature.id)}
-                                    className={cn(
-                                        "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all group",
-                                        activeTab === feature.id
-                                            ? "bg-primary text-primary-foreground shadow-sm"
-                                            : "hover:bg-muted text-muted-foreground hover:text-foreground"
-                                    )}
-                                >
-                                    <feature.icon className={cn("w-5 h-5", activeTab === feature.id ? "text-primary-foreground" : "text-primary")} />
-                                    <span className="font-medium flex-1">{feature.title}</span>
-                                    {activeTab === feature.id && <ChevronRight className="w-4 h-4 opacity-50" />}
-                                </button>
-                            ))}
+                            {features.map((feature) => {
+                                const Icon = iconMap[feature.icon] || Star;
+                                return (
+                                    <button
+                                        key={feature.id}
+                                        onClick={() => setActiveTab(feature.id)}
+                                        className={cn(
+                                            "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all group",
+                                            activeTab === feature.id
+                                                ? "bg-primary text-primary-foreground shadow-sm"
+                                                : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                                        )}
+                                    >
+                                        <Icon className={cn("w-5 h-5", activeTab === feature.id ? "text-primary-foreground" : "text-primary")} />
+                                        <span className="font-medium flex-1">{feature.title}</span>
+                                        {activeTab === feature.id && <ChevronRight className="w-4 h-4 opacity-50" />}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </ScrollArea>
                 </div>
@@ -174,7 +192,7 @@ export default function FeatureTabs() {
                                 <div className="w-64 flex flex-col gap-4">
                                     <Card className="flex-1 bg-muted/30 border-dashed flex items-center justify-center p-6 text-center">
                                         <div>
-                                            <activeFeatureByTab.icon className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
+                                            <ActiveIcon className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
                                             <p className="text-sm text-muted-foreground">More details coming soon...</p>
                                         </div>
                                     </Card>

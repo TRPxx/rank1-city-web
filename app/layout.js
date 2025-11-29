@@ -2,6 +2,7 @@ import { Inter, Kanit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
+import ClientToaster from "@/components/ClientToaster";
 
 const inter = Inter({ subsets: ["latin"] });
 const kanit = Kanit({
@@ -26,6 +27,9 @@ export const metadata = {
     icon: '/favicon.svg',
   },
   metadataBase: new URL('https://rank1city.com'),
+  alternates: {
+    canonical: 'https://rank1city.com',
+  },
 };
 
 export default function RootLayout({ children }) {
@@ -40,6 +44,7 @@ export default function RootLayout({ children }) {
             disableTransitionOnChange
           >
             {children}
+            <ClientToaster />
           </ThemeProvider>
         </SessionProviderWrapper>
       </body>

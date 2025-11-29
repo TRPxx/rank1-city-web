@@ -49,17 +49,21 @@ export default function PreRegisterButton({ onRegisterSuccess }) {
             <Button
                 size="lg"
                 className="relative z-50 text-lg px-8 py-6 shadow-lg shadow-primary/20 animate-pulse cursor-pointer"
+                disabled={isLoading}
                 onClick={async (e) => {
                     e.preventDefault();
+                    setIsLoading(true);
                     console.log('Attempting to sign in with Discord...');
                     try {
                         await signIn('discord', { callbackUrl: '/', redirect: true });
                     } catch (error) {
                         console.error('SignIn error:', error);
+                        setIsLoading(false);
                     }
                 }}
             >
-                ลงทะเบียนล่วงหน้า (Login Discord)
+                {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
+                {isLoading ? 'กำลังเข้าสู่ระบบ...' : 'ลงทะเบียนล่วงหน้า (Login Discord)'}
             </Button>
         );
     }

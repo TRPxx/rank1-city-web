@@ -107,7 +107,7 @@ export default function ProfilePage() {
                         </p>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" onClick={() => signOut()}>
+                        <Button variant="outline" onClick={() => signOut({ callbackUrl: '/' })}>
                             <LogOut className="mr-2 h-4 w-4" /> ออกจากระบบ
                         </Button>
                     </div>

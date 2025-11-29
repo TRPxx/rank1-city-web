@@ -56,7 +56,7 @@ const DropdownMenuContent = ({ className, align = "center", children, ...props }
     return (
         <div
             className={cn(
-                "absolute z-50 min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-80 zoom-in-95",
+                "absolute z-[100] min-w-[8rem] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-lg animate-in fade-in-80 zoom-in-95",
                 align === "end" ? "right-0" : "left-0",
                 "mt-2",
                 className
@@ -68,8 +68,29 @@ const DropdownMenuContent = ({ className, align = "center", children, ...props }
     )
 }
 
-const DropdownMenuItem = ({ className, inset, children, onClick, ...props }) => {
+const DropdownMenuItem = ({ className, inset, children, onClick, asChild, ...props }) => {
     const { setOpen } = React.useContext(DropdownMenuContext)
+
+    const handleClick = (e) => {
+        onClick?.(e)
+        setOpen(false)
+    }
+
+    if (asChild && React.isValidElement(children)) {
+        return React.cloneElement(children, {
+            ...props,
+            className: cn(
+                "relative flex cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground data-[disabled]:pointer-events-none data-[disabled]:opacity-50 cursor-pointer",
+                inset && "pl-8",
+                className,
+                children.props.className
+            ),
+            onClick: (e) => {
+                children.props.onClick?.(e)
+                handleClick(e)
+            }
+        })
+    }
 
     return (
         <div
@@ -78,10 +99,7 @@ const DropdownMenuItem = ({ className, inset, children, onClick, ...props }) => 
                 inset && "pl-8",
                 className
             )}
-            onClick={(e) => {
-                onClick?.(e)
-                setOpen(false)
-            }}
+            onClick={handleClick}
             {...props}
         >
             {children}

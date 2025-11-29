@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+
+# Disallow admin paths
+Disallow: /admin/
+Disallow: /api/admin/
+
+# Sitemap
+Sitemap: https://rank1city.com/sitemap.xml

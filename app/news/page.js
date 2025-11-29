@@ -6,35 +6,80 @@ import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import NewsCard from '@/components/news/NewsCard';
 import { Button } from '@/components/ui/button';
-import { categories, newsData } from '@/lib/news-data';
+import { categories } from '@/lib/news-data';
 import { cn } from '@/lib/utils';
-import { Search } from 'lucide-react';
+import { Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 
 function NewsContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
 
-    // Get category from URL or default to 'all'
+    // Get params from URL
     const currentCategory = searchParams.get('category') || 'all';
+    const currentPage = parseInt(searchParams.get('page')) || 1;
     const [searchQuery, setSearchQuery] = useState('');
 
-    // Filter Logic
-    const filteredNews = newsData.filter(item => {
-        const matchesCategory = currentCategory === 'all' || item.category === currentCategory;
-        const matchesSearch = item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            item.excerpt.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesCategory && matchesSearch;
-    });
+    // Data State
+    const [news, setNews] = useState([]);
+    const [totalPages, setTotalPages] = useState(1);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const fetchNews = async () => {
+        setIsLoading(true);
+        try {
+            // Build Query Params
+            const params = new URLSearchParams();
+            if (currentCategory !== 'all') params.set('category', currentCategory);
+            if (searchQuery) params.set('search', searchQuery);
+            params.set('page', currentPage.toString());
+            params.set('limit', '9'); // 9 items per page
+
+            const res = await fetch(`/api/news?${params.toString()}`);
+            if (res.ok) {
+                const data = await res.json();
+                // Handle both paginated and non-paginated (just in case)
+                if (data.items) {
+                    setNews(data.items);
+                    setTotalPages(data.metadata.totalPages);
+                } else {
+                    setNews(data); // Fallback
+                }
+            }
+        } catch (error) {
+            console.error("Failed to fetch news:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Debounce Search ONLY
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchNews();
+        }, 500);
+        return () => clearTimeout(timer);
+    }, [searchQuery]);
+
+    // Immediate update for Category and Page
+    useEffect(() => {
+        fetchNews();
+    }, [currentCategory, currentPage]);
 
     // Handle Category Click
     const handleCategoryChange = (catId) => {
         const params = new URLSearchParams(searchParams);
-        if (catId === 'all') {
-            params.delete('category');
-        } else {
-            params.set('category', catId);
-        }
+        if (catId === 'all') params.delete('category');
+        else params.set('category', catId);
+
+        params.delete('page'); // Reset to page 1
+        router.push(`/news?${params.toString()}`);
+    };
+
+    // Handle Page Change
+    const handlePageChange = (newPage) => {
+        const params = new URLSearchParams(searchParams);
+        params.set('page', newPage.toString());
         router.push(`/news?${params.toString()}`);
     };
 
@@ -82,12 +127,50 @@ function NewsContent() {
                     </div>
 
                     {/* News Grid */}
-                    {filteredNews.length > 0 ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                            {filteredNews.map((item) => (
-                                <NewsCard key={item.id} item={item} />
-                            ))}
+                    {isLoading ? (
+                        <div className="flex justify-center py-20">
+                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
                         </div>
+                    ) : news.length > 0 ? (
+                        <>
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                                {news.map((item) => (
+                                    <NewsCard key={item.id} item={item} />
+                                ))}
+                            </div>
+
+                            {/* Pagination Controls */}
+                            {totalPages > 1 && (
+                                <div className="flex justify-center gap-2">
+                                    <Button
+                                        variant="outline"
+                                        disabled={currentPage <= 1}
+                                        onClick={() => handlePageChange(currentPage - 1)}
+                                    >
+                                        Previous
+                                    </Button>
+
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
+                                        <Button
+                                            key={p}
+                                            variant={currentPage === p ? "default" : "outline"}
+                                            onClick={() => handlePageChange(p)}
+                                            className="w-10 h-10 p-0"
+                                        >
+                                            {p}
+                                        </Button>
+                                    ))}
+
+                                    <Button
+                                        variant="outline"
+                                        disabled={currentPage >= totalPages}
+                                        onClick={() => handlePageChange(currentPage + 1)}
+                                    >
+                                        Next
+                                    </Button>
+                                </div>
+                            )}
+                        </>
                     ) : (
                         <div className="text-center py-20 bg-muted/30 rounded-xl border border-dashed">
                             <p className="text-muted-foreground text-lg">ไม่พบข้อมูลข่าวสารที่คุณค้นหา</p>
