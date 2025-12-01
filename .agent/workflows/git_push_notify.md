@@ -70,7 +70,7 @@ This workflow pushes changes to the git repository and then sends a notification
          embeds = @(
              @{
                  title = "🚀 อัปเดตระบบเรียบร้อย! (New Update)"
-                 description = "**รายละเอียดการแก้ไข (Commit Message):**`n$commitMessage`n`n**ตำแหน่งที่แก้ไข (Changed Lines):**`n$detailedChanges"
+                 description = "```ansi`n$commitMessage`n```"
                  color = 5763719
                  fields = @(
                      @{
@@ -97,6 +97,11 @@ This workflow pushes changes to the git repository and then sends a notification
                          name = "เวลา (Timestamp)"
                          value = "$timestamp"
                          inline = $true
+                     },
+                     @{
+                         name = "📂 ไฟล์ที่แก้ไข (Files Changed)"
+                         value = "```yaml`n$detailedChanges`n```"
+                         inline = $false
                      }
                  )
                  footer = @{

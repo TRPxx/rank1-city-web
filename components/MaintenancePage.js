@@ -5,8 +5,32 @@ import { Badge } from '@/components/ui/badge';
 import { motion } from 'framer-motion';
 import { Wrench, Clock, MessageCircle, AlertTriangle } from 'lucide-react';
 import Image from 'next/image';
+import { signIn } from "next-auth/react";
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function MaintenancePage({ discordLink }) {
+    const router = useRouter();
+
+    useEffect(() => {
+        const checkStatus = async () => {
+            try {
+                const res = await fetch(`/api/system/config?t=${Date.now()}`);
+                const data = await res.json();
+
+                if (data.serverStatus !== 'maintenance') {
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error('Failed to check server status', error);
+            }
+        };
+
+        const interval = setInterval(checkStatus, 5000);
+        return () => clearInterval(interval);
+    }, [router]);
+
     return (
         <div className="min-h-screen w-full flex flex-col items-center justify-center relative overflow-hidden bg-zinc-950 text-white">
             {/* Background */}
@@ -78,7 +102,7 @@ export default function MaintenancePage({ discordLink }) {
                 </div>
 
                 {/* Action Button */}
-                <div className="pt-8">
+                <div className="pt-8 flex flex-col items-center gap-4">
                     <Button
                         size="lg"
                         className="h-14 px-8 text-lg bg-orange-600 hover:bg-orange-700 text-white border-none rounded-full shadow-[0_0_20px_rgba(249,115,22,0.3)] hover:shadow-[0_0_30px_rgba(249,115,22,0.5)] transition-all duration-300"

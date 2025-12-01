@@ -3,8 +3,15 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import pool from '@/lib/db';
 
+import { rateLimit } from '@/lib/rate-limit';
+
 export async function GET(request) {
     try {
+        const ip = request.headers.get("x-forwarded-for") || "unknown";
+        if (!rateLimit(ip, 60, 60000)) { // 60 requests per minute
+            return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+        }
+
         const session = await getServerSession(authOptions);
 
         if (!session) {
@@ -28,11 +35,26 @@ export async function GET(request) {
         );
 
         if (rows.length === 0) {
-
             return NextResponse.json({ error: 'User not found in game database' }, { status: 404 });
         }
 
         const user = rows[0];
+
+        // Fetch Job Label separately (Safe Mode)
+        let jobLabel = user.job;
+        try {
+            const [jobRows] = await pool.query(
+                `SELECT label FROM job_grades WHERE job_name = ? AND grade = ? LIMIT 1`,
+                [user.job, user.job_grade]
+            );
+            if (jobRows.length > 0) {
+                jobLabel = jobRows[0].label;
+            }
+        } catch (err) {
+            console.warn("Failed to fetch job label:", err.message);
+        }
+
+
 
         // Parse JSON Data
         // Parse JSON Data with Fault Tolerance
@@ -82,11 +104,16 @@ export async function GET(request) {
             dob: user.dateofbirth,
             job: user.job,
             job_grade: user.job_grade,
+            job_label: jobLabel,
             inventory: inventory,
             loadout: loadout
         };
 
-        return NextResponse.json(userData);
+        return NextResponse.json(userData, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=30, stale-while-revalidate=59',
+            },
+        });
 
     } catch (error) {
 

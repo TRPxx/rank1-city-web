@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { revalidatePath } from 'next/cache';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import fs from 'fs/promises';
@@ -63,6 +64,10 @@ export async function POST(request) {
 
         // Write to file
         await fs.writeFile(filePath, JSON.stringify(data, null, 4), 'utf-8');
+
+        // Clear cache
+        revalidatePath('/');
+        revalidatePath('/api/system/config');
 
         return NextResponse.json({ success: true, message: 'Settings saved successfully' });
 

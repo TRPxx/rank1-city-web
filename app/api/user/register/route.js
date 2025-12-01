@@ -3,8 +3,15 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import pool from '@/lib/db';
 
+import { rateLimit } from '@/lib/rate-limit';
+
 export async function POST(request) {
     try {
+        const ip = request.headers.get("x-forwarded-for") || "unknown";
+        if (!rateLimit(ip, 5, 60000)) { // 5 requests per minute for registration
+            return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+        }
+
         const session = await getServerSession(authOptions);
 
         if (!session) {
@@ -14,19 +21,41 @@ export async function POST(request) {
         const data = await request.json();
         const { firstname, lastname, dateofbirth, sex, height } = data;
 
-        // Validation เบื้องต้น
-        // 1. Validation: ตรวจสอบความครบถ้วน
-        if (!firstname || !lastname || !dateofbirth || !sex || !height) {
+        // 1. Formatting: จัดรูปแบบชื่อ (Trim -> Title Case)
+        const formatName = (name) => {
+            if (!name) return '';
+            const trimmed = name.trim();
+            // แปลงตัวแรกเป็นพิมพ์ใหญ่ ตัวที่เหลือเป็นพิมพ์เล็ก
+            return trimmed.charAt(0).toUpperCase() + trimmed.slice(1).toLowerCase();
+        };
+
+        const formattedFirstname = formatName(firstname);
+        const formattedLastname = formatName(lastname);
+
+        // 2. Validation: ตรวจสอบความครบถ้วน
+        if (!formattedFirstname || !formattedLastname || !dateofbirth || !sex || !height) {
             return NextResponse.json({ error: 'กรุณากรอกข้อมูลให้ครบถ้วน' }, { status: 400 });
         }
 
-        // 2. Validation: ตรวจสอบรูปแบบชื่อ (ห้ามมีตัวเลขหรืออักขระพิเศษ)
-        const nameRegex = /^[a-zA-Zก-๙\s]+$/;
-        if (!nameRegex.test(firstname) || !nameRegex.test(lastname)) {
-            return NextResponse.json({ error: 'ชื่อและนามสกุลต้องเป็นตัวอักษรเท่านั้น (ห้ามมีตัวเลขหรือสัญลักษณ์)' }, { status: 400 });
+        // 3. Validation: ตรวจสอบรูปแบบชื่อ
+        // - เฉพาะ a-z, A-Z เท่านั้น
+        // - ห้ามมีช่องว่าง (เพราะต้องเป็นคำเดียว)
+        // - ห้ามมีตัวเลขหรืออักขระพิเศษ
+        const nameRegex = /^[a-zA-Z]+$/;
+
+        if (!nameRegex.test(formattedFirstname) || !nameRegex.test(formattedLastname)) {
+            return NextResponse.json({ error: 'ชื่อและนามสกุลต้องเป็นภาษาอังกฤษเท่านั้น (A-Z, a-z) ห้ามมีตัวเลข, ช่องว่าง หรืออักขระพิเศษ' }, { status: 400 });
         }
 
-        // 3. Validation: ตรวจสอบส่วนสูง (ต้องเป็นตัวเลขและอยู่ในเกณฑ์)
+        // 4. Validation: ตรวจสอบความยาว (2-20 ตัวอักษร)
+        if (formattedFirstname.length < 2 || formattedFirstname.length > 20) {
+            return NextResponse.json({ error: 'ชื่อต้องมีความยาวระหว่าง 2 ถึง 20 ตัวอักษร' }, { status: 400 });
+        }
+        if (formattedLastname.length < 2 || formattedLastname.length > 20) {
+            return NextResponse.json({ error: 'นามสกุลต้องมีความยาวระหว่าง 2 ถึง 20 ตัวอักษร' }, { status: 400 });
+        }
+
+        // 5. Validation: ตรวจสอบส่วนสูง (ต้องเป็นตัวเลขและอยู่ในเกณฑ์)
         const heightInt = parseInt(height);
         if (isNaN(heightInt) || heightInt < 100 || heightInt > 250) {
             return NextResponse.json({ error: 'ส่วนสูงไม่ถูกต้อง (ต้องอยู่ระหว่าง 100-250 ซม.)' }, { status: 400 });
@@ -52,66 +81,59 @@ export async function POST(request) {
         const defaultJob = 'unemployed';
         const defaultJobGrade = 0;
         const defaultGroup = 'user';
+        const identifier = `web_pending:${dbDiscordId}`;
 
-        // Generate SSN ตามมาตรฐาน ESX Legacy (XXX-XX-XXXX)
-        let ssn = '';
-        let isSsnUnique = false;
-
+        // Optimistic Locking for SSN Generation
+        // Try to generate and insert. If duplicate SSN, retry.
         let attempt = 0;
-        const MAX_ATTEMPTS = 50; // ป้องกัน Infinite Loop
+        const MAX_RETRIES = 5;
+        let registered = false;
 
-        while (!isSsnUnique && attempt < MAX_ATTEMPTS) {
+        while (!registered && attempt < MAX_RETRIES) {
             attempt++;
 
-            // 1. Area (001-899, skip 666)
+            // Generate SSN (Pure Random Logic - No DB Check)
             let area = Math.floor(Math.random() * 899) + 1;
-            while (area === 666) {
-                area = Math.floor(Math.random() * 899) + 1;
-            }
-
-            // 2. Group (01-99)
+            while (area === 666) area = Math.floor(Math.random() * 899) + 1;
             let group = Math.floor(Math.random() * 99) + 1;
-
-            // 3. Serial (0001-9999)
             let serial = Math.floor(Math.random() * 9999) + 1;
-
-            // Format: XXX-XX-XXXX
-            const candidate = `${area.toString().padStart(3, '0')}-${group.toString().padStart(2, '0')}-${serial.toString().padStart(4, '0')}`;
+            const ssn = `${area.toString().padStart(3, '0')}-${group.toString().padStart(2, '0')}-${serial.toString().padStart(4, '0')}`;
 
             // Check Reserved
             const reservedSSNs = ["078-05-1120", "219-09-9999", "123-45-6789"];
-            if (reservedSSNs.includes(candidate)) continue;
-
-            // Check Range Exception (987-65-4320..4329)
+            if (reservedSSNs.includes(ssn)) continue;
             if (area === 987 && group === 65 && serial >= 4320 && serial <= 4329) continue;
 
-            // Check Database Uniqueness
-            const [checkSsn] = await pool.query('SELECT 1 FROM users WHERE ssn = ?', [candidate]);
-            if (checkSsn.length === 0) {
-                ssn = candidate;
-                isSsnUnique = true;
+            try {
+                // Try Insert directly
+                const sql = `
+                    INSERT INTO users (
+                        identifier, discord_id, firstname, lastname, dateofbirth, sex, height, 
+                        accounts, job, job_grade, \`group\`, position, inventory, ssn
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                `;
+
+                await pool.execute(sql, [
+                    identifier, dbDiscordId, formattedFirstname, formattedLastname, dateofbirth, sex, parseInt(height),
+                    defaultAccounts, defaultJob, defaultJobGrade, defaultGroup, defaultPosition, defaultInventory, ssn
+                ]);
+
+                registered = true; // Success!
+
+            } catch (err) {
+                // Check if error is Duplicate Entry for SSN
+                if (err.code === 'ER_DUP_ENTRY' && err.message.includes('ssn')) {
+                    console.warn(`SSN Collision detected (${ssn}). Retrying... attempt ${attempt}`);
+                    continue; // Retry with new SSN
+                } else {
+                    throw err; // Other error, rethrow
+                }
             }
         }
 
-        if (!isSsnUnique) {
-            throw new Error('Server Busy: Unable to generate unique SSN. Please try again.');
+        if (!registered) {
+            throw new Error('Server Busy: Unable to generate unique SSN after multiple attempts.');
         }
-
-        // Identifier ใช้ค่า web_pending เพื่อรอการ Update จากเกม
-        const identifier = `web_pending:${dbDiscordId}`;
-
-        // Insert ข้อมูลลง Database
-        const sql = `
-            INSERT INTO users (
-                identifier, discord_id, firstname, lastname, dateofbirth, sex, height, 
-                accounts, job, job_grade, \`group\`, position, inventory, ssn
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        `;
-
-        await pool.execute(sql, [
-            identifier, dbDiscordId, firstname, lastname, dateofbirth, sex, parseInt(height),
-            defaultAccounts, defaultJob, defaultJobGrade, defaultGroup, defaultPosition, defaultInventory, ssn
-        ]);
 
         return NextResponse.json({ success: true, message: 'ลงทะเบียนสำเร็จ' });
 

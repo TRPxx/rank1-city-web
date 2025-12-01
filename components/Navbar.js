@@ -18,11 +18,12 @@ import {
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Gamepad2, ChevronDown, Globe, Menu, X, User, Gift, Newspaper, LogOut, LayoutDashboard, Shield, Star } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
-import siteConfig from '@/lib/config';
+import staticConfig from '@/lib/config';
 import { useSession, signIn, signOut } from "next-auth/react";
 import Image from 'next/image';
 
-export default function Navbar() {
+export default function Navbar({ siteConfig: propConfig }) {
+    const siteConfig = propConfig || staticConfig;
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { data: session, status } = useSession();
 

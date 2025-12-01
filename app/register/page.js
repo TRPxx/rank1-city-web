@@ -78,9 +78,25 @@ export default function RegisterPage() {
             return;
         }
 
-        const nameRegex = /^[a-zA-Zก-๙\s]+$/;
-        if (!nameRegex.test(formData.firstname) || !nameRegex.test(formData.lastname)) {
-            toast.error('ชื่อและนามสกุลต้องเป็นตัวอักษรเท่านั้น (ห้ามมีตัวเลขหรือสัญลักษณ์)');
+        // Strict Regex: English only, no spaces
+        const nameRegex = /^[a-zA-Z]+$/;
+
+        // Trim before check
+        const cleanFirstname = formData.firstname.trim();
+        const cleanLastname = formData.lastname.trim();
+
+        if (!nameRegex.test(cleanFirstname) || !nameRegex.test(cleanLastname)) {
+            toast.error('ชื่อและนามสกุลต้องเป็นภาษาอังกฤษเท่านั้น (A-Z, a-z) ห้ามมีตัวเลข, ช่องว่าง หรืออักขระพิเศษ');
+            return;
+        }
+
+        if (cleanFirstname.length < 2 || cleanFirstname.length > 20) {
+            toast.error('ชื่อต้องมีความยาวระหว่าง 2 ถึง 20 ตัวอักษร');
+            return;
+        }
+
+        if (cleanLastname.length < 2 || cleanLastname.length > 20) {
+            toast.error('นามสกุลต้องมีความยาวระหว่าง 2 ถึง 20 ตัวอักษร');
             return;
         }
 

@@ -10,10 +10,12 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     User, Wallet, CreditCard, Phone, Calendar, LogOut, Search,
-    Backpack, Swords, Shield, Vault, Loader2, Briefcase, MapPin
+    Backpack, Swords, Shield, Vault, Loader2, Briefcase, MapPin,
+    Stethoscope, Wrench, Car, Gavel
 } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
@@ -116,8 +118,58 @@ export default function ProfilePage() {
                 <Separator />
 
                 {loading ? (
-                    <div className="flex items-center justify-center h-[400px]">
-                        <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                        {/* Skeleton Sidebar */}
+                        <div className="lg:col-span-4 space-y-6">
+                            <Card>
+                                <CardHeader className="pb-0">
+                                    <Skeleton className="h-6 w-16 absolute top-4 right-4 rounded-full" />
+                                </CardHeader>
+                                <CardContent className="flex flex-col items-center pt-6">
+                                    <Skeleton className="h-32 w-32 rounded-full mb-4" />
+                                    <Skeleton className="h-8 w-48 mb-2" />
+                                    <Skeleton className="h-4 w-32 mb-8" />
+
+                                    <div className="grid grid-cols-2 gap-4 w-full">
+                                        <Skeleton className="h-20 w-full rounded-lg" />
+                                        <Skeleton className="h-20 w-full rounded-lg" />
+                                    </div>
+
+                                    <div className="w-full space-y-4 mt-8">
+                                        <Skeleton className="h-8 w-full" />
+                                        <Skeleton className="h-8 w-full" />
+                                        <Skeleton className="h-8 w-full" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
+
+                        {/* Skeleton Content */}
+                        <div className="lg:col-span-8">
+                            <div className="space-y-4">
+                                <div className="flex justify-between">
+                                    <div className="flex gap-2">
+                                        <Skeleton className="h-10 w-24" />
+                                        <Skeleton className="h-10 w-24" />
+                                        <Skeleton className="h-10 w-24" />
+                                    </div>
+                                    <Skeleton className="h-10 w-64 hidden sm:block" />
+                                </div>
+                                <Card>
+                                    <CardHeader>
+                                        <Skeleton className="h-6 w-32 mb-2" />
+                                        <Skeleton className="h-4 w-48" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                                            {[...Array(10)].map((_, i) => (
+                                                <Skeleton key={i} className="h-32 w-full rounded-lg" />
+                                            ))}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </div>
                     </div>
                 ) : error ? (
                     <Card className="border-destructive/50 bg-destructive/5">
@@ -148,9 +200,20 @@ export default function ProfilePage() {
                                     </Avatar>
 
                                     <h3 className="text-2xl font-bold">{gameData.firstname} {gameData.lastname}</h3>
-                                    <p className="text-muted-foreground flex items-center gap-1 mt-1">
-                                        <Briefcase className="w-3 h-3" /> {gameData.job} ({gameData.job_grade})
-                                    </p>
+                                    <div className="mt-2">
+                                        <Badge variant="secondary" className="px-3 py-1 text-sm font-medium bg-primary/10 text-primary hover:bg-primary/20 border-primary/20 transition-colors">
+                                            {(() => {
+                                                const job = gameData.job?.toLowerCase() || '';
+                                                if (job.includes('police') || job.includes('sheriff')) return <Shield className="w-4 h-4 mr-2" />;
+                                                if (job.includes('ambulance') || job.includes('medic') || job.includes('doctor')) return <Stethoscope className="w-4 h-4 mr-2" />;
+                                                if (job.includes('mechanic') || job.includes('fix')) return <Wrench className="w-4 h-4 mr-2" />;
+                                                if (job.includes('taxi') || job.includes('driver')) return <Car className="w-4 h-4 mr-2" />;
+                                                if (job.includes('judge') || job.includes('lawyer')) return <Gavel className="w-4 h-4 mr-2" />;
+                                                return <Briefcase className="w-4 h-4 mr-2" />;
+                                            })()}
+                                            {gameData.job_label}
+                                        </Badge>
+                                    </div>
 
                                     <div className="grid grid-cols-2 gap-4 w-full mt-8">
                                         <div className="flex flex-col items-center p-3 bg-muted/50 rounded-lg">

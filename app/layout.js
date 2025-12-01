@@ -33,14 +33,34 @@ export const metadata = {
   },
 };
 
-import siteConfig from '@/lib/config.json';
+import fs from 'fs/promises';
+import path from 'path';
 
-export default function RootLayout({ children }) {
+async function getConfig() {
+  try {
+    const filePath = path.join(process.cwd(), 'lib', 'config.json');
+    const fileContent = await fs.readFile(filePath, 'utf-8');
+    return JSON.parse(fileContent);
+  } catch (error) {
+    return {};
+  }
+}
+
+import MaintenancePage from '@/components/MaintenancePage';
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+
+import MaintenanceListener from '@/components/MaintenanceListener';
+
+export default async function RootLayout({ children }) {
+  const siteConfig = await getConfig();
+  const session = await getServerSession(authOptions);
   const isMaintenance = siteConfig?.serverStatus === 'maintenance';
+  const isAdmin = session?.user?.isAdmin;
 
   return (
     <html lang="th" suppressHydrationWarning>
-      <body className={`${inter.className} ${kanit.variable} font-sans`}>
+      <body className={`${inter.className} ${kanit.variable} font-sans bg-background`}>
         <SessionProviderWrapper>
           <ThemeProvider
             attribute="class"
@@ -48,8 +68,15 @@ export default function RootLayout({ children }) {
             enableSystem
             disableTransitionOnChange
           >
-            {!isMaintenance && <Navbar />}
-            {children}
+            {isMaintenance && !isAdmin ? (
+              <MaintenancePage discordLink={siteConfig?.links?.discord} />
+            ) : (
+              <>
+                <MaintenanceListener />
+                <Navbar siteConfig={siteConfig} />
+                {children}
+              </>
+            )}
             <ClientToaster />
           </ThemeProvider>
         </SessionProviderWrapper>
