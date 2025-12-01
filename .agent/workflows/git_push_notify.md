@@ -26,6 +26,8 @@ This workflow pushes changes to the git repository and then sends a notification
      $fullHash = git rev-parse HEAD
      $commitUrl = "https://github.com/TRPxx/rank1-city-web/commit/$fullHash"
      $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+     $stats = git diff --shortstat HEAD^ HEAD
+     if (-not $stats) { $stats = "No changes detected or initial commit" }
 
      $payload = @{
          username = "Rank1 City Deploy Bot"
@@ -49,6 +51,11 @@ This workflow pushes changes to the git repository and then sends a notification
                      @{
                          name = "รหัส (Hash)"
                          value = "[$shortHash]($commitUrl)"
+                         inline = $true
+                     },
+                     @{
+                         name = "สถิติ (Stats)"
+                         value = "$stats"
                          inline = $true
                      },
                      @{
