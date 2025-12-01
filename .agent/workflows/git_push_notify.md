@@ -20,32 +20,37 @@ This workflow pushes changes to the git repository and then sends a notification
 5. Notify Discord
    - Construct a JSON payload with the commit message and author.
    - Use `curl` or a script to POST the payload to the Discord Webhook URL: `https://discord.com/api/webhooks/1445144998495518821/uHIfO9ZeYt87If-UveTqVaeNP3TikHBwgw5TsAuJrC3tlhkWu6LWNcOTL0aepa3vyUP5`
-   - Payload format:
-     ```json
-     {
-       "username": "Rank1 City Deploy Bot",
-       "avatar_url": "https://rank1city.com/favicon.svg",
-       "embeds": [
-         {
-           "title": "🚀 อัปเดตระบบเรียบร้อย! (New Update)",
-           "description": "**รายละเอียดการแก้ไข (Commit Message):**\n{COMMIT_MESSAGE}",
-           "color": 5763719,
-           "fields": [
-             {
-               "name": "ผู้แก้ไข (Author)",
-               "value": "Bear",
-               "inline": true
-             },
-             {
-               "name": "เวลา (Timestamp)",
-               "value": "{CURRENT_TIMESTAMP}",
-               "inline": true
+   - Use the following PowerShell script to ensure UTF-8 encoding:
+     ```powershell
+     $payload = @{
+         username = "Rank1 City Deploy Bot"
+         avatar_url = "https://rank1city.com/favicon.svg"
+         embeds = @(
+             @{
+                 title = "🚀 อัปเดตระบบเรียบร้อย! (New Update)"
+                 description = "**รายละเอียดการแก้ไข (Commit Message):**`n{COMMIT_MESSAGE}"
+                 color = 5763719
+                 fields = @(
+                     @{
+                         name = "ผู้แก้ไข (Author)"
+                         value = "Bear"
+                         inline = $true
+                     },
+                     @{
+                         name = "เวลา (Timestamp)"
+                         value = "{CURRENT_TIMESTAMP}"
+                         inline = $true
+                     }
+                 )
+                 footer = @{
+                     text = "Rank1 City Web System"
+                 }
              }
-           ],
-           "footer": {
-             "text": "Rank1 City Web System"
-           }
-         }
-       ]
+         )
      }
+     
+     $jsonPayload = $payload | ConvertTo-Json -Depth 10
+     $utf8Bytes = [System.Text.Encoding]::UTF8.GetBytes($jsonPayload)
+     
+     Invoke-RestMethod -Uri "https://discord.com/api/webhooks/1445144998495518821/uHIfO9ZeYt87If-UveTqVaeNP3TikHBwgw5TsAuJrC3tlhkWu6LWNcOTL0aepa3vyUP5" -Method Post -ContentType "application/json; charset=utf-8" -Body $utf8Bytes
      ```
