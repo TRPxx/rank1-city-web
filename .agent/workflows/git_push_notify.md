@@ -27,17 +27,17 @@ This workflow pushes changes to the git repository and then sends a notification
        "avatar_url": "https://rank1city.com/favicon.svg",
        "embeds": [
          {
-           "title": "🚀 New Update Deployed!",
-           "description": "**Commit Message:**\n{COMMIT_MESSAGE}",
+           "title": "🚀 อัปเดตระบบเรียบร้อย! (New Update)",
+           "description": "**รายละเอียดการแก้ไข (Commit Message):**\n{COMMIT_MESSAGE}",
            "color": 5763719,
            "fields": [
              {
-               "name": "Author",
-               "value": "Antigravity AI",
+               "name": "ผู้แก้ไข (Author)",
+               "value": "Bear",
                "inline": true
              },
              {
-               "name": "Timestamp",
+               "name": "เวลา (Timestamp)",
                "value": "{CURRENT_TIMESTAMP}",
                "inline": true
              }
