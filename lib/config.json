@@ -34,7 +34,7 @@
             "sub": "DEVELOPMENT"
         }
     },
-    "serverStatus": "preregister",
+    "serverStatus": "live",
     "roadmap": [
         {
             "id": 1,
