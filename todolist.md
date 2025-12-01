@@ -1,56 +1,66 @@
-# To-Do List: ระบบลงทะเบียนผู้เล่นใหม่ผ่านหน้าเว็บ (Web-Based Registration & FiveM Integration)
+# Website Audit & To-Do List
 
-เอกสารนี้รวบรวมขั้นตอนการพัฒนาระบบลงทะเบียนผ่านเว็บไซต์ และเชื่อมต่อกับเซิร์ฟเวอร์ FiveM (ESX Legacy) เพื่อให้ผู้เล่นต้องลงทะเบียนก่อนเข้าเกม
+## 🚨 Critical Priority (P0)
 
-## Concept การทำงาน
-1.  **Web**: ผู้เล่น Login Discord -> กรอกข้อมูล -> บันทึกลง DB (โดยใช้ `discord_id` เป็นหลัก, `identifier` เป็น `web_pending:...`)
-2.  **FiveM**: ผู้เล่นเข้าเกม -> Server เช็ค `discord_id`
-    -   **กรณีลงทะเบียนแล้ว**: ระบบจะ Update `identifier` (License) ของผู้เล่นลงใน DB ให้ตรงกับข้อมูลที่ลงทะเบียนไว้ -> เข้าเกมได้
-    -   **กรณียังไม่ลงทะเบียน**: ระบบจะเตะออกจากเซิร์ฟเวอร์ (Kick) พร้อมแจ้งให้ไปลงทะเบียนที่เว็บ
+- [ ] **[PERF/SEO] Enable SSR for `LiveServerHero`**
+  - **File:** `components/HomeClient.js`
+  - **Issue:** `LiveServerHero` is currently dynamically imported with `ssr: false`. This causes the most important part of the page (the Hero section) to be invisible to search engine crawlers and delays the Largest Contentful Paint (LCP) for users until JavaScript loads.
+  - **Fix:** Change `ssr: false` to `ssr: true` or remove the dynamic import if not strictly necessary for bundle splitting. The component's internal logic (`window` usage) is inside event handlers, so it is safe for SSR.
 
----
+- [ ] **[SEO] Update Placeholder Links & Metadata**
+  - **File:** `lib/config.json`
+  - **Issue:** The configuration file contains placeholder links (e.g., `discord.gg/your-invite-link`, `facebook.com/your-page`).
+  - **Fix:** Replace all `"your-..."` placeholders with actual URLs.
 
-## Phase 1: Web Development (Frontend & Backend)
-### 1.1 ปรับปรุง API Register (`/app/api/user/register/route.js`)
-- [x] **แก้ไข Logic การบันทึกข้อมูล**:
-    -   ใช้ `web_pending:discord_id` เป็น identifier ชั่วคราว
-    -   Generate `ssn` (Unique) ตามมาตรฐาน ESX Legacy (XXX-XX-XXXX)
-    -   บันทึก `discord_id` ให้ถูกต้อง
-    -   ตรวจสอบความซ้ำซ้อนก่อนบันทึก
+## 🔥 High Priority (P1)
 
-### 1.2 ปรับปรุงหน้า Register (`/app/register/page.js`)
-- [x] **เพิ่มคำอธิบาย**: แจ้งผู้เล่นว่า "เมื่อลงทะเบียนเสร็จแล้ว สามารถเข้าเกมได้ทันที"
-- [x] **Validation**: ตรวจสอบข้อมูลให้ครบถ้วนก่อนส่ง
+- [ ] **[PERF] Optimize External Images**
+  - **File:** `lib/config.json`, `next.config.js`
+  - **Issue:** The site relies on `placehold.co` for placeholder images. These can be slow and affect performance scores.
+  - **Fix:** Replace placeholder images with local optimized assets (WebP/AVIF) in `public/images/` or use a dedicated CDN.
 
----
+- [ ] **[UX/A11Y] Fix Mobile Menu Accessibility**
+  - **File:** `components/Navbar.js`
+  - **Issue:** The mobile menu toggle button should have `aria-expanded` and `aria-controls` attributes dynamically updated (already present, but verify behavior). Ensure focus trap is implemented if the menu covers the screen.
+  - **Fix:** Verify keyboard navigation works inside the mobile menu.
 
-## Phase 2: FiveM Script Modification (`esx_identity`)
-**File Target**: `e:\txData\ESXLegacy_17B6DE.base\resources\[core]\esx_identity\server\main.lua`
+- [ ] **[SEO] Add `alt` Text to Images**
+  - **File:** `components/Footer.js`, `components/FeatureTabs.js`
+  - **Issue:** Ensure all `Image` components have descriptive `alt` text. Currently, some might use generic text or config values that need to be descriptive.
+  - **Fix:** Review all `Image` usages and ensure `alt` props describe the image content for screen readers.
 
-### 2.1 เพิ่มฟังก์ชัน Helper
-- [x] **สร้างฟังก์ชัน `GetDiscordID(source)`**:
-    -   วนลูปหา Identifier ที่ขึ้นต้นด้วย `discord:`
-    -   Return ค่า Discord ID ออกมา
+## 🛠️ Medium Priority (P2)
 
-### 2.2 แก้ไข Event `playerConnecting`
-- [x] **ปรับ Logic การตรวจสอบผู้เล่น**:
-    1.  ดึง `license` (Identifier) และ `discord_id` ของผู้เล่น
-    2.  **Query 1**: เช็คว่ามี `identifier` นี้ใน DB หรือยัง (ผู้เล่นเก่า) -> ถ้ามี ปล่อยผ่าน
-    3.  **Query 2**: ถ้าไม่มี `identifier` -> เช็คว่ามี `discord_id` นี้ใน DB หรือไม่ (ผู้เล่นใหม่ที่ลงทะเบียนผ่านเว็บ)
-        -   **ถ้ามี (Found)**: Update `identifier` เป็น License -> ปล่อยผ่าน
-        -   **ถ้าไม่มี (Not Found)**: Kick Player พร้อมข้อความแจ้งเตือน
+- [ ] **[CLEANUP] Remove Console Logs**
+  - **File:** `components/HomeClient.js`
+  - **Issue:** `console.log('Server status changed, refreshing...');` is present in production code.
+  - **Fix:** Remove the log or wrap it in `if (process.env.NODE_ENV === 'development')`.
 
-### 2.3 ปิดระบบ Register ในเกม
-- [x] **Disable In-Game Register**:
-    -   Comment Out `TriggerClientEvent("esx_identity:showRegisterIdentity", ...)` ใน `esx:playerLoaded`
+- [ ] **[DX] Type Checking / Prop Validation**
+  - **File:** `components/FeatureTabs.js`, `components/LiveServerHero.js`
+  - **Issue:** No PropTypes or TypeScript interfaces.
+  - **Fix:** Add PropTypes or migrate to TypeScript for better type safety, especially for `siteConfig` and `features` props.
 
----
+- [ ] **[UX] Loading Skeletons**
+  - **File:** `components/HomeClient.js`
+  - **Issue:** The loading skeletons for dynamic components (`FeatureTabs`, `NewsSection`) are generic gray boxes.
+  - **Fix:** Create custom skeleton components that match the actual layout of the content to reduce layout shift perception.
 
-## Phase 3: Testing & Validation
-- [x] **Test Case 1: ผู้เล่นใหม่ (ยังไม่ลงเว็บ)**
-    -   เข้าเกม -> ต้องโดน Kick พร้อมข้อความแจ้งเตือน
-- [ ] **Test Case 2: ผู้เล่นใหม่ (ลงเว็บแล้ว)**
-    -   ลงทะเบียนหน้าเว็บ -> ข้อมูลเข้า DB (Identifier เป็น `web_pending`)
-    -   เข้าเกม -> เข้าได้ปกติ -> เช็ค DB ต้องเห็น Identifier ถูกอัปเดตเป็น License
-- [ ] **Test Case 3: ผู้เล่นเก่า**
-    -   เข้าเกม -> เข้าได้ปกติ ข้อมูลไม่หาย
+## 🔒 Security (P2)
+
+- [ ] **[SEC] Verify NextAuth Secret**
+  - **File:** `.env` (not visible, but implied)
+  - **Issue:** Ensure `NEXTAUTH_SECRET` is set to a strong random string in production.
+  - **Fix:** Run `openssl rand -base64 32` to generate a secret and add it to `.env`.
+
+- [ ] **[SEC] Review External Link Security**
+  - **File:** `components/Navbar.js`, `components/Footer.js`
+  - **Issue:** External links (`target="_blank"`) should have `rel="noopener noreferrer"` to prevent tabnabbing (already present in Navbar, check Footer and others).
+  - **Fix:** Audit all `<a>` tags or `Link` components opening in new tabs.
+
+## 💡 Low Priority (P3)
+
+- [ ] **[UI] Consistent Button Styles**
+  - **File:** `components/LiveServerHero.js`, `components/Navbar.js`
+  - **Issue:** Check if button hover effects and shadows are consistent across the site (e.g., shadow colors matching brand colors).
+  - **Fix:** Standardize button variants in `components/ui/button.jsx` if needed.

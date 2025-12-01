@@ -2,10 +2,10 @@
     "name": "Website",
     "description": "The Ultimate FiveM Experience. Roleplay, Action, and Community.",
     "links": {
-        "discord": "https://discord.gg/your-invite-link",
-        "facebook": "https://facebook.com/your-page",
-        "youtube": "https://youtube.com/your-channel",
-        "tiktok": "https://tiktok.com/@your-account",
+        "discord": "https://discord.gg/rank1",
+        "facebook": "https://www.facebook.com/Rank1City",
+        "youtube": "https://www.youtube.com/@Rank1City",
+        "tiktok": "https://www.tiktok.com/@rank1city",
         "download": "#",
         "topup": "#"
     },
@@ -43,7 +43,7 @@
             "date": "NOW LIVE",
             "desc": "เปิดให้บริการเต็มรูปแบบ ระบบเศรษฐกิจสมดุล อาชีพพื้นฐานครบครัน พร้อมกิจกรรมต้อนรับผู้เล่นใหม่",
             "status": "completed",
-            "image": "https://placehold.co/600x800/1a1a1a/ffffff?text=Grand+Opening"
+            "image": "/images/roadmap/grand_opening.png"
         },
         {
             "id": 2,
@@ -52,7 +52,7 @@
             "date": "COMING SOON",
             "desc": "เปิดระบบยึดพื้นที่ (Turf War) เต็มรูปแบบ เดิมพันด้วยศักดิ์ศรีและผลประโยชน์มหาศาล",
             "status": "current",
-            "image": "https://placehold.co/600x800/1e3a8a/ffffff?text=Gang+Wars"
+            "image": "/images/roadmap/gang_wars.png"
         },
         {
             "id": 3,
@@ -61,7 +61,7 @@
             "date": "IN DEVELOPMENT",
             "desc": "ระบบปล้นธนาคารกลาง ความยากระดับสูงสุด ต้องวางแผนและทำงานเป็นทีม พร้อมของรางวัลระดับ Legendary",
             "status": "upcoming",
-            "image": "https://placehold.co/600x800/3f3f46/ffffff?text=Bank+Heist"
+            "image": "/images/roadmap/bank_heist.png"
         },
         {
             "id": 4,
@@ -70,7 +70,7 @@
             "date": "PLANNED",
             "desc": "ขยายแผนที่สู่เกาะ Cayo Perico พร้อมทรัพยากรใหม่ ภารกิจลับ และพื้นที่สีแดงแห่งใหม่",
             "status": "upcoming",
-            "image": "https://placehold.co/600x800/064e3b/ffffff?text=Cayo+Perico"
+            "image": "/images/roadmap/cayo_perico.png"
         },
         {
             "id": 5,
@@ -79,7 +79,7 @@
             "date": "PLANNED",
             "desc": "การแข่งขัน E-Sport ภายในเซิร์ฟเวอร์ ชิงเงินรางวัลรวมกว่า 100,000 บาท",
             "status": "upcoming",
-            "image": "https://placehold.co/600x800/7f1d1d/ffffff?text=Championship"
+            "image": "/images/roadmap/championship.png"
         }
     ]
 }

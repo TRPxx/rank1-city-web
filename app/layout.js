@@ -3,6 +3,7 @@ import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 import ClientToaster from "@/components/ClientToaster";
+import Navbar from "@/components/Navbar";
 
 const inter = Inter({ subsets: ["latin"] });
 const kanit = Kanit({
@@ -43,6 +44,7 @@ export default function RootLayout({ children }) {
             enableSystem
             disableTransitionOnChange
           >
+            <Navbar />
             {children}
             <ClientToaster />
           </ThemeProvider>

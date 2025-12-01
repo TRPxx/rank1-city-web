@@ -1,24 +1,22 @@
 export default function sitemap() {
-    const baseUrl = 'https://rank1city.com';
-
     return [
         {
-            url: baseUrl,
+            url: 'https://rank1city.com',
             lastModified: new Date(),
             changeFrequency: 'daily',
             priority: 1,
         },
         {
-            url: `${baseUrl}/preregister`,
+            url: 'https://rank1city.com/news',
             lastModified: new Date(),
             changeFrequency: 'daily',
-            priority: 0.9,
-        },
-        {
-            url: `${baseUrl}/news`,
-            lastModified: new Date(),
-            changeFrequency: 'weekly',
             priority: 0.8,
         },
-    ];
+        {
+            url: 'https://rank1city.com/preregister',
+            lastModified: new Date(),
+            changeFrequency: 'weekly',
+            priority: 0.5,
+        },
+    ]
 }

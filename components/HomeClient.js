@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import Navbar from '@/components/Navbar';
+
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -19,6 +19,8 @@ import { PREREGISTER_CONFIG } from '@/lib/preregister-config';
 import { m, LazyMotion, domAnimation } from 'framer-motion';
 import { usePreregisterStatus } from '@/hooks/usePreregisterStatus';
 
+import HeroSkeleton from '@/components/skeletons/HeroSkeleton';
+
 // Lazy load heavy components
 const FeatureTabs = dynamic(() => import('@/components/FeatureTabs'), {
     loading: () => <div className="w-full h-[400px] animate-pulse bg-muted/20 rounded-xl" />,
@@ -31,8 +33,8 @@ const NewsSection = dynamic(() => import('@/components/news/NewsSection'), {
 });
 
 const LiveServerHero = dynamic(() => import('@/components/LiveServerHero'), {
-    loading: () => <div className="w-full h-[300px] animate-pulse bg-muted/20 rounded-xl" />,
-    ssr: false
+    loading: () => <HeroSkeleton />,
+    ssr: true
 });
 
 const MaintenancePage = dynamic(() => import('@/components/MaintenancePage'), {
@@ -98,7 +100,7 @@ export default function HomeClient({ initialFeatures, siteConfig }) {
 
                 // If current status in prop is different from server, reload
                 if (data.serverStatus && data.serverStatus !== (siteConfig?.serverStatus || 'preregister')) {
-                    console.log('Server status changed, refreshing...');
+
                     window.location.reload();
                 }
             } catch (error) {
@@ -149,7 +151,7 @@ export default function HomeClient({ initialFeatures, siteConfig }) {
                     <div className="absolute inset-0 opacity-20">
                         <Image
                             src="/images/hero-bg-fivem.webp"
-                            alt="Hero Background"
+                            alt="Rank1 City FiveM Server Atmosphere"
                             fill
                             className="object-cover object-center"
                             priority
@@ -159,7 +161,7 @@ export default function HomeClient({ initialFeatures, siteConfig }) {
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/50 to-background" />
 
-                    <Navbar />
+
 
                     <div className="flex-1 container flex items-center relative z-10">
                         {isServerLive ? (

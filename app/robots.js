@@ -3,7 +3,7 @@ export default function robots() {
         rules: {
             userAgent: '*',
             allow: '/',
-            disallow: '/api/',
+            disallow: '/private/',
         },
         sitemap: 'https://rank1city.com/sitemap.xml',
     }

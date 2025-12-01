@@ -85,15 +85,15 @@ const CountdownTimer = ({ targetDate }) => {
 
 export default function SpecialEventPage() {
     return (
-        <div className="min-h-screen bg-black text-white selection:bg-primary selection:text-primary-foreground font-sans">
+        <div className="min-h-screen bg-background text-foreground selection:bg-primary selection:text-primary-foreground font-sans transition-colors duration-300">
             <Navbar />
 
             {/* Hero Section */}
             <section className="relative min-h-screen flex items-center justify-center overflow-hidden pt-16">
                 {/* Background Video/Image */}
                 <div className="absolute inset-0 z-0">
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/40 to-black z-10" />
-                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1514525253440-b393452e8d26?q=80&w=2874&auto=format&fit=crop')] bg-cover bg-center opacity-50" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-background/90 via-background/70 to-background z-10" />
+                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1514525253440-b393452e8d26?q=80&w=2874&auto=format&fit=crop')] bg-cover bg-center opacity-20 dark:opacity-50" />
                 </div>
 
                 <div className="container relative z-20 text-center px-4">
@@ -105,10 +105,10 @@ export default function SpecialEventPage() {
                         <Badge variant="outline" className="mb-4 px-4 py-1 text-lg border-primary text-primary bg-primary/10 backdrop-blur">
                             SPECIAL EVENT
                         </Badge>
-                        <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-b from-white to-white/60 drop-shadow-2xl">
+                        <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-b from-zinc-900 to-zinc-500 dark:from-white dark:to-white/60 drop-shadow-2xl">
                             {EVENT_DATA.title}
                         </h1>
-                        <p className="text-xl md:text-2xl text-gray-300 max-w-3xl mx-auto mb-8 font-light">
+                        <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8 font-light">
                             {EVENT_DATA.subtitle}
                         </p>
 
@@ -118,7 +118,7 @@ export default function SpecialEventPage() {
                             <Button size="lg" className="text-lg px-8 py-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_30px_rgba(var(--primary),0.5)] transition-all hover:scale-105">
                                 เข้าร่วมกิจกรรม
                             </Button>
-                            <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-white/20 hover:bg-white/10 backdrop-blur transition-all hover:scale-105">
+                            <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-input hover:bg-accent hover:text-accent-foreground backdrop-blur transition-all hover:scale-105">
                                 อ่านรายละเอียด
                             </Button>
                         </div>
@@ -131,7 +131,7 @@ export default function SpecialEventPage() {
                     animate={{ y: [0, 10, 0] }}
                     transition={{ repeat: Infinity, duration: 2 }}
                 >
-                    <div className="flex flex-col items-center gap-2 text-white/50">
+                    <div className="flex flex-col items-center gap-2 text-muted-foreground/50">
                         <span className="text-xs uppercase tracking-widest">Scroll Down</span>
                         <ChevronRight className="rotate-90 w-6 h-6" />
                     </div>
@@ -139,7 +139,7 @@ export default function SpecialEventPage() {
             </section>
 
             {/* Highlights Section */}
-            <section className="py-24 bg-zinc-950 relative">
+            <section className="py-24 bg-muted/30 relative">
                 <div className="container px-4">
                     <div className="text-center mb-16">
                         <h2 className="text-3xl md:text-5xl font-bold mb-4">Event Highlights</h2>
@@ -155,12 +155,12 @@ export default function SpecialEventPage() {
                                 transition={{ delay: index * 0.2 }}
                                 viewport={{ once: true }}
                             >
-                                <Card className="bg-zinc-900/50 border-zinc-800 overflow-hidden hover:border-primary/50 transition-colors group h-full">
+                                <Card className="bg-card border-border overflow-hidden hover:border-primary/50 transition-colors group h-full shadow-sm hover:shadow-md">
                                     <div className="relative h-48 overflow-hidden">
-                                        <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 to-transparent z-10" />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10" />
                                         {/* Placeholder for Image */}
-                                        <div className="w-full h-full bg-zinc-800 group-hover:scale-110 transition-transform duration-500 flex items-center justify-center">
-                                            <item.icon className="w-16 h-16 text-zinc-700 group-hover:text-primary/50 transition-colors" />
+                                        <div className="w-full h-full bg-muted group-hover:scale-110 transition-transform duration-500 flex items-center justify-center">
+                                            <item.icon className="w-16 h-16 text-muted-foreground/50 group-hover:text-primary/50 transition-colors" />
                                         </div>
                                     </div>
                                     <CardContent className="p-6 relative z-20 -mt-12">
@@ -178,7 +178,7 @@ export default function SpecialEventPage() {
             </section>
 
             {/* Schedule Section */}
-            <section className="py-24 bg-black relative overflow-hidden">
+            <section className="py-24 bg-background relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent" />
 
                 <div className="container px-4">
@@ -196,8 +196,8 @@ export default function SpecialEventPage() {
                                         <div className="w-24 text-right font-mono text-xl text-primary font-bold group-hover:scale-110 transition-transform">
                                             {item.time}
                                         </div>
-                                        <div className="w-px h-12 bg-zinc-800 group-hover:bg-primary transition-colors" />
-                                        <div className="text-lg font-medium group-hover:text-white text-zinc-400 transition-colors">
+                                        <div className="w-px h-12 bg-border group-hover:bg-primary transition-colors" />
+                                        <div className="text-lg font-medium group-hover:text-foreground text-muted-foreground transition-colors">
                                             {item.activity}
                                         </div>
                                     </div>
@@ -207,7 +207,7 @@ export default function SpecialEventPage() {
 
                         <div className="relative">
                             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-500/20 blur-3xl rounded-full opacity-30" />
-                            <Card className="relative bg-zinc-900/80 border-zinc-800 backdrop-blur-xl p-8">
+                            <Card className="relative bg-card/80 border-border backdrop-blur-xl p-8">
                                 <div className="flex items-start gap-4 mb-6">
                                     <AlertCircle className="w-6 h-6 text-primary shrink-0 mt-1" />
                                     <div>
