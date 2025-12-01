@@ -18,17 +18,22 @@ This workflow pushes changes to the git repository and then sends a notification
    - Run `git push`
 
 5. Notify Discord
-   - Construct a JSON payload with the commit message and author.
-   - Use `curl` or a script to POST the payload to the Discord Webhook URL: `https://discord.com/api/webhooks/1445144998495518821/uHIfO9ZeYt87If-UveTqVaeNP3TikHBwgw5TsAuJrC3tlhkWu6LWNcOTL0aepa3vyUP5`
-   - Use the following PowerShell script to ensure UTF-8 encoding:
+   - Use the following PowerShell script to send a rich notification (Ensure you replace `{COMMIT_MESSAGE}` with the actual message):
      ```powershell
+     $commitMessage = "{COMMIT_MESSAGE}"
+     $branch = git rev-parse --abbrev-ref HEAD
+     $shortHash = git rev-parse --short HEAD
+     $fullHash = git rev-parse HEAD
+     $commitUrl = "https://github.com/TRPxx/rank1-city-web/commit/$fullHash"
+     $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
+
      $payload = @{
          username = "Rank1 City Deploy Bot"
          avatar_url = "https://rank1city.com/favicon.svg"
          embeds = @(
              @{
                  title = "🚀 อัปเดตระบบเรียบร้อย! (New Update)"
-                 description = "**รายละเอียดการแก้ไข (Commit Message):**`n{COMMIT_MESSAGE}"
+                 description = "**รายละเอียดการแก้ไข (Commit Message):**`n$commitMessage"
                  color = 5763719
                  fields = @(
                      @{
@@ -37,13 +42,23 @@ This workflow pushes changes to the git repository and then sends a notification
                          inline = $true
                      },
                      @{
+                         name = "สาขา (Branch)"
+                         value = "`$branch"
+                         inline = $true
+                     },
+                     @{
+                         name = "รหัส (Hash)"
+                         value = "[$shortHash]($commitUrl)"
+                         inline = $true
+                     },
+                     @{
                          name = "เวลา (Timestamp)"
-                         value = "{CURRENT_TIMESTAMP}"
+                         value = "$timestamp"
                          inline = $true
                      }
                  )
                  footer = @{
-                     text = "Rank1 City Web System"
+                     text = "Rank1 City Web System • $shortHash"
                  }
              }
          )
