@@ -18,7 +18,7 @@ This workflow pushes changes to the git repository and then sends a notification
    - Run `git push`
 
 5. Notify Discord
-   - Use the following PowerShell script to send a rich notification (Ensure you replace `{COMMIT_MESSAGE}` with the actual message):
+   - Use the following PowerShell script to send a rich notification with detailed line changes:
      ```powershell
      $commitMessage = "{COMMIT_MESSAGE}"
      $branch = git rev-parse --abbrev-ref HEAD
@@ -27,7 +27,42 @@ This workflow pushes changes to the git repository and then sends a notification
      $commitUrl = "https://github.com/TRPxx/rank1-city-web/commit/$fullHash"
      $timestamp = (Get-Date).ToString("yyyy-MM-dd HH:mm:ss")
      $stats = git diff --shortstat HEAD^ HEAD
-     if (-not $stats) { $stats = "No changes detected or initial commit" }
+     
+     # Parse line numbers from git diff
+     $diffOutput = git diff --unified=0 HEAD^ HEAD
+     $fileDetails = @()
+     $currentFile = ""
+     $lines = @()
+     
+     foreach ($line in $diffOutput) {
+         if ($line -match "^\+\+\+ b/(.*)") {
+             if ($currentFile -ne "") {
+                 $lineStr = $lines -join ", "
+                 if ($lineStr) { $fileDetails += "**$currentFile**: $lineStr" }
+                 else { $fileDetails += "**$currentFile**" }
+             }
+             $currentFile = $matches[1]
+             $lines = @()
+         }
+         elseif ($line -match "^@@ .* \+(\d+)(?:,(\d+))? @@") {
+             $start = [int]$matches[1]
+             $count = if ($matches[2]) { [int]$matches[2] } else { 1 }
+             if ($count -gt 0) {
+                 $end = $start + $count - 1
+                 if ($start -eq $end) { $lines += "L$start" } else { $lines += "L$start-$end" }
+             }
+         }
+     }
+     if ($currentFile -ne "") { 
+         $lineStr = $lines -join ", "
+         if ($lineStr) { $fileDetails += "**$currentFile**: $lineStr" }
+         else { $fileDetails += "**$currentFile**" }
+     }
+     
+     $detailedChanges = $fileDetails -join "`n"
+     if ($detailedChanges.Length -gt 1000) { $detailedChanges = $detailedChanges.Substring(0, 990) + "... (truncated)" }
+     if (-not $detailedChanges) { $detailedChanges = "No content changes (maybe binary files or renames)." }
+     if (-not $stats) { $stats = "Initial commit or no changes" }
 
      $payload = @{
          username = "Rank1 City Deploy Bot"
@@ -35,7 +70,7 @@ This workflow pushes changes to the git repository and then sends a notification
          embeds = @(
              @{
                  title = "🚀 อัปเดตระบบเรียบร้อย! (New Update)"
-                 description = "**รายละเอียดการแก้ไข (Commit Message):**`n$commitMessage"
+                 description = "**รายละเอียดการแก้ไข (Commit Message):**`n$commitMessage`n`n**ตำแหน่งที่แก้ไข (Changed Lines):**`n$detailedChanges"
                  color = 5763719
                  fields = @(
                      @{
