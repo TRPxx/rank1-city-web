@@ -34,7 +34,8 @@
             "sub": "DEVELOPMENT"
         }
     },
-    "serverStatus": "live",
+    "serverStatus": "preregister",
+    "serverApiUrl": "http://127.0.0.1:30120/players.json",
     "roadmap": [
         {
             "id": 1,
@@ -81,5 +82,6 @@
             "status": "upcoming",
             "image": "/images/roadmap/championship.png"
         }
-    ]
+    ],
+    "serverStatusBadge": "beta"
 }

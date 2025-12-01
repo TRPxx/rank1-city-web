@@ -322,8 +322,30 @@ export default function AdminSettingsPage() {
                                         </SelectContent>
                                     </Select>
                                     <p className="text-xs text-muted-foreground">
-                                        "ลงทะเบียนล่วงหน้า": แสดงเวลานับถอยหลังและปุ่มลงทะเบียน<br />
-                                        "เปิดให้บริการ": แสดงปุ่ม "เล่นเลย" และสถานะเซิร์ฟเวอร์
+                                        โหมดหลักของเว็บไซต์: <br />
+                                        - <b>ลงทะเบียนล่วงหน้า</b>: แสดงหน้า Landing Page สำหรับลงทะเบียน<br />
+                                        - <b>เปิดให้บริการ</b>: แสดงหน้าหลักพร้อมข้อมูลเซิร์ฟเวอร์
+                                    </p>
+                                </div>
+
+                                <div className="grid gap-2 pt-4 border-t">
+                                    <Label>สถานะเซิร์ฟเวอร์ (Badge)</Label>
+                                    <Select
+                                        value={siteConfig?.serverStatusBadge || 'online'}
+                                        onValueChange={(value) => setSiteConfig({ ...siteConfig, serverStatusBadge: value })}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="เลือกสถานะ" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="online">🟢 ONLINE (เปิดให้บริการ)</SelectItem>
+                                            <SelectItem value="offline">🔴 OFFLINE (ปิดให้บริการ)</SelectItem>
+                                            <SelectItem value="maintenance">🟠 MAINTENANCE (ปิดปรับปรุง)</SelectItem>
+                                            <SelectItem value="beta">🔵 BETA (เปิดทดสอบ)</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <p className="text-xs text-muted-foreground">
+                                        สถานะที่จะแสดงบนการ์ด Server Status
                                     </p>
                                 </div>
                             </CardContent>

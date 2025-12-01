@@ -1,0 +1,126 @@
+name: Discord Push Notification
+
+on:
+  push:
+    branches:
+      - main
+      - master
+
+jobs:
+  notify-discord:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2  # Need previous commit for diff
+
+      - name: Get commit info
+        id: commit_info
+        run: |
+          BRANCH_NAME="${GITHUB_REF#refs/heads/}"
+          COMMIT_HASH="${GITHUB_SHA:0:7}"
+          COMMIT_HASH_FULL="${GITHUB_SHA}"
+          COMMIT_MESSAGE=$(git log -1 --pretty=%B)
+          TIMESTAMP=$(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          STATS=$(git diff --shortstat HEAD~1 HEAD)
+          
+          echo "branch=$BRANCH_NAME" >> $GITHUB_OUTPUT
+          echo "hash=$COMMIT_HASH" >> $GITHUB_OUTPUT
+          echo "hash_full=$COMMIT_HASH_FULL" >> $GITHUB_OUTPUT
+          echo "message<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMIT_MESSAGE" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+          echo "timestamp=$TIMESTAMP" >> $GITHUB_OUTPUT
+          echo "stats=$STATS" >> $GITHUB_OUTPUT
+
+      - name: Get detailed file changes
+        id: file_changes
+        run: |
+          # Get list of changed files with their line changes
+          FILES_CHANGED=""
+          
+          git diff --numstat HEAD~1 HEAD | while read added removed file; do
+            if [ -f "$file" ]; then
+              # Get line number ranges
+              RANGES=$(git diff HEAD~1 HEAD "$file" | grep -E '^@@' | sed 's/@@ -[0-9,]* +\([0-9,]*\) @@.*/\1/' | head -5)
+              
+              if [ ! -z "$RANGES" ]; then
+                FORMATTED_RANGES=$(echo "$RANGES" | sed 's/\([0-9]*\),\([0-9]*\)/L\1-L\1+\2/g' | sed 's/\([0-9]*\)$/L\1/g' | tr '\n' ', ' | sed 's/,$//')
+                FILES_CHANGED="${FILES_CHANGED}**${file}**: ${FORMATTED_RANGES}\n"
+              fi
+            fi
+          done
+          
+          echo "files<<EOF" >> $GITHUB_OUTPUT
+          echo -e "$FILES_CHANGED" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Send Discord notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          # Build Discord embed payload
+          REPO_URL="https://github.com/${{ github.repository }}"
+          COMMIT_URL="${REPO_URL}/commit/${{ steps.commit_info.outputs.hash_full }}"
+          
+          # Prepare file changes (limit to prevent message too long)
+          FILE_CHANGES="${{ steps.file_changes.outputs.files }}"
+          if [ -z "$FILE_CHANGES" ]; then
+            FILE_CHANGES="ไม่มีการเปลี่ยนแปลง"
+          fi
+          
+          # Create JSON payload
+          cat << EOF > payload.json
+          {
+            "username": "Git Push Bot",
+            "avatar_url": "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+            "embeds": [{
+              "title": "🚀 Push ใหม่บน GitHub",
+              "description": "${{ steps.commit_info.outputs.message }}",
+              "color": 3447003,
+              "fields": [
+                {
+                  "name": "👤 ผู้ Push",
+                  "value": "Bear",
+                  "inline": true
+                },
+                {
+                  "name": "🌿 Branch",
+                  "value": "\`${{ steps.commit_info.outputs.branch }}\`",
+                  "inline": true
+                },
+                {
+                  "name": "🔗 Commit",
+                  "value": "[\`${{ steps.commit_info.outputs.hash }}\`]($COMMIT_URL)",
+                  "inline": true
+                },
+                {
+                  "name": "⏰ เวลา",
+                  "value": "${{ steps.commit_info.outputs.timestamp }}",
+                  "inline": false
+                },
+                {
+                  "name": "📊 สถิติ",
+                  "value": "\`${{ steps.commit_info.outputs.stats }}\`",
+                  "inline": false
+                },
+                {
+                  "name": "📝 ไฟล์ที่แก้ไข",
+                  "value": "$FILE_CHANGES",
+                  "inline": false
+                }
+              ],
+              "footer": {
+                "text": "Rank1 City • Automated Git Push Notification"
+              },
+              "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%S.000Z)"
+            }]
+          }
+          EOF
+          
+          # Send to Discord
+          curl -H "Content-Type: application/json" \
+               -d @payload.json \
+               "$DISCORD_WEBHOOK"

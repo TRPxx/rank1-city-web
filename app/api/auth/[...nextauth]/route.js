@@ -15,7 +15,7 @@ export const authOptions = {
                 const guildId = process.env.DISCORD_GUILD_ID;
 
                 if (!guildId) {
-                    console.error("DISCORD_GUILD_ID is not set in environment variables.");
+
                     return false;
                 }
 
@@ -30,13 +30,13 @@ export const authOptions = {
                     const isMember = guilds.some((guild) => guild.id === guildId);
 
                     if (!isMember) {
-                        console.log("User is NOT in the required Discord server.");
+
                         return false;
                     }
 
                     return true;
                 } catch (error) {
-                    console.error("Error checking Discord guild:", error);
+
                     return false;
                 }
             }
@@ -61,11 +61,11 @@ export const authOptions = {
                         const hasAdminRole = member.roles && member.roles.includes(ADMIN_ROLE_ID);
                         token.isAdmin = hasAdminRole;
                     } else {
-                        console.error("Failed to fetch guild member for role check:", await response.text());
+
                         token.isAdmin = false;
                     }
                 } catch (error) {
-                    console.error("Error checking admin role:", error);
+
                     token.isAdmin = false;
                 }
             }

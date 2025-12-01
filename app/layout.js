@@ -33,7 +33,11 @@ export const metadata = {
   },
 };
 
+import siteConfig from '@/lib/config.json';
+
 export default function RootLayout({ children }) {
+  const isMaintenance = siteConfig?.serverStatus === 'maintenance';
+
   return (
     <html lang="th" suppressHydrationWarning>
       <body className={`${inter.className} ${kanit.variable} font-sans`}>
@@ -44,7 +48,7 @@ export default function RootLayout({ children }) {
             enableSystem
             disableTransitionOnChange
           >
-            <Navbar />
+            {!isMaintenance && <Navbar />}
             {children}
             <ClientToaster />
           </ThemeProvider>

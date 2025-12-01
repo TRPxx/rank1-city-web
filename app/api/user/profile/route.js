@@ -16,7 +16,7 @@ export async function GET(request) {
         // แปลงเป็น format ที่เก็บใน DB (discord:123456789)
         const dbDiscordId = `discord:${rawDiscordId}`;
 
-        console.log(`Searching for user with Discord ID: ${dbDiscordId}`);
+
 
         // Query ข้อมูลจากตาราง users โดยใช้ discord_id
         const [rows] = await pool.query(
@@ -28,7 +28,7 @@ export async function GET(request) {
         );
 
         if (rows.length === 0) {
-            console.log("User not found in game database.");
+
             return NextResponse.json({ error: 'User not found in game database' }, { status: 404 });
         }
 
@@ -40,7 +40,7 @@ export async function GET(request) {
         try {
             accounts = JSON.parse(user.accounts || '{}');
         } catch (e) {
-            console.error("Error parsing accounts:", e);
+
         }
 
         let inventory = [];
@@ -54,7 +54,7 @@ export async function GET(request) {
                 }
             }
         } catch (e) {
-            console.error("Error parsing inventory:", e);
+
         }
 
         let loadout = [];
@@ -68,7 +68,7 @@ export async function GET(request) {
                 }
             }
         } catch (e) {
-            console.error("Error parsing loadout:", e);
+
         }
 
         // จัดรูปแบบข้อมูลที่จะส่งกลับ
@@ -89,7 +89,7 @@ export async function GET(request) {
         return NextResponse.json(userData);
 
     } catch (error) {
-        console.error('Database error:', error);
+
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

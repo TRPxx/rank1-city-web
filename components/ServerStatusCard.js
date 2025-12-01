@@ -6,7 +6,7 @@ import { Users, Copy, Check, Signal, Play } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 
-export default function ServerStatusCard() {
+export default function ServerStatusCard({ siteConfig }) {
     const [copied, setCopied] = useState(false);
     const [playerCount, setPlayerCount] = useState(0);
     const [maxPlayers, setMaxPlayers] = useState(300);
@@ -14,18 +14,28 @@ export default function ServerStatusCard() {
 
     // Mock Data Simulation
     useEffect(() => {
-        const baseCount = 1500;
-        setMaxPlayers(2000);
-        setPlayerCount(baseCount + Math.floor(Math.random() * 50));
-        setPing(Math.floor(Math.random() * 20) + 15);
+        const fetchServerStatus = async () => {
+            try {
+                const res = await fetch('/api/server/players');
+                const data = await res.json();
 
-        const interval = setInterval(() => {
-            setPlayerCount(prev => {
-                const change = Math.floor(Math.random() * 10) - 4;
-                return Math.min(2000, Math.max(0, prev + change));
-            });
-            setPing(Math.floor(Math.random() * 20) + 15);
-        }, 5000);
+                if (Array.isArray(data)) {
+                    setPlayerCount(data.length);
+                }
+
+                // Randomize ping slightly for realism even if data is static
+                setPing(Math.floor(Math.random() * 20) + 15);
+            } catch (error) {
+                console.error("Failed to fetch server status");
+                // Fallback to 0 or keep previous state
+            }
+        };
+
+        // Initial fetch
+        fetchServerStatus();
+
+        // Poll every 10 seconds
+        const interval = setInterval(fetchServerStatus, 10000);
 
         return () => clearInterval(interval);
     }, []);
@@ -50,10 +60,35 @@ export default function ServerStatusCard() {
                 {/* Status Indicator */}
                 <div className="flex items-center gap-3 bg-zinc-100 dark:bg-black/20 backdrop-blur-sm px-4 py-2 rounded-full border border-zinc-200 dark:border-white/5">
                     <div className="relative flex h-3 w-3">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.8)]"></span>
+                        {siteConfig?.serverStatusBadge === 'online' && (
+                            <>
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.8)]"></span>
+                            </>
+                        )}
+                        {siteConfig?.serverStatusBadge === 'offline' && (
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500 shadow-[0_0_15px_rgba(239,68,68,0.8)]"></span>
+                        )}
+                        {siteConfig?.serverStatusBadge === 'maintenance' && (
+                            <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500 shadow-[0_0_15px_rgba(249,115,22,0.8)]"></span>
+                        )}
+                        {siteConfig?.serverStatusBadge === 'beta' && (
+                            <>
+                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500 shadow-[0_0_15px_rgba(59,130,246,0.8)]"></span>
+                            </>
+                        )}
                     </div>
-                    <span className="text-sm font-medium text-green-600 dark:text-green-400 tracking-wide">SERVER ONLINE</span>
+                    <span className={`text-sm font-medium tracking-wide ${siteConfig?.serverStatusBadge === 'online' ? 'text-green-600 dark:text-green-400' :
+                        siteConfig?.serverStatusBadge === 'offline' ? 'text-red-600 dark:text-red-400' :
+                            siteConfig?.serverStatusBadge === 'maintenance' ? 'text-orange-600 dark:text-orange-400' :
+                                'text-blue-600 dark:text-blue-400'
+                        }`}>
+                        {siteConfig?.serverStatusBadge === 'online' ? 'SERVER ONLINE' :
+                            siteConfig?.serverStatusBadge === 'offline' ? 'SERVER OFFLINE' :
+                                siteConfig?.serverStatusBadge === 'maintenance' ? 'MAINTENANCE' :
+                                    'BETA TESTING'}
+                    </span>
                     <div className="w-px h-4 bg-zinc-300 dark:bg-white/10 mx-1"></div>
                     <span className="text-xs font-mono text-zinc-500 dark:text-gray-400 flex items-center gap-1">
                         <Signal className="w-3 h-3" /> {ping}ms

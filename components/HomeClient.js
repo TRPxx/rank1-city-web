@@ -122,6 +122,12 @@ export default function HomeClient({ initialFeatures, siteConfig }) {
     const maxCount = globalRewards[globalRewards.length - 1]?.count || 5000;
     const progressPercent = Math.min(100, (totalRegistrations / maxCount) * 100);
 
+    // Set maintenance mode cookie for middleware
+    useEffect(() => {
+        const isMaintenance = siteConfig?.serverStatus === 'maintenance';
+        document.cookie = `maintenance-mode=${isMaintenance}; path=/; max-age=31536000`;
+    }, [siteConfig?.serverStatus]);
+
     if (siteConfig?.serverStatus === 'maintenance') {
         return <MaintenancePage discordLink={siteConfig?.links?.discord} />;
     }
@@ -160,8 +166,6 @@ export default function HomeClient({ initialFeatures, siteConfig }) {
                         />
                     </div>
                     <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/50 to-background" />
-
-
 
                     <div className="flex-1 container flex items-center relative z-10">
                         {isServerLive ? (

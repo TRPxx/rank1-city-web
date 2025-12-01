@@ -120,7 +120,7 @@ export default function LiveServerHero({ siteConfig }) {
                             transition={{ delay: 0.2, duration: 0.8 }}
                             className="relative z-10 w-full max-w-md"
                         >
-                            <ServerStatusCard />
+                            <ServerStatusCard siteConfig={siteConfig} />
                         </motion.div>
                     </div>
 
