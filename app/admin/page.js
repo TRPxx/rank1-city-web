@@ -91,12 +91,12 @@ export default function AdminDashboard() {
             <div className="container pt-24 pb-12">
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-                        <p className="text-muted-foreground">Manage your server events and users</p>
+                        <h1 className="text-3xl font-bold tracking-tight">แดชบอร์ดผู้ดูแลระบบ</h1>
+                        <p className="text-muted-foreground">จัดการกิจกรรมเซิร์ฟเวอร์และผู้ใช้งาน</p>
                     </div>
                     <Link href="/admin/settings">
                         <Button variant="outline">
-                            <Settings className="mr-2 h-4 w-4" /> Settings
+                            <Settings className="mr-2 h-4 w-4" /> ตั้งค่าระบบ
                         </Button>
                     </Link>
                 </div>
@@ -104,7 +104,7 @@ export default function AdminDashboard() {
                 <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+                            <CardTitle className="text-sm font-medium">ผู้ใช้งานทั้งหมด</CardTitle>
                             <Users className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
@@ -113,7 +113,7 @@ export default function AdminDashboard() {
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Gangs</CardTitle>
+                            <CardTitle className="text-sm font-medium">แก๊งทั้งหมด</CardTitle>
                             <ShieldAlert className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
@@ -122,7 +122,7 @@ export default function AdminDashboard() {
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Tickets Held</CardTitle>
+                            <CardTitle className="text-sm font-medium">ตั๋วที่มีในระบบ</CardTitle>
                             <Ticket className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
@@ -131,7 +131,7 @@ export default function AdminDashboard() {
                     </Card>
                     <Card>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                            <CardTitle className="text-sm font-medium">Total Spins</CardTitle>
+                            <CardTitle className="text-sm font-medium">ยอดการหมุนวงล้อ</CardTitle>
                             <Trophy className="h-4 w-4 text-muted-foreground" />
                         </CardHeader>
                         <CardContent>
@@ -142,23 +142,23 @@ export default function AdminDashboard() {
 
                 <Tabs defaultValue="overview" className="space-y-4">
                     <TabsList>
-                        <TabsTrigger value="overview">Overview</TabsTrigger>
-                        <TabsTrigger value="users">User Management</TabsTrigger>
+                        <TabsTrigger value="overview">ภาพรวม</TabsTrigger>
+                        <TabsTrigger value="users">จัดการผู้ใช้</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="overview" className="space-y-4">
                         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
                             <Card className="col-span-4">
                                 <CardHeader>
-                                    <CardTitle>Recent Registrations</CardTitle>
+                                    <CardTitle>การลงทะเบียนล่าสุด</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
                                                 <TableHead>Discord ID</TableHead>
-                                                <TableHead>Referral Code</TableHead>
-                                                <TableHead className="text-right">Date</TableHead>
+                                                <TableHead>รหัสแนะนำ</TableHead>
+                                                <TableHead className="text-right">วันที่</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
@@ -167,7 +167,7 @@ export default function AdminDashboard() {
                                                     <TableCell className="font-mono text-xs">{user.discord_id}</TableCell>
                                                     <TableCell>{user.referral_code}</TableCell>
                                                     <TableCell className="text-right text-muted-foreground">
-                                                        {new Date(user.created_at).toLocaleDateString()}
+                                                        {new Date(user.created_at).toLocaleDateString('th-TH')}
                                                     </TableCell>
                                                 </TableRow>
                                             ))}
@@ -177,7 +177,7 @@ export default function AdminDashboard() {
                             </Card>
                             <Card className="col-span-3">
                                 <CardHeader>
-                                    <CardTitle>Recent Lucky Draw Wins</CardTitle>
+                                    <CardTitle>ผู้โชคดีล่าสุด</CardTitle>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="space-y-8">
@@ -186,11 +186,11 @@ export default function AdminDashboard() {
                                                 <div className="ml-4 space-y-1">
                                                     <p className="text-sm font-medium leading-none">{win.item_name}</p>
                                                     <p className="text-xs text-muted-foreground">
-                                                        Winner: {win.discord_id.substring(0, 8)}...
+                                                        ผู้ชนะ: {win.discord_id.substring(0, 8)}...
                                                     </p>
                                                 </div>
                                                 <div className="ml-auto font-medium text-xs text-muted-foreground">
-                                                    {new Date(win.created_at).toLocaleTimeString()}
+                                                    {new Date(win.created_at).toLocaleTimeString('th-TH')}
                                                 </div>
                                             </div>
                                         ))}
@@ -203,15 +203,15 @@ export default function AdminDashboard() {
                     <TabsContent value="users">
                         <Card>
                             <CardHeader>
-                                <CardTitle>Search Users</CardTitle>
+                                <CardTitle>ค้นหาผู้ใช้งาน</CardTitle>
                                 <div className="flex gap-2">
                                     <Input
-                                        placeholder="Search by Discord ID or Referral Code..."
+                                        placeholder="ค้นหาด้วย Discord ID หรือ รหัสแนะนำ..."
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                     />
                                     <Button onClick={handleSearch}>
-                                        <Search className="mr-2 h-4 w-4" /> Search
+                                        <Search className="mr-2 h-4 w-4" /> ค้นหา
                                     </Button>
                                 </div>
                             </CardHeader>
@@ -220,11 +220,11 @@ export default function AdminDashboard() {
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>Discord ID</TableHead>
-                                            <TableHead>Gang</TableHead>
-                                            <TableHead>Tickets</TableHead>
-                                            <TableHead>Points</TableHead>
-                                            <TableHead>Ref Code</TableHead>
-                                            <TableHead>Invited By</TableHead>
+                                            <TableHead>แก๊ง</TableHead>
+                                            <TableHead>ตั๋ว</TableHead>
+                                            <TableHead>แต้ม</TableHead>
+                                            <TableHead>รหัสแนะนำ</TableHead>
+                                            <TableHead>ผู้แนะนำ</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -245,7 +245,7 @@ export default function AdminDashboard() {
                                         {searchResults.length === 0 && searchQuery && (
                                             <TableRow>
                                                 <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                                                    No users found
+                                                    ไม่พบข้อมูลผู้ใช้งาน
                                                 </TableCell>
                                             </TableRow>
                                         )}

@@ -13,7 +13,6 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { Loader2, Save, AlertCircle, CheckCircle, Plus, Trash2, Users, Shield, Zap, Car, Briefcase, Home, Star, Heart, Trophy, Target, Flag, MapPin, Gift, Activity, Settings, MessageCircle, PlayCircle, Gamepad2, Info, HelpCircle, Search, Newspaper } from 'lucide-react';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Image from 'next/image';
 import { categories as newsCategories } from '@/lib/news-data';
@@ -24,6 +23,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
+import RoadmapEditor from '@/components/admin/RoadmapEditor';
+import RewardsEditor from '@/components/admin/RewardsEditor';
 
 const iconList = [
     { name: 'Users', icon: Users },
@@ -34,7 +35,7 @@ const iconList = [
     { name: 'Home', icon: Home },
     { name: 'Star', icon: Star },
     { name: 'Heart', icon: Heart },
-    { name: 'Trophy', Trophy },
+    { name: 'Trophy', icon: Trophy },
     { name: 'Target', icon: Target },
     { name: 'Flag', icon: Flag },
     { name: 'MapPin', icon: MapPin },
@@ -178,10 +179,10 @@ export default function AdminSettingsPage() {
         const newFeature = {
             id: `feature-${Date.now()}`,
             icon: 'Star',
-            title: 'New Feature',
-            description: 'Description here...',
+            title: 'ฟีเจอร์ใหม่',
+            description: 'คำอธิบาย...',
             image: 'https://placehold.co/800x600',
-            stats: [{ label: 'Stat 1', value: '100' }]
+            stats: [{ label: 'สถิติ 1', value: '100' }]
         };
         setFeaturesConfig([...featuresConfig, newFeature]);
         setSelectedFeatureIndex(featuresConfig.length); // Select the new feature
@@ -213,12 +214,12 @@ export default function AdminSettingsPage() {
     const addNews = () => {
         const newNewsItem = {
             id: `${Date.now()}`,
-            title: 'New Announcement',
+            title: 'ประกาศใหม่',
             category: 'news',
             date: new Date().toLocaleDateString('en-GB'), // DD/MM/YYYY format
-            excerpt: 'Short description...',
+            excerpt: 'คำอธิบายสั้นๆ...',
             image: 'https://placehold.co/600x400/3b82f6/ffffff?text=News',
-            content: '<p>Content goes here...</p>'
+            content: '<p>เนื้อหาข่าว...</p>'
         };
         setNewsConfig([newNewsItem, ...newsConfig]); // Add to top
         setSelectedNewsIndex(0);
@@ -259,105 +260,90 @@ export default function AdminSettingsPage() {
             <div className="container pt-24">
                 <div className="flex items-center justify-between mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">System Settings</h1>
-                        <p className="text-muted-foreground">Configure global website settings</p>
+                        <h1 className="text-3xl font-bold tracking-tight">ตั้งค่าระบบ</h1>
+                        <p className="text-muted-foreground">จัดการการตั้งค่าเว็บไซต์ทั้งหมด</p>
                     </div>
                     <Button disabled={isSaving} onClick={() => window.location.reload()}>
-                        Refresh Data
+                        รีเฟรชข้อมูล
                     </Button>
                 </div>
 
                 <Tabs defaultValue="general" className="space-y-4">
                     <TabsList>
-                        <TabsTrigger value="general">General</TabsTrigger>
-                        <TabsTrigger value="game">Game & Activity</TabsTrigger>
-                        <TabsTrigger value="features">Features</TabsTrigger>
-                        <TabsTrigger value="news">News</TabsTrigger>
+                        <TabsTrigger value="general">ทั่วไป</TabsTrigger>
+                        <TabsTrigger value="game">เกมและกิจกรรม</TabsTrigger>
+                        <TabsTrigger value="features">ฟีเจอร์</TabsTrigger>
+                        <TabsTrigger value="news">ข่าวสาร</TabsTrigger>
+                        <TabsTrigger value="roadmap">แผนงาน</TabsTrigger>
                     </TabsList>
 
                     {/* General Settings */}
                     <TabsContent value="general">
                         <Card>
                             <CardHeader>
-                                <CardTitle>General Information</CardTitle>
-                                <CardDescription>Basic website information and SEO settings.</CardDescription>
+                                <CardTitle>ข้อมูลทั่วไป</CardTitle>
+                                <CardDescription>ข้อมูลพื้นฐานของเว็บไซต์และการตั้งค่า SEO</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="grid gap-2">
-                                    <Label>Website Name</Label>
+                                    <Label>ชื่อเว็บไซต์</Label>
                                     <Input
                                         value={siteConfig?.name || ''}
                                         onChange={(e) => setSiteConfig({ ...siteConfig, name: e.target.value })}
                                     />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label>Description</Label>
+                                    <Label>คำอธิบาย</Label>
                                     <Textarea
                                         value={siteConfig?.description || ''}
                                         onChange={(e) => setSiteConfig({ ...siteConfig, description: e.target.value })}
                                     />
                                 </div>
                                 <div className="grid gap-2">
-                                    <Label>Discord Link</Label>
+                                    <Label>ลิงก์ Discord</Label>
                                     <Input
                                         value={siteConfig?.links?.discord || ''}
                                         onChange={(e) => setSiteConfig({ ...siteConfig, links: { ...siteConfig.links, discord: e.target.value } })}
                                     />
                                 </div>
+                                <div className="grid gap-2 pt-4 border-t">
+                                    <Label>สถานะเซิร์ฟเวอร์</Label>
+                                    <Select
+                                        value={siteConfig?.serverStatus || 'preregister'}
+                                        onValueChange={(value) => setSiteConfig({ ...siteConfig, serverStatus: value })}
+                                    >
+                                        <SelectTrigger>
+                                            <SelectValue placeholder="เลือกโหมด" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="preregister">ลงทะเบียนล่วงหน้า (เร็วๆ นี้)</SelectItem>
+                                            <SelectItem value="live">เปิดให้บริการ (เล่นเลย)</SelectItem>
+                                            <SelectItem value="maintenance">ปิดปรับปรุง</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <p className="text-xs text-muted-foreground">
+                                        "ลงทะเบียนล่วงหน้า": แสดงเวลานับถอยหลังและปุ่มลงทะเบียน<br />
+                                        "เปิดให้บริการ": แสดงปุ่ม "เล่นเลย" และสถานะเซิร์ฟเวอร์
+                                    </p>
+                                </div>
                             </CardContent>
                             <CardFooter>
                                 <Button onClick={() => handleSave('site', siteConfig)} disabled={isSaving}>
                                     {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                    Save Changes
+                                    บันทึกการเปลี่ยนแปลง
                                 </Button>
                             </CardFooter>
                         </Card>
                     </TabsContent>
 
                     {/* Game Settings */}
+                    {/* Game Settings */}
                     <TabsContent value="game">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Activity Configuration</CardTitle>
-                                <CardDescription>Manage preregistration and lucky draw systems.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-                                <div className="flex items-center justify-between space-x-2">
-                                    <Label htmlFor="gang-mode" className="flex flex-col space-y-1">
-                                        <span>Enable Gang System</span>
-                                        <span className="font-normal text-xs text-muted-foreground">Allow users to create and join gangs</span>
-                                    </Label>
-                                    <Switch
-                                        id="gang-mode"
-                                        checked={preregisterConfig?.features?.enableGang}
-                                        onCheckedChange={(checked) => setPreregisterConfig({
-                                            ...preregisterConfig,
-                                            features: { ...preregisterConfig.features, enableGang: checked }
-                                        })}
-                                    />
-                                </div>
-                                <div className="flex items-center justify-between space-x-2">
-                                    <Label htmlFor="lucky-draw" className="flex flex-col space-y-1">
-                                        <span>Enable Lucky Draw</span>
-                                        <span className="font-normal text-xs text-muted-foreground">Allow users to spin for rewards</span>
-                                    </Label>
-                                    <Switch
-                                        id="lucky-draw"
-                                        checked={preregisterConfig?.features?.enableLuckyDraw}
-                                        onCheckedChange={(checked) => setPreregisterConfig({
-                                            ...preregisterConfig,
-                                            features: { ...preregisterConfig.features, enableLuckyDraw: checked }
-                                        })}
-                                    />
-                                </div>
-                            </CardContent>
-                            <CardFooter>
-                                <Button onClick={() => handleSave('preregister', preregisterConfig)} disabled={isSaving}>
-                                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                    Save Changes
-                                </Button>
-                            </CardFooter>
-                        </Card>
+                        <RewardsEditor
+                            config={preregisterConfig}
+                            setConfig={setPreregisterConfig}
+                            onSave={handleSave}
+                        />
                     </TabsContent>
 
                     {/* Features Settings */}
@@ -366,12 +352,12 @@ export default function AdminSettingsPage() {
                             <CardHeader>
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <CardTitle>Featured Features</CardTitle>
-                                        <CardDescription>Manage the features displayed on the homepage.</CardDescription>
+                                        <CardTitle>ฟีเจอร์เด่น</CardTitle>
+                                        <CardDescription>จัดการฟีเจอร์ที่จะแสดงบนหน้าแรก</CardDescription>
                                     </div>
                                     <Button onClick={handleSaveFeatures} disabled={isSaving}>
                                         {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                        Save All Features
+                                        บันทึกฟีเจอร์ทั้งหมด
                                     </Button>
                                 </div>
                             </CardHeader>
@@ -379,7 +365,7 @@ export default function AdminSettingsPage() {
                                 {/* Left Sidebar: List of Features */}
                                 <div className="w-64 shrink-0 flex flex-col border-r pr-6">
                                     <Button onClick={addFeature} className="w-full mb-4" variant="outline">
-                                        <Plus className="mr-2 h-4 w-4" /> Add Feature
+                                        <Plus className="mr-2 h-4 w-4" /> เพิ่มฟีเจอร์
                                     </Button>
                                     <ScrollArea className="flex-1">
                                         <div className="space-y-2">
@@ -390,7 +376,7 @@ export default function AdminSettingsPage() {
                                                     className="w-full justify-start font-normal"
                                                     onClick={() => setSelectedFeatureIndex(index)}
                                                 >
-                                                    <span className="truncate">{feature.title || "Untitled Feature"}</span>
+                                                    <span className="truncate">{feature.title || "ฟีเจอร์ไม่มีชื่อ"}</span>
                                                 </Button>
                                             ))}
                                         </div>
@@ -402,15 +388,15 @@ export default function AdminSettingsPage() {
                                     {selectedFeature ? (
                                         <div className="space-y-6">
                                             <div className="flex items-center justify-between">
-                                                <h3 className="text-lg font-semibold">Edit Feature</h3>
+                                                <h3 className="text-lg font-semibold">แก้ไขฟีเจอร์</h3>
                                                 <Button variant="destructive" size="sm" onClick={() => removeFeature(selectedFeatureIndex)}>
-                                                    <Trash2 className="mr-2 h-4 w-4" /> Remove
+                                                    <Trash2 className="mr-2 h-4 w-4" /> ลบ
                                                 </Button>
                                             </div>
 
                                             <div className="grid gap-4">
                                                 <div className="grid gap-2">
-                                                    <Label>ID (Unique)</Label>
+                                                    <Label>ID (ห้ามซ้ำ)</Label>
                                                     <Input
                                                         value={selectedFeature.id}
                                                         onChange={(e) => updateFeature(selectedFeatureIndex, 'id', e.target.value)}
@@ -418,7 +404,7 @@ export default function AdminSettingsPage() {
                                                 </div>
 
                                                 <div className="grid gap-2">
-                                                    <Label>Icon</Label>
+                                                    <Label>ไอคอน</Label>
                                                     <div className="relative">
                                                         <Button
                                                             variant="outline"
@@ -450,7 +436,7 @@ export default function AdminSettingsPage() {
                                                 </div>
 
                                                 <div className="grid gap-2">
-                                                    <Label>Title</Label>
+                                                    <Label>หัวข้อ</Label>
                                                     <Input
                                                         value={selectedFeature.title}
                                                         onChange={(e) => updateFeature(selectedFeatureIndex, 'title', e.target.value)}
@@ -458,7 +444,7 @@ export default function AdminSettingsPage() {
                                                 </div>
 
                                                 <div className="grid gap-2">
-                                                    <Label>Description</Label>
+                                                    <Label>คำอธิบาย</Label>
                                                     <Textarea
                                                         value={selectedFeature.description}
                                                         onChange={(e) => updateFeature(selectedFeatureIndex, 'description', e.target.value)}
@@ -466,7 +452,7 @@ export default function AdminSettingsPage() {
                                                 </div>
 
                                                 <div className="grid gap-2">
-                                                    <Label>Image URL</Label>
+                                                    <Label>URL รูปภาพ</Label>
                                                     <Input
                                                         value={selectedFeature.image}
                                                         onChange={(e) => updateFeature(selectedFeatureIndex, 'image', e.target.value)}
@@ -482,22 +468,22 @@ export default function AdminSettingsPage() {
                                                                 onError={(e) => { e.target.style.display = 'none'; }}
                                                             />
                                                         ) : (
-                                                            <div className="flex items-center justify-center h-full text-muted-foreground">No Image</div>
+                                                            <div className="flex items-center justify-center h-full text-muted-foreground">ไม่มีรูปภาพ</div>
                                                         )}
                                                     </div>
                                                 </div>
 
                                                 <div className="space-y-2">
-                                                    <Label>Stats</Label>
+                                                    <Label>สถิติ</Label>
                                                     {selectedFeature.stats.map((stat, sIndex) => (
                                                         <div key={sIndex} className="flex gap-2">
                                                             <Input
-                                                                placeholder="Label"
+                                                                placeholder="ชื่อสถิติ"
                                                                 value={stat.label}
                                                                 onChange={(e) => updateFeatureStat(selectedFeatureIndex, sIndex, 'label', e.target.value)}
                                                             />
                                                             <Input
-                                                                placeholder="Value"
+                                                                placeholder="ค่า"
                                                                 value={stat.value}
                                                                 onChange={(e) => updateFeatureStat(selectedFeatureIndex, sIndex, 'value', e.target.value)}
                                                             />
@@ -508,7 +494,7 @@ export default function AdminSettingsPage() {
                                         </div>
                                     ) : (
                                         <div className="h-full flex items-center justify-center text-muted-foreground">
-                                            Select a feature to edit
+                                            เลือกฟีเจอร์เพื่อแก้ไข
                                         </div>
                                     )}
                                 </div>
@@ -522,12 +508,12 @@ export default function AdminSettingsPage() {
                             <CardHeader>
                                 <div className="flex items-center justify-between">
                                     <div>
-                                        <CardTitle>News & Announcements</CardTitle>
-                                        <CardDescription>Manage news, updates, and promotions.</CardDescription>
+                                        <CardTitle>ข่าวสารและประกาศ</CardTitle>
+                                        <CardDescription>จัดการข่าวสาร อัปเดต และโปรโมชั่น</CardDescription>
                                     </div>
                                     <Button onClick={handleSaveNews} disabled={isSaving}>
                                         {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                        Save All News
+                                        บันทึกข่าวสารทั้งหมด
                                     </Button>
                                 </div>
                             </CardHeader>
@@ -535,7 +521,7 @@ export default function AdminSettingsPage() {
                                 {/* Left Sidebar: List of News */}
                                 <div className="w-64 shrink-0 flex flex-col border-r pr-6">
                                     <Button onClick={addNews} className="w-full mb-4" variant="outline">
-                                        <Plus className="mr-2 h-4 w-4" /> Add News
+                                        <Plus className="mr-2 h-4 w-4" /> เพิ่มข่าวสาร
                                     </Button>
                                     <ScrollArea className="flex-1">
                                         <div className="space-y-2">
@@ -546,7 +532,7 @@ export default function AdminSettingsPage() {
                                                     className="w-full justify-start font-normal"
                                                     onClick={() => setSelectedNewsIndex(index)}
                                                 >
-                                                    <span className="truncate">{item.title || "Untitled News"}</span>
+                                                    <span className="truncate">{item.title || "ข่าวสารไม่มีชื่อ"}</span>
                                                 </Button>
                                             ))}
                                         </div>
@@ -558,21 +544,21 @@ export default function AdminSettingsPage() {
                                     {selectedNews ? (
                                         <div className="space-y-6">
                                             <div className="flex items-center justify-between">
-                                                <h3 className="text-lg font-semibold">Edit News</h3>
+                                                <h3 className="text-lg font-semibold">แก้ไขข่าวสาร</h3>
                                                 <Button variant="destructive" size="sm" onClick={() => removeNews(selectedNewsIndex)}>
-                                                    <Trash2 className="mr-2 h-4 w-4" /> Remove
+                                                    <Trash2 className="mr-2 h-4 w-4" /> ลบ
                                                 </Button>
                                             </div>
 
                                             <div className="grid gap-4">
                                                 <div className="grid gap-2">
-                                                    <Label>Category</Label>
+                                                    <Label>หมวดหมู่</Label>
                                                     <Select
                                                         value={selectedNews.category}
                                                         onValueChange={(value) => updateNews(selectedNewsIndex, 'category', value)}
                                                     >
                                                         <SelectTrigger>
-                                                            <SelectValue placeholder="Select Category" />
+                                                            <SelectValue placeholder="เลือกหมวดหมู่" />
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             {newsCategories.filter(c => c.id !== 'all').map((cat) => (
@@ -585,7 +571,7 @@ export default function AdminSettingsPage() {
                                                 </div>
 
                                                 <div className="grid gap-2">
-                                                    <Label>Title</Label>
+                                                    <Label>หัวข้อ</Label>
                                                     <Input
                                                         value={selectedNews.title}
                                                         onChange={(e) => updateNews(selectedNewsIndex, 'title', e.target.value)}
@@ -593,7 +579,7 @@ export default function AdminSettingsPage() {
                                                 </div>
 
                                                 <div className="grid gap-2">
-                                                    <Label>Date (DD/MM/YYYY)</Label>
+                                                    <Label>วันที่ (วว/ดด/ปปปป)</Label>
                                                     <Input
                                                         value={selectedNews.date}
                                                         onChange={(e) => updateNews(selectedNewsIndex, 'date', e.target.value)}
@@ -601,7 +587,7 @@ export default function AdminSettingsPage() {
                                                 </div>
 
                                                 <div className="grid gap-2">
-                                                    <Label>Excerpt (Short Description)</Label>
+                                                    <Label>เนื้อหาย่อ (คำอธิบายสั้นๆ)</Label>
                                                     <Textarea
                                                         value={selectedNews.excerpt}
                                                         onChange={(e) => updateNews(selectedNewsIndex, 'excerpt', e.target.value)}
@@ -609,7 +595,7 @@ export default function AdminSettingsPage() {
                                                 </div>
 
                                                 <div className="grid gap-2">
-                                                    <Label>Image URL</Label>
+                                                    <Label>URL รูปภาพ</Label>
                                                     <Input
                                                         value={selectedNews.image}
                                                         onChange={(e) => updateNews(selectedNewsIndex, 'image', e.target.value)}
@@ -625,13 +611,13 @@ export default function AdminSettingsPage() {
                                                                 onError={(e) => { e.target.style.display = 'none'; }}
                                                             />
                                                         ) : (
-                                                            <div className="flex items-center justify-center h-full text-muted-foreground">No Image</div>
+                                                            <div className="flex items-center justify-center h-full text-muted-foreground">ไม่มีรูปภาพ</div>
                                                         )}
                                                     </div>
                                                 </div>
 
                                                 <div className="grid gap-2">
-                                                    <Label>Content (HTML Supported)</Label>
+                                                    <Label>เนื้อหา (รองรับ HTML)</Label>
                                                     <Textarea
                                                         className="min-h-[200px] font-mono text-sm"
                                                         value={selectedNews.content}
@@ -642,7 +628,7 @@ export default function AdminSettingsPage() {
                                         </div>
                                     ) : (
                                         <div className="h-full flex items-center justify-center text-muted-foreground">
-                                            Select a news item to edit
+                                            เลือกข่าวสารเพื่อแก้ไข
                                         </div>
                                     )}
                                 </div>
@@ -650,8 +636,16 @@ export default function AdminSettingsPage() {
                         </Card>
                     </TabsContent>
 
+                    {/* Roadmap Settings */}
+                    <TabsContent value="roadmap">
+                        <RoadmapEditor
+                            siteConfig={siteConfig}
+                            setSiteConfig={setSiteConfig}
+                            onSave={handleSave}
+                        />
+                    </TabsContent>
                 </Tabs>
             </div>
-        </div>
+        </div >
     );
 }

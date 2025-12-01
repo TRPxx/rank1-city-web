@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { Loader2, UserPlus, Mars, Venus, Users, ChevronRight, CheckCircle2, ScrollText, X } from 'lucide-react';
@@ -67,11 +68,19 @@ export default function RegisterPage() {
         setFormData(prev => ({ ...prev, sex: value }));
     };
 
-    const handleNext = (e) => {
+    const [acceptedTerms, setAcceptedTerms] = useState(false);
+
+    const handleRegister = async (e) => {
         e.preventDefault();
 
         if (!formData.firstname || !formData.lastname || !date || !formData.height) {
             toast.error('กรุณากรอกข้อมูลให้ครบถ้วน');
+            return;
+        }
+
+        const nameRegex = /^[a-zA-Zก-๙\s]+$/;
+        if (!nameRegex.test(formData.firstname) || !nameRegex.test(formData.lastname)) {
+            toast.error('ชื่อและนามสกุลต้องเป็นตัวอักษรเท่านั้น (ห้ามมีตัวเลขหรือสัญลักษณ์)');
             return;
         }
 
@@ -80,7 +89,13 @@ export default function RegisterPage() {
             return;
         }
 
-        setShowTerms(true);
+        if (!acceptedTerms) {
+            toast.error('กรุณายอมรับข้อตกลงการใช้งาน');
+            return;
+        }
+
+        // Proceed to register directly
+        await handleConfirmRegister();
     };
 
     const handleConfirmRegister = async () => {
@@ -254,7 +269,7 @@ export default function RegisterPage() {
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <form onSubmit={handleNext} className="space-y-6">
+                            <form onSubmit={handleRegister} className="space-y-6">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="firstname">ชื่อจริง</Label>
@@ -361,12 +376,34 @@ export default function RegisterPage() {
                                     </div>
                                 </div>
 
+                                <div className="flex items-center space-x-2 pt-2">
+                                    <Checkbox
+                                        id="terms"
+                                        checked={acceptedTerms}
+                                        onCheckedChange={setAcceptedTerms}
+                                    />
+                                    <label
+                                        htmlFor="terms"
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-muted-foreground"
+                                    >
+                                        ฉันยอมรับ <button type="button" onClick={() => setShowTerms(true)} className="text-primary hover:underline">ข้อตกลงการใช้งาน</button> และกฎของเซิร์ฟเวอร์
+                                    </label>
+                                </div>
+
                                 <Button
                                     type="submit"
                                     className="w-full text-lg py-6 font-semibold shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-all group"
                                     disabled={isLoading}
                                 >
-                                    ถัดไป <ChevronRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-5 w-5 animate-spin" /> กำลังสร้างตัวละคร...
+                                        </>
+                                    ) : (
+                                        <>
+                                            สร้างตัวละคร <CheckCircle2 className="ml-2 w-5 h-5 group-hover:scale-110 transition-transform" />
+                                        </>
+                                    )}
                                 </Button>
                             </form>
                         </CardContent>
@@ -432,19 +469,8 @@ export default function RegisterPage() {
                             </div>
 
                             <div className="flex items-center justify-end gap-3 p-6 border-t border-border bg-muted/20">
-                                <Button variant="outline" onClick={() => setShowTerms(false)}>
-                                    ยกเลิก
-                                </Button>
-                                <Button onClick={handleConfirmRegister} disabled={isLoading} className="bg-primary hover:bg-primary/90">
-                                    {isLoading ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" /> กำลังสร้าง...
-                                        </>
-                                    ) : (
-                                        <>
-                                            <CheckCircle2 className="mr-2 h-4 w-4" /> ยอมรับและสร้างตัวละคร
-                                        </>
-                                    )}
+                                <Button onClick={() => { setShowTerms(false); setAcceptedTerms(true); }} className="bg-primary hover:bg-primary/90 w-full sm:w-auto">
+                                    รับทราบและปิดหน้าต่าง
                                 </Button>
                             </div>
                         </motion.div>

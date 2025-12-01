@@ -15,8 +15,21 @@ export async function POST(request) {
         const { firstname, lastname, dateofbirth, sex, height } = data;
 
         // Validation เบื้องต้น
+        // 1. Validation: ตรวจสอบความครบถ้วน
         if (!firstname || !lastname || !dateofbirth || !sex || !height) {
             return NextResponse.json({ error: 'กรุณากรอกข้อมูลให้ครบถ้วน' }, { status: 400 });
+        }
+
+        // 2. Validation: ตรวจสอบรูปแบบชื่อ (ห้ามมีตัวเลขหรืออักขระพิเศษ)
+        const nameRegex = /^[a-zA-Zก-๙\s]+$/;
+        if (!nameRegex.test(firstname) || !nameRegex.test(lastname)) {
+            return NextResponse.json({ error: 'ชื่อและนามสกุลต้องเป็นตัวอักษรเท่านั้น (ห้ามมีตัวเลขหรือสัญลักษณ์)' }, { status: 400 });
+        }
+
+        // 3. Validation: ตรวจสอบส่วนสูง (ต้องเป็นตัวเลขและอยู่ในเกณฑ์)
+        const heightInt = parseInt(height);
+        if (isNaN(heightInt) || heightInt < 100 || heightInt > 250) {
+            return NextResponse.json({ error: 'ส่วนสูงไม่ถูกต้อง (ต้องอยู่ระหว่าง 100-250 ซม.)' }, { status: 400 });
         }
 
         const rawDiscordId = session.user.id;
@@ -44,7 +57,12 @@ export async function POST(request) {
         let ssn = '';
         let isSsnUnique = false;
 
-        while (!isSsnUnique) {
+        let attempt = 0;
+        const MAX_ATTEMPTS = 50; // ป้องกัน Infinite Loop
+
+        while (!isSsnUnique && attempt < MAX_ATTEMPTS) {
+            attempt++;
+
             // 1. Area (001-899, skip 666)
             let area = Math.floor(Math.random() * 899) + 1;
             while (area === 666) {
@@ -73,6 +91,10 @@ export async function POST(request) {
                 ssn = candidate;
                 isSsnUnique = true;
             }
+        }
+
+        if (!isSsnUnique) {
+            throw new Error('Server Busy: Unable to generate unique SSN. Please try again.');
         }
 
         // Identifier ใช้ค่า web_pending เพื่อรอการ Update จากเกม

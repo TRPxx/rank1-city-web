@@ -16,7 +16,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Gamepad2, ChevronDown, Globe, Menu, X, User, Gift, Newspaper, LogOut, LayoutDashboard, Shield } from 'lucide-react';
+import { Gamepad2, ChevronDown, Globe, Menu, X, User, Gift, Newspaper, LogOut, LayoutDashboard, Shield, Star } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import siteConfig from '@/lib/config';
 import { useSession, signIn, signOut } from "next-auth/react";
@@ -54,6 +54,15 @@ export default function Navbar() {
                     <Link href="/news" className="flex items-center gap-2 transition-colors hover:text-primary">
                         <Newspaper className="w-4 h-4" />
                         ข่าวสาร
+                    </Link>
+
+                    {/* Special Event Link */}
+                    <Link href="/event" className="flex items-center gap-2 transition-colors hover:text-primary relative group">
+                        <Star className="w-4 h-4 text-yellow-500 group-hover:text-yellow-400 animate-pulse" />
+                        <span className="bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent font-bold group-hover:from-yellow-400 group-hover:to-orange-400">
+                            SPECIAL EVENT
+                        </span>
+                        <Badge variant="destructive" className="absolute -top-3 -right-6 text-[10px] px-1 h-4">NEW</Badge>
                     </Link>
 
                     {/* Community Dropdown */}
@@ -167,6 +176,11 @@ export default function Navbar() {
                             <Link href="/news" className="flex items-center gap-2 text-sm font-medium hover:text-primary px-2 py-1" onClick={toggleMobileMenu}>
                                 <Newspaper className="w-4 h-4" />
                                 ข่าวสาร
+                            </Link>
+
+                            <Link href="/event" className="flex items-center gap-2 text-sm font-medium hover:text-primary px-2 py-1" onClick={toggleMobileMenu}>
+                                <Star className="w-4 h-4 text-yellow-500" />
+                                <span className="text-yellow-500 font-bold">SPECIAL EVENT</span>
                             </Link>
 
                             <div className="border-t pt-4 mt-2">

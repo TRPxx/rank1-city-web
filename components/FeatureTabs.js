@@ -119,12 +119,15 @@ export default function FeatureTabs({ features = [] }) {
                         <p className="text-sm text-muted-foreground">Explore our unique gameplay systems</p>
                     </div>
                     <ScrollArea className="flex-1">
-                        <div className="p-4 space-y-2">
+                        <div className="p-4 space-y-2" role="tablist" aria-orientation="vertical">
                             {features.map((feature) => {
                                 const Icon = iconMap[feature.icon] || Star;
                                 return (
                                     <button
                                         key={feature.id}
+                                        role="tab"
+                                        aria-selected={activeTab === feature.id}
+                                        aria-controls={`panel-${feature.id}`}
                                         onClick={() => setActiveTab(feature.id)}
                                         className={cn(
                                             "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all group",

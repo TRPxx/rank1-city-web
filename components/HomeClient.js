@@ -30,6 +30,18 @@ const NewsSection = dynamic(() => import('@/components/news/NewsSection'), {
     ssr: true
 });
 
+const LiveServerHero = dynamic(() => import('@/components/LiveServerHero'), {
+    loading: () => <div className="w-full h-[300px] animate-pulse bg-muted/20 rounded-xl" />,
+    ssr: false
+});
+
+const MaintenancePage = dynamic(() => import('@/components/MaintenancePage'), {
+    ssr: false
+});
+
+const RoadmapSlide = dynamic(() => import('@/components/slide2-concepts/RoadmapSlide'), { ssr: false });
+const PreregisterDesignSwitcher = dynamic(() => import('@/components/PreregisterDesignSwitcher'), { ssr: false });
+
 // Animation Variants
 const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
@@ -52,10 +64,11 @@ const scaleIn = {
     visible: { opacity: 1, scale: 1, transition: { duration: 0.6 } }
 };
 
-export default function HomeClient({ initialFeatures }) {
+export default function HomeClient({ initialFeatures, siteConfig }) {
     const { data: session } = useSession();
     const { isRegistered, isLoading, totalRegistrations, refetch } = usePreregisterStatus();
     const router = useRouter();
+    const isServerLive = siteConfig?.serverStatus === 'live';
 
     // Check user registration status on login
     useEffect(() => {
@@ -76,6 +89,28 @@ export default function HomeClient({ initialFeatures }) {
         checkUserRegistration();
     }, [session, router]);
 
+    // Auto-refresh when server status changes
+    useEffect(() => {
+        const checkServerStatus = async () => {
+            try {
+                const res = await fetch('/api/system/config');
+                const data = await res.json();
+
+                // If current status in prop is different from server, reload
+                if (data.serverStatus && data.serverStatus !== (siteConfig?.serverStatus || 'preregister')) {
+                    console.log('Server status changed, refreshing...');
+                    window.location.reload();
+                }
+            } catch (error) {
+                console.error("Failed to check server status");
+            }
+        };
+
+        // Poll every 10 seconds
+        const interval = setInterval(checkServerStatus, 10000);
+        return () => clearInterval(interval);
+    }, [siteConfig]);
+
     const fetchStatus = async () => {
         // Trigger a re-fetch of the data without reloading the page
         refetch();
@@ -84,6 +119,10 @@ export default function HomeClient({ initialFeatures }) {
     const globalRewards = PREREGISTER_CONFIG.rewards.global;
     const maxCount = globalRewards[globalRewards.length - 1]?.count || 5000;
     const progressPercent = Math.min(100, (totalRegistrations / maxCount) * 100);
+
+    if (siteConfig?.serverStatus === 'maintenance') {
+        return <MaintenancePage discordLink={siteConfig?.links?.discord} />;
+    }
 
     return (
         <LazyMotion features={domAnimation}>
@@ -123,71 +162,75 @@ export default function HomeClient({ initialFeatures }) {
                     <Navbar />
 
                     <div className="flex-1 container flex items-center relative z-10">
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center w-full pt-20 md:pt-24 lg:pt-16">
+                        {isServerLive ? (
+                            <LiveServerHero siteConfig={siteConfig} />
+                        ) : (
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 md:gap-12 items-center w-full pt-20 md:pt-24 lg:pt-16">
 
-                            {/* Left Content */}
-                            <m.div
-                                initial="hidden"
-                                whileInView="visible"
-                                viewport={{ once: true }}
-                                variants={staggerContainer}
-                                style={{ willChange: 'opacity, transform' }}
-                                className="space-y-6 md:space-y-8 text-center lg:text-left"
-                            >
-                                <m.div variants={fadeInUp} className="space-y-2 md:space-y-4">
-                                    <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-foreground drop-shadow-2xl">
-                                        {siteConfig.name.split(' ')[0]} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">{siteConfig.name.split(' ')[1]}</span>
-                                    </h1>
-                                    <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground font-medium max-w-2xl mx-auto lg:mx-0">
-                                        {siteConfig.description}
-                                    </p>
-                                </m.div>
+                                {/* Left Content */}
+                                <m.div
+                                    initial="hidden"
+                                    whileInView="visible"
+                                    viewport={{ once: true }}
+                                    variants={staggerContainer}
+                                    style={{ willChange: 'opacity, transform' }}
+                                    className="space-y-6 md:space-y-8 text-center lg:text-left"
+                                >
+                                    <m.div variants={fadeInUp} className="space-y-2 md:space-y-4">
+                                        <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black tracking-tighter text-foreground drop-shadow-2xl">
+                                            {siteConfig?.name?.split(' ')[0] || 'Rank1'} <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-500">{siteConfig?.name?.split(' ')[1] || 'City'}</span>
+                                        </h1>
+                                        <p className="text-lg sm:text-xl md:text-2xl text-muted-foreground font-medium max-w-2xl mx-auto lg:mx-0">
+                                            {siteConfig?.description}
+                                        </p>
+                                    </m.div>
 
-                                <m.div variants={fadeInUp} className="w-full max-w-md mx-auto lg:mx-0">
-                                    {isLoading ? (
-                                        <div className="h-16 w-full bg-muted/20 animate-pulse rounded-lg" />
-                                    ) : isRegistered ? (
-                                        <div className="flex flex-col gap-3">
-                                            <Link href="/preregister" className="w-full">
-                                                <Button size="lg" className="w-full text-lg px-8 py-6 shadow-lg shadow-primary/20 bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-500/90 border-0 transition-transform hover:scale-105">
-                                                    <Gift className="mr-2 h-6 w-6" />
-                                                    เข้าสู่หน้ากิจกรรม & กาชาปอง
+                                    <m.div variants={fadeInUp} className="w-full max-w-md mx-auto lg:mx-0">
+                                        {isLoading ? (
+                                            <div className="h-16 w-full bg-muted/20 animate-pulse rounded-lg" />
+                                        ) : isRegistered ? (
+                                            <div className="flex flex-col gap-3">
+                                                <Link href="/preregister" className="w-full">
+                                                    <Button size="lg" className="w-full text-lg px-8 py-6 shadow-lg shadow-primary/20 bg-gradient-to-r from-primary to-blue-500 hover:from-primary/90 hover:to-blue-500/90 border-0 transition-transform hover:scale-105">
+                                                        <Gift className="mr-2 h-6 w-6" />
+                                                        เข้าสู่หน้ากิจกรรม & กาชาปอง
+                                                    </Button>
+                                                </Link>
+                                                <p className="text-xs text-muted-foreground">คุณลงทะเบียนแล้ว! คลิกเพื่อเช็คชื่อและรับของรางวัล</p>
+                                            </div>
+                                        ) : (
+                                            <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center lg:justify-start w-full">
+                                                <PreRegisterButton onRegisterSuccess={fetchStatus} />
+                                                <Button size="lg" variant="outline" className="text-base md:text-lg px-6 md:px-8 py-6 border-blue-600/30 hover:bg-blue-600/10 w-full sm:w-auto backdrop-blur-sm transition-all hover:scale-105" onClick={() => window.open(siteConfig?.links?.discord || 'https://discord.gg/rank1', '_blank')}>
+                                                    <MessageCircle className="mr-2 h-5 w-5 md:h-6 md:w-6" />
+                                                    Discord Community
                                                 </Button>
-                                            </Link>
-                                            <p className="text-xs text-muted-foreground">คุณลงทะเบียนแล้ว! คลิกเพื่อเช็คชื่อและรับของรางวัล</p>
+                                            </div>
+                                        )}
+                                    </m.div>
+
+                                    <m.div variants={fadeInUp} className="hidden sm:flex items-center justify-center lg:justify-start gap-4 pt-4 md:pt-8 opacity-90">
+                                        <GlobalRegisCounter />
+                                        <div className="h-4 w-px bg-border" />
+                                        <div className="text-sm text-muted-foreground font-medium">
+                                            Coming Soon
                                         </div>
-                                    ) : (
-                                        <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-center lg:justify-start w-full">
-                                            <PreRegisterButton onRegisterSuccess={fetchStatus} />
-                                            <Button size="lg" variant="outline" className="text-base md:text-lg px-6 md:px-8 py-6 border-blue-600/30 hover:bg-blue-600/10 w-full sm:w-auto backdrop-blur-sm transition-all hover:scale-105" onClick={() => window.open('https://discord.gg/rank1', '_blank')}>
-                                                <MessageCircle className="mr-2 h-5 w-5 md:h-6 md:w-6" />
-                                                Discord Community
-                                            </Button>
-                                        </div>
-                                    )}
+                                    </m.div>
                                 </m.div>
 
-                                <m.div variants={fadeInUp} className="hidden sm:flex items-center justify-center lg:justify-start gap-4 pt-4 md:pt-8 opacity-90">
-                                    <GlobalRegisCounter />
-                                    <div className="h-4 w-px bg-border" />
-                                    <div className="text-sm text-muted-foreground font-medium">
-                                        Coming Soon
-                                    </div>
+                                {/* Right Visual */}
+                                <m.div
+                                    initial={{ opacity: 0, x: 50 }}
+                                    whileInView={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 1, delay: 0.2 }}
+                                    viewport={{ once: true }}
+                                    className="hidden lg:flex relative lg:h-[500px] items-center justify-center"
+                                >
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent rounded-full blur-3xl opacity-30 animate-pulse" />
+                                    <RecentRegistrations />
                                 </m.div>
-                            </m.div>
-
-                            {/* Right Visual */}
-                            <m.div
-                                initial={{ opacity: 0, x: 50 }}
-                                whileInView={{ opacity: 1, x: 0 }}
-                                transition={{ duration: 1, delay: 0.2 }}
-                                viewport={{ once: true }}
-                                className="hidden lg:flex relative lg:h-[500px] items-center justify-center"
-                            >
-                                <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-transparent rounded-full blur-3xl opacity-30 animate-pulse" />
-                                <RecentRegistrations />
-                            </m.div>
-                        </div>
+                            </div>
+                        )}
                     </div>
 
                     <m.div
@@ -200,100 +243,16 @@ export default function HomeClient({ initialFeatures }) {
                     </m.div>
                 </div>
 
-                {/* Slide 2: Global Milestone Rewards */}
+                {/* Slide 2: Roadmap (Live) or Rewards (Pre-reg) */}
                 <div className="w-full h-dvh snap-start bg-background flex flex-col items-center justify-center relative overflow-hidden">
-                    <div className="absolute inset-0 h-full w-full bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_at_center,black,transparent_75%)]" />
-
-                    <m.div
-                        initial="hidden"
-                        whileInView="visible"
-                        viewport={{ once: false, amount: 0.3 }}
-                        variants={staggerContainer}
-                        className="container max-w-6xl relative z-20 flex flex-col h-full justify-center px-4 md:px-6"
-                    >
-                        <m.div variants={fadeInUp} className="flex flex-col items-center text-center mb-8 space-y-4">
-                            <Badge variant="outline" className="uppercase tracking-wider">Season 1</Badge>
-                            <h2 className="text-3xl md:text-5xl font-bold tracking-tighter sm:text-6xl">
-                                รางวัลเป้าหมายยอดลงทะเบียน
-                            </h2>
-                            <p className="max-w-[700px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
-                                ยิ่งมีชาวเมืองลงทะเบียนมาก ยิ่งได้รับของรางวัลยกเซิร์ฟ!
-                            </p>
-                        </m.div>
-
-                        <m.div variants={scaleIn} className="w-full max-w-2xl mx-auto mb-12 px-4">
-                            <div className="flex justify-between text-sm mb-2 font-medium">
-                                <span className="text-muted-foreground">ยอดลงทะเบียนปัจจุบัน</span>
-                                <span className="text-primary font-bold text-lg">{totalRegistrations.toLocaleString()} / {maxCount.toLocaleString()} คน</span>
-                            </div>
-                            <div className="h-6 w-full bg-secondary rounded-full overflow-hidden shadow-inner border border-border/50 relative">
-                                <m.div
-                                    initial={{ width: 0 }}
-                                    whileInView={{ width: `${progressPercent}%` }}
-                                    transition={{ duration: 1.5, ease: "easeOut" }}
-                                    className="h-full bg-gradient-to-r from-blue-600 via-cyan-500 to-blue-400 rounded-full shadow-lg shadow-blue-500/20 relative"
-                                >
-                                    <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/40 to-transparent -skew-x-12 animate-shimmer" />
-                                </m.div>
-                            </div>
-                        </m.div>
-
-                        <m.div variants={staggerContainer} className="w-full relative">
-                            <div className="relative w-full overflow-x-auto pb-12 pt-4 custom-scrollbar">
-                                <div className="flex items-start justify-center gap-6 min-w-max px-4 mx-auto">
-                                    <div className="absolute left-10 right-10 top-[28px] h-[2px] bg-border -z-10" />
-                                    {globalRewards.map((reward, index) => {
-                                        const isUnlocked = totalRegistrations >= reward.count;
-                                        return (
-                                            <m.div
-                                                key={index}
-                                                variants={fadeInUp}
-                                                className={`flex flex-col items-center gap-4 group w-48 ${isUnlocked ? 'opacity-100' : 'opacity-80 grayscale-[0.8] hover:grayscale-0 transition-all'}`}
-                                            >
-                                                <div className={`w-14 h-14 rounded-full border-4 flex items-center justify-center z-10 shadow-sm transition-all duration-500 ${isUnlocked ? 'bg-primary text-primary-foreground border-primary scale-110 shadow-primary/30' : 'bg-background border-border group-hover:border-primary group-hover:text-primary'}`}>
-                                                    {isUnlocked ? <Users className="w-6 h-6" /> : <span className="text-sm font-bold">{reward.count >= 1000 ? `${reward.count / 1000}k` : reward.count}</span>}
-                                                </div>
-                                                <div className={`w-full rounded-xl border bg-card text-card-foreground shadow-sm transition-all hover:shadow-md hover:border-primary/50 p-4 text-center group/card ${isUnlocked ? 'border-primary/50 shadow-md shadow-primary/10 ring-1 ring-primary/20' : ''}`}>
-                                                    <div className="mb-3 flex justify-center relative w-24 h-24 mx-auto">
-                                                        {reward.image ? (
-                                                            <Image
-                                                                src={reward.image}
-                                                                alt={reward.name}
-                                                                fill
-                                                                className="object-contain drop-shadow-lg group-hover/card:scale-110 transition-transform duration-300"
-                                                            />
-                                                        ) : (
-                                                            <div className="p-4 rounded-full bg-blue-100 text-blue-600 dark:bg-blue-900/20 dark:text-blue-400">
-                                                                <Gift className="w-8 h-8" />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <h3 className="font-semibold tracking-tight text-sm mb-1 truncate px-1" title={reward.name}>{reward.name}</h3>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {isUnlocked ? 'ปลดล็อกแล้ว!' : `ขาดอีก ${(reward.count - totalRegistrations).toLocaleString()}`}
-                                                    </p>
-                                                </div>
-                                            </m.div>
-                                        );
-                                    })}
-                                </div>
-                            </div>
-
-                            <m.div variants={fadeInUp} className="mt-8 text-center">
-                                {isRegistered ? (
-                                    <Button size="lg" variant="secondary" className="font-semibold shadow-lg cursor-default hover:bg-secondary">
-                                        <CheckCircle className="mr-2 h-4 w-4" /> คุณได้ทำการลงทะเบียนแล้ว
-                                    </Button>
-                                ) : (
-                                    <Link href="/preregister">
-                                        <Button size="lg" className="font-semibold shadow-lg">
-                                            ลงทะเบียนเลย <ChevronDown className="ml-2 h-4 w-4 -rotate-90" />
-                                        </Button>
-                                    </Link>
-                                )}
-                            </m.div>
-                        </m.div>
-                    </m.div>
+                    {isServerLive ? (
+                        <RoadmapSlide siteConfig={siteConfig} />
+                    ) : (
+                        <PreregisterDesignSwitcher
+                            totalRegistrations={totalRegistrations}
+                            isRegistered={isRegistered}
+                        />
+                    )}
                 </div>
 
                 {/* Slide 3: Features */}

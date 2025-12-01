@@ -33,5 +33,53 @@
             "name": "RANK1",
             "sub": "DEVELOPMENT"
         }
-    }
+    },
+    "serverStatus": "preregister",
+    "roadmap": [
+        {
+            "id": 1,
+            "phase": "PHASE 1",
+            "title": "Grand Opening",
+            "date": "NOW LIVE",
+            "desc": "เปิดให้บริการเต็มรูปแบบ ระบบเศรษฐกิจสมดุล อาชีพพื้นฐานครบครัน พร้อมกิจกรรมต้อนรับผู้เล่นใหม่",
+            "status": "completed",
+            "image": "https://placehold.co/600x800/1a1a1a/ffffff?text=Grand+Opening"
+        },
+        {
+            "id": 2,
+            "phase": "PHASE 1.5",
+            "title": "Gang Wars Begins",
+            "date": "COMING SOON",
+            "desc": "เปิดระบบยึดพื้นที่ (Turf War) เต็มรูปแบบ เดิมพันด้วยศักดิ์ศรีและผลประโยชน์มหาศาล",
+            "status": "current",
+            "image": "https://placehold.co/600x800/1e3a8a/ffffff?text=Gang+Wars"
+        },
+        {
+            "id": 3,
+            "phase": "PHASE 2",
+            "title": "The Bank Heist",
+            "date": "IN DEVELOPMENT",
+            "desc": "ระบบปล้นธนาคารกลาง ความยากระดับสูงสุด ต้องวางแผนและทำงานเป็นทีม พร้อมของรางวัลระดับ Legendary",
+            "status": "upcoming",
+            "image": "https://placehold.co/600x800/3f3f46/ffffff?text=Bank+Heist"
+        },
+        {
+            "id": 4,
+            "phase": "PHASE 3",
+            "title": "Cayo Perico Expansion",
+            "date": "PLANNED",
+            "desc": "ขยายแผนที่สู่เกาะ Cayo Perico พร้อมทรัพยากรใหม่ ภารกิจลับ และพื้นที่สีแดงแห่งใหม่",
+            "status": "upcoming",
+            "image": "https://placehold.co/600x800/064e3b/ffffff?text=Cayo+Perico"
+        },
+        {
+            "id": 5,
+            "phase": "PHASE 4",
+            "title": "Rank1 Championship",
+            "date": "PLANNED",
+            "desc": "การแข่งขัน E-Sport ภายในเซิร์ฟเวอร์ ชิงเงินรางวัลรวมกว่า 100,000 บาท",
+            "status": "upcoming",
+            "image": "https://placehold.co/600x800/7f1d1d/ffffff?text=Championship"
+        }
+    ]
 }
