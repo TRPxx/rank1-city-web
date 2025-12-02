@@ -292,7 +292,7 @@ export default function AdminSettingsPage() {
                                 </Button>
                             </div>
 
-                            <ScrollArea className="flex-1">
+                            <div className="flex-1 overflow-y-auto">
                                 <div className="p-8 space-y-6 max-w-3xl">
                                     <div className="grid gap-3">
                                         <Label className="text-base">ชื่อเว็บไซต์</Label>
@@ -363,14 +363,14 @@ export default function AdminSettingsPage() {
                                         </div>
                                     </div>
                                 </div>
-                            </ScrollArea>
+                            </div>
                         </div>
                     </TabsContent>
 
                     {/* Game Settings */}
                     <TabsContent value="game" className="flex-1 min-h-0 mt-0 data-[state=active]:flex flex-col">
                         <div className="bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden flex flex-col flex-1">
-                            <ScrollArea className="flex-1">
+                            <div className="flex-1 overflow-y-auto">
                                 <div className="p-8">
                                     <RewardsEditor
                                         config={preregisterConfig}
@@ -378,7 +378,7 @@ export default function AdminSettingsPage() {
                                         onSave={handleSave}
                                     />
                                 </div>
-                            </ScrollArea>
+                            </div>
                         </div>
                     </TabsContent>
 
@@ -404,7 +404,7 @@ export default function AdminSettingsPage() {
                                             <Plus className="mr-2 h-4 w-4" /> เพิ่มฟีเจอร์
                                         </Button>
                                     </div>
-                                    <ScrollArea className="flex-1 px-4 pb-4">
+                                    <div className="flex-1 overflow-y-auto px-4 pb-4">
                                         <div className="space-y-2">
                                             {featuresConfig.map((feature, index) => (
                                                 <div
@@ -421,7 +421,7 @@ export default function AdminSettingsPage() {
                                                 </div>
                                             ))}
                                         </div>
-                                    </ScrollArea>
+                                    </div>
                                 </div>
 
                                 {/* Right Content: Editor */}
@@ -579,7 +579,7 @@ export default function AdminSettingsPage() {
                                             <Plus className="mr-2 h-4 w-4" /> เพิ่มข่าวสาร
                                         </Button>
                                     </div>
-                                    <ScrollArea className="flex-1 px-4 pb-4">
+                                    <div className="flex-1 overflow-y-auto px-4 pb-4">
                                         <div className="space-y-2">
                                             {newsConfig.map((item, index) => (
                                                 <div
@@ -597,7 +597,7 @@ export default function AdminSettingsPage() {
                                                 </div>
                                             ))}
                                         </div>
-                                    </ScrollArea>
+                                    </div>
                                 </div>
 
                                 {/* Right Content: Editor */}
@@ -712,7 +712,7 @@ export default function AdminSettingsPage() {
                     {/* Roadmap Settings */}
                     <TabsContent value="roadmap" className="flex-1 min-h-0 mt-0 data-[state=active]:flex flex-col">
                         <div className="bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden flex flex-col flex-1">
-                            <ScrollArea className="flex-1">
+                            <div className="flex-1 overflow-y-auto">
                                 <div className="p-8">
                                     <RoadmapEditor
                                         siteConfig={siteConfig}
@@ -720,7 +720,7 @@ export default function AdminSettingsPage() {
                                         onSave={handleSave}
                                     />
                                 </div>
-                            </ScrollArea>
+                            </div>
                         </div>
                     </TabsContent>
                 </Tabs>
