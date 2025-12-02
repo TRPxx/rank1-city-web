@@ -326,33 +326,37 @@ export default function AdminSettingsPage() {
                                     </Button>
                                 </div>
 
-                                <div className="space-y-4 max-w-3xl">
-                                    <div className="grid gap-2">
-                                        <Label className="text-sm">ชื่อเว็บไซต์</Label>
-                                        <Input
-                                            value={siteConfig?.name || ''}
-                                            onChange={(e) => setSiteConfig({ ...siteConfig, name: e.target.value })}
-                                            className="h-10 rounded-lg bg-muted/30 border-transparent focus:bg-background text-sm"
-                                        />
-                                    </div>
-                                    <div className="grid gap-2">
-                                        <Label className="text-sm">คำอธิบาย</Label>
-                                        <Textarea
-                                            value={siteConfig?.description || ''}
-                                            onChange={(e) => setSiteConfig({ ...siteConfig, description: e.target.value })}
-                                            className="min-h-[80px] rounded-lg bg-muted/30 border-transparent focus:bg-background resize-none text-sm"
-                                        />
-                                    </div>
-                                    <div className="grid gap-2">
-                                        <Label className="text-sm">ลิงก์ Discord</Label>
-                                        <Input
-                                            value={siteConfig?.links?.discord || ''}
-                                            onChange={(e) => setSiteConfig({ ...siteConfig, links: { ...siteConfig.links, discord: e.target.value } })}
-                                            className="h-10 rounded-lg bg-muted/30 border-transparent focus:bg-background text-sm"
-                                        />
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                    {/* Left Column: Site Info */}
+                                    <div className="space-y-4">
+                                        <div className="grid gap-2">
+                                            <Label className="text-sm">ชื่อเว็บไซต์</Label>
+                                            <Input
+                                                value={siteConfig?.name || ''}
+                                                onChange={(e) => setSiteConfig({ ...siteConfig, name: e.target.value })}
+                                                className="h-10 rounded-lg bg-muted/30 border-transparent focus:bg-background text-sm"
+                                            />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label className="text-sm">คำอธิบาย</Label>
+                                            <Textarea
+                                                value={siteConfig?.description || ''}
+                                                onChange={(e) => setSiteConfig({ ...siteConfig, description: e.target.value })}
+                                                className="min-h-[120px] rounded-lg bg-muted/30 border-transparent focus:bg-background resize-none text-sm"
+                                            />
+                                        </div>
+                                        <div className="grid gap-2">
+                                            <Label className="text-sm">ลิงก์ Discord</Label>
+                                            <Input
+                                                value={siteConfig?.links?.discord || ''}
+                                                onChange={(e) => setSiteConfig({ ...siteConfig, links: { ...siteConfig.links, discord: e.target.value } })}
+                                                className="h-10 rounded-lg bg-muted/30 border-transparent focus:bg-background text-sm"
+                                            />
+                                        </div>
                                     </div>
 
-                                    <div className="grid gap-6 pt-8 mt-4 border-t border-border/50">
+                                    {/* Right Column: Server Status */}
+                                    <div className="space-y-6">
                                         <div className="grid gap-3">
                                             <Label className="text-base">สถานะเซิร์ฟเวอร์</Label>
                                             <Select
@@ -401,7 +405,7 @@ export default function AdminSettingsPage() {
 
                         {/* Game Settings */}
                         <TabsContent value="game" className="mt-0">
-                            <div className="bg-card rounded-[2rem] border border-border/50 shadow-sm overflow-hidden p-6">
+                            <div className="bg-card rounded-[2rem] border border-border/50 shadow-sm overflow-hidden h-[600px] flex flex-col">
                                 <RewardsEditor
                                     config={preregisterConfig}
                                     setConfig={setPreregisterConfig}
