@@ -131,7 +131,7 @@ export default function ProfilePage() {
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                         {/* Sidebar / Profile Card */}
                         <div className="lg:col-span-4">
-                            <div className="bg-muted/30 rounded-[2.5rem] p-8 relative overflow-hidden">
+                            <div className="bg-muted/30 rounded-[2.5rem] p-8 relative overflow-hidden h-full">
                                 <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary/10 to-transparent" />
 
                                 <div className="relative flex flex-col items-center text-center">
@@ -212,9 +212,9 @@ export default function ProfilePage() {
                         </div>
 
                         {/* Main Content / Inventory */}
-                        <div className="lg:col-span-8">
-                            <Tabs defaultValue="inventory" className="w-full">
-                                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+                        <div className="lg:col-span-8 flex flex-col">
+                            <Tabs defaultValue="inventory" className="w-full flex flex-col h-full">
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 flex-none">
                                     <TabsList className="bg-muted/50 p-1 rounded-full h-auto">
                                         <TabsTrigger value="inventory" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
                                             <Backpack className="w-4 h-4 mr-2" /> กระเป๋า
@@ -241,8 +241,8 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
 
-                                <div className="bg-muted/30 rounded-[2.5rem] p-8 relative overflow-hidden h-full">
-                                    <TabsContent value="inventory" className="mt-0 focus-visible:ring-0">
+                                <div className="bg-muted/30 rounded-[2.5rem] p-8 relative overflow-hidden flex-1">
+                                    <TabsContent value="inventory" className="mt-0 focus-visible:ring-0 h-full overflow-y-auto custom-scrollbar pr-2">
                                         <div className="mb-6 px-2">
                                             <h3 className="text-xl font-bold">รายการไอเทม</h3>
                                             <p className="text-muted-foreground">ไอเทมทั้งหมดในกระเป๋าของคุณ</p>
@@ -250,7 +250,7 @@ export default function ProfilePage() {
                                         <InventoryGrid items={filterItems(gameData.inventory)} type="item" />
                                     </TabsContent>
 
-                                    <TabsContent value="weapons" className="mt-0 focus-visible:ring-0">
+                                    <TabsContent value="weapons" className="mt-0 focus-visible:ring-0 h-full overflow-y-auto custom-scrollbar pr-2">
                                         <div className="mb-6 px-2">
                                             <h3 className="text-xl font-bold">อาวุธยุทโธปกรณ์</h3>
                                             <p className="text-muted-foreground">อาวุธที่พกพาอยู่</p>
@@ -258,7 +258,7 @@ export default function ProfilePage() {
                                         <InventoryGrid items={filterItems(gameData.loadout)} type="weapon" />
                                     </TabsContent>
 
-                                    <TabsContent value="safe" className="mt-0 focus-visible:ring-0">
+                                    <TabsContent value="safe" className="mt-0 focus-visible:ring-0 h-full overflow-y-auto custom-scrollbar pr-2">
                                         <div className="mb-6 px-2">
                                             <h3 className="text-xl font-bold">ตู้เซฟส่วนตัว</h3>
                                             <p className="text-muted-foreground">ไอเทมที่เก็บไว้ในตู้เซฟ</p>
@@ -266,7 +266,7 @@ export default function ProfilePage() {
                                         <InventoryGrid items={filterItems(gameData.safe)} type="item" />
                                     </TabsContent>
 
-                                    <TabsContent value="gift" className="mt-0 focus-visible:ring-0">
+                                    <TabsContent value="gift" className="mt-0 focus-visible:ring-0 h-full overflow-y-auto custom-scrollbar pr-2">
                                         <div className="mb-6 px-2">
                                             <h3 className="text-xl font-bold">กล่องของขวัญ</h3>
                                             <p className="text-muted-foreground">ไอเทมรางวัลที่รอรับเข้าเกม</p>
