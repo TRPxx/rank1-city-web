@@ -48,37 +48,41 @@ export default function RecentRegistrations() {
                             กำลังโหลดข้อมูล...
                         </div>
                     ) : (
-                        registrations.map((user, index) => (
-                            <motion.div
-                                key={`${index}-${user.created_at}`}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: index * 0.05 }}
-                                className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-muted/40 transition-colors duration-300"
-                            >
-                                <div className="relative">
-                                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary/20 to-secondary/20 flex items-center justify-center shrink-0 border border-white/5 group-hover:border-primary/30 transition-colors">
-                                        <User className="w-5 h-5 text-foreground/70 group-hover:text-primary transition-colors" />
+                        <AnimatePresence mode="popLayout" initial={false}>
+                            {registrations.map((user) => (
+                                <motion.div
+                                    layout
+                                    key={`${user.discord_name}-${user.created_at}`}
+                                    initial={{ opacity: 0, scale: 0.9, y: -20 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
+                                    transition={{ type: "spring", stiffness: 300, damping: 25 }}
+                                    className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-muted/40 transition-colors duration-300"
+                                >
+                                    <div className="relative">
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary/20 to-secondary/20 flex items-center justify-center shrink-0 border border-white/5 group-hover:border-primary/30 transition-colors">
+                                            <User className="w-5 h-5 text-foreground/70 group-hover:text-primary transition-colors" />
+                                        </div>
+                                        <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
                                     </div>
-                                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
-                                </div>
 
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-baseline justify-between gap-2">
-                                        <p className="text-sm font-semibold truncate text-foreground/90 group-hover:text-primary transition-colors">
-                                            {user.discord_name || 'Unknown'}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-baseline justify-between gap-2">
+                                            <p className="text-sm font-semibold truncate text-foreground/90 group-hover:text-primary transition-colors">
+                                                {user.discord_name || 'Unknown'}
+                                            </p>
+                                            <span className="text-[10px] text-muted-foreground/60 font-medium uppercase tracking-wider">
+                                                New Citizen
+                                            </span>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                                            <Clock className="w-3 h-3 opacity-70" />
+                                            <span>ลงทะเบียนเมื่อ {formatDistanceToNow(new Date(user.created_at), { addSuffix: true, locale: th })}</span>
                                         </p>
-                                        <span className="text-[10px] text-muted-foreground/60 font-medium uppercase tracking-wider">
-                                            New Citizen
-                                        </span>
                                     </div>
-                                    <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                                        <Clock className="w-3 h-3 opacity-70" />
-                                        <span>ลงทะเบียนเมื่อ {formatDistanceToNow(new Date(user.created_at), { addSuffix: true, locale: th })}</span>
-                                    </p>
-                                </div>
-                            </motion.div>
-                        ))
+                                </motion.div>
+                            ))}
+                        </AnimatePresence>
                     )}
                 </div>
             </div>
