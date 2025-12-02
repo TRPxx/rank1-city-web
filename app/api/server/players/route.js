@@ -34,7 +34,11 @@ export async function GET() {
             throw new Error('Invalid data format received from server');
         }
 
-        return NextResponse.json(players);
+        return NextResponse.json(players, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=10, stale-while-revalidate=20',
+            }
+        });
 
     } catch (error) {
         console.error('Error fetching server players:', error);

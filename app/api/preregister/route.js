@@ -13,8 +13,15 @@ function generateReferralCode() {
     return code;
 }
 
+import { rateLimit } from '@/lib/rate-limit';
+
 export async function POST(request) {
     try {
+        const ip = request.headers.get("x-forwarded-for") || "unknown";
+        if (!rateLimit(ip, 5, 60000)) { // 5 requests per minute
+            return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+        }
+
         const session = await getServerSession(authOptions);
 
         if (!session) {

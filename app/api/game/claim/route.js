@@ -1,10 +1,15 @@
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
+import { webDb as pool } from '@/lib/db';
+import { rateLimit } from '@/lib/rate-limit';
 
 // Security: In production, check for a specific Header or API Key!
 // const API_SECRET = process.env.GAME_API_SECRET;
 
 export async function GET(request) {
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    if (!rateLimit(ip, 60, 60000)) { // 60 requests per minute (Game Server might poll)
+        return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+    }
     const { searchParams } = new URL(request.url);
     const discordId = searchParams.get('discord_id');
 
@@ -24,6 +29,10 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+    const ip = request.headers.get("x-forwarded-for") || "unknown";
+    if (!rateLimit(ip, 60, 60000)) {
+        return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+    }
     try {
         const body = await request.json();
         const { claim_ids } = body; // Array of IDs to mark as claimed

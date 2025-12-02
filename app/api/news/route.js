@@ -69,11 +69,19 @@ export async function GET(req) {
                     totalPages: Math.ceil(total / l),
                     hasNextPage: end < total
                 }
+            }, {
+                headers: {
+                    'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+                }
             });
         }
 
         // Default: Return all (for Admin or simple lists)
-        return NextResponse.json(news);
+        return NextResponse.json(news, {
+            headers: {
+                'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+            }
+        });
     } catch (error) {
         console.error("API Error:", error);
         return NextResponse.json({ error: 'Failed to load news' }, { status: 500 });
