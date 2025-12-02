@@ -65,6 +65,17 @@ CREATE TABLE IF NOT EXISTS \`claim_queue\` (
   KEY \`status\` (\`status\`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+CREATE TABLE IF NOT EXISTS \`users\` (
+  \`id\` int(11) NOT NULL AUTO_INCREMENT,
+  \`discord_id\` varchar(50) NOT NULL,
+  \`firstname\` varchar(50) NOT NULL,
+  \`lastname\` varchar(50) NOT NULL,
+  \`avatar\` varchar(255) DEFAULT NULL,
+  \`created_at\` timestamp NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (\`id\`),
+  UNIQUE KEY \`discord_id\` (\`discord_id\`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 SET FOREIGN_KEY_CHECKS = 1;
 `;
 
