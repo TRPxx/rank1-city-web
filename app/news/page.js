@@ -88,21 +88,21 @@ function NewsContent() {
             <Navbar />
 
             <main className="flex-1 pt-24 pb-16">
-                <div className="container max-w-6xl">
+                <div className="container max-w-7xl px-4">
 
                     {/* Header */}
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-10">
+                    <div className="flex flex-col md:flex-row items-end justify-between gap-6 mb-10">
                         <div>
-                            <h1 className="text-3xl md:text-4xl font-bold mb-2">ข่าวสารและอัปเดต</h1>
-                            <p className="text-muted-foreground">ติดตามความเคลื่อนไหวล่าสุดของ Rank1 City ได้ที่นี่</p>
+                            <h1 className="text-4xl md:text-5xl font-bold mb-3 tracking-tight">ข่าวสารและอัปเดต</h1>
+                            <p className="text-lg text-muted-foreground">ติดตามความเคลื่อนไหวล่าสุดของ Rank1 City ได้ที่นี่</p>
                         </div>
 
                         {/* Search Bar */}
-                        <div className="relative w-full md:w-72">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <div className="relative w-full md:w-80">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="ค้นหาข่าวสาร..."
-                                className="pl-9"
+                                className="pl-10 h-12 rounded-2xl bg-muted/50 border-transparent focus:bg-background transition-all"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
@@ -110,32 +110,70 @@ function NewsContent() {
                     </div>
 
                     {/* Category Tabs */}
-                    <div className="flex flex-wrap gap-2 mb-8 border-b pb-4">
+                    <div className="flex items-center gap-2 mb-10 overflow-x-auto scrollbar-hide pb-2">
                         {categories.map((cat) => (
-                            <Button
+                            <button
                                 key={cat.id}
-                                variant={currentCategory === cat.id ? "default" : "ghost"}
                                 onClick={() => handleCategoryChange(cat.id)}
                                 className={cn(
-                                    "rounded-full px-6",
-                                    currentCategory === cat.id && cat.id !== 'all' ? `${cat.color} ${cat.textColor} hover:${cat.color}/90` : ""
+                                    "px-5 py-2 rounded-full text-sm font-medium transition-all whitespace-nowrap",
+                                    currentCategory === cat.id
+                                        ? "bg-primary text-primary-foreground shadow-md"
+                                        : "bg-muted/50 text-muted-foreground hover:bg-muted hover:text-foreground"
                                 )}
                             >
                                 {cat.label}
-                            </Button>
+                            </button>
                         ))}
                     </div>
 
                     {/* News Grid */}
                     {isLoading ? (
                         <div className="flex justify-center py-20">
-                            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                            <Loader2 className="h-10 w-10 animate-spin text-primary" />
                         </div>
                     ) : news.length > 0 ? (
                         <>
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
                                 {news.map((item) => (
-                                    <NewsCard key={item.id} item={item} />
+                                    <Link
+                                        key={item.id}
+                                        href={`/news/${item.id}`}
+                                        className="group flex flex-col gap-4 p-4 rounded-[2rem] hover:bg-muted/30 transition-all duration-300"
+                                    >
+                                        {/* Image */}
+                                        <div className="relative aspect-video rounded-3xl overflow-hidden bg-muted shadow-sm">
+                                            <Image
+                                                src={item.image}
+                                                alt={item.title}
+                                                fill
+                                                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                            />
+                                            {/* Category Badge */}
+                                            <div className="absolute top-4 left-4">
+                                                <span className={cn(
+                                                    "px-3 py-1 rounded-xl text-[10px] font-bold uppercase tracking-wider backdrop-blur-md shadow-sm",
+                                                    "bg-background/90 text-foreground"
+                                                )}>
+                                                    {categories.find(c => c.id === item.category)?.label}
+                                                </span>
+                                            </div>
+                                        </div>
+
+                                        {/* Content */}
+                                        <div className="flex-1 flex flex-col px-2">
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 font-medium">
+                                                <CalendarDays className="w-3.5 h-3.5" />
+                                                <span>{item.date}</span>
+                                            </div>
+                                            <h3 className="font-bold text-xl leading-tight mb-3 group-hover:text-primary transition-colors line-clamp-2">
+                                                {item.title}
+                                            </h3>
+                                            <p className="text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+                                                {item.excerpt}
+                                            </p>
+                                        </div>
+                                    </Link>
                                 ))}
                             </div>
 
@@ -146,6 +184,7 @@ function NewsContent() {
                                         variant="outline"
                                         disabled={currentPage <= 1}
                                         onClick={() => handlePageChange(currentPage - 1)}
+                                        className="rounded-xl"
                                     >
                                         Previous
                                     </Button>
@@ -155,7 +194,7 @@ function NewsContent() {
                                             key={p}
                                             variant={currentPage === p ? "default" : "outline"}
                                             onClick={() => handlePageChange(p)}
-                                            className="w-10 h-10 p-0"
+                                            className={cn("w-10 h-10 p-0 rounded-xl", currentPage === p && "shadow-md")}
                                         >
                                             {p}
                                         </Button>
@@ -165,6 +204,7 @@ function NewsContent() {
                                         variant="outline"
                                         disabled={currentPage >= totalPages}
                                         onClick={() => handlePageChange(currentPage + 1)}
+                                        className="rounded-xl"
                                     >
                                         Next
                                     </Button>
@@ -172,14 +212,18 @@ function NewsContent() {
                             )}
                         </>
                     ) : (
-                        <div className="text-center py-20 bg-muted/30 rounded-xl border border-dashed">
-                            <p className="text-muted-foreground text-lg">ไม่พบข้อมูลข่าวสารที่คุณค้นหา</p>
+                        <div className="text-center py-32 bg-muted/20 rounded-[3rem] border border-dashed border-muted-foreground/20">
+                            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-muted mb-4">
+                                <Search className="w-6 h-6 text-muted-foreground" />
+                            </div>
+                            <h3 className="text-xl font-bold mb-2">ไม่พบข้อมูลข่าวสาร</h3>
+                            <p className="text-muted-foreground mb-6">ลองเปลี่ยนคำค้นหาหรือหมวดหมู่ดูนะครับ</p>
                             <Button
-                                variant="link"
+                                variant="outline"
                                 onClick={() => { setSearchQuery(''); handleCategoryChange('all'); }}
-                                className="mt-2"
+                                className="rounded-full px-6"
                             >
-                                ล้างคำค้นหา
+                                ล้างตัวกรองทั้งหมด
                             </Button>
                         </div>
                     )}
