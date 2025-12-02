@@ -1,3 +1,15 @@
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/app/api/auth/[...nextauth]/route';
+import { NextResponse } from 'next/server';
+import { promises as fs } from 'fs';
+import path from 'path';
+import { revalidatePath } from 'next/cache';
+
+const isAdmin = (session) => {
+    return session?.user?.isAdmin;
+};
+
+
 export async function GET(request) {
     try {
         const session = await getServerSession(authOptions);
