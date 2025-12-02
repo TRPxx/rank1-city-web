@@ -10,6 +10,9 @@ import { categories } from '@/lib/news-data';
 import { cn } from '@/lib/utils';
 import { Search, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
+import Link from 'next/link';
+import { CalendarDays } from 'lucide-react';
+import Image from 'next/image';
 
 function NewsContent() {
     const searchParams = useSearchParams();
