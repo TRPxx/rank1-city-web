@@ -743,7 +743,7 @@ export default function AdminSettingsPage() {
 
                         {/* Roadmap Settings */}
                         <TabsContent value="roadmap" className="mt-0">
-                            <div className="bg-card rounded-[2rem] border border-border/50 shadow-sm overflow-hidden p-6">
+                            <div className="bg-card rounded-[2rem] border border-border/50 shadow-sm overflow-hidden h-[600px] flex flex-col">
                                 <RoadmapEditor
                                     siteConfig={siteConfig}
                                     setSiteConfig={setSiteConfig}

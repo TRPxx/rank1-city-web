@@ -65,7 +65,7 @@ export default function RoadmapEditor({ siteConfig, setSiteConfig, onSave }) {
     const selectedMilestone = roadmap[selectedIndex];
 
     return (
-        <Card className="h-[800px] flex flex-col">
+        <Card className="h-full flex flex-col border-0 shadow-none rounded-none">
             <CardHeader>
                 <div className="flex items-center justify-between">
                     <div>
