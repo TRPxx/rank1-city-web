@@ -96,7 +96,7 @@ export default function GiftInventory() {
                             </div>
                         </div>
                     ) : pendingItems.length > 0 ? (
-                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar p-1">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-4">
                             {pendingItems.map((item) => (
                                 <div key={item.id} className="bg-background rounded-3xl p-4 border border-border/50 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center gap-3 group relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-bl-[2rem] -mr-4 -mt-4 transition-transform group-hover:scale-110" />
@@ -127,7 +127,7 @@ export default function GiftInventory() {
                 </TabsContent>
 
                 <TabsContent value="history" className="mt-0 focus-visible:ring-0">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-h-[350px] overflow-y-auto pr-2 custom-scrollbar p-1">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 pb-4">
                         {claimedItems.length > 0 ? (
                             claimedItems.map((item) => (
                                 <div key={item.id} className="bg-muted/20 rounded-3xl p-4 border border-transparent hover:border-border/50 transition-all flex flex-col items-center text-center gap-3 shrink-0">
