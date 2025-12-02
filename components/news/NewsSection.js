@@ -43,87 +43,112 @@ export default function NewsSection() {
         return <div className="w-full h-64 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-muted-foreground" /></div>;
     }
 
+    // แยกข่าวล่าสุดออกมาเป็น Featured
+    const featuredNews = filteredNews[0];
+    const otherNews = filteredNews.slice(1);
+
     return (
-        <div className="w-full h-full flex flex-col">
+        <div className="w-full h-full flex flex-col max-w-7xl mx-auto px-4">
 
-            {/* Tabs Header - Clean Design without any lines */}
-            <div className="flex items-center gap-6 md:gap-8 mb-6 md:mb-8 px-2 overflow-x-auto scrollbar-hide" role="tablist" aria-label="News Categories">
-                {categories.map((cat) => (
-                    <button
-                        key={cat.id}
-                        role="tab"
-                        aria-selected={activeTab === cat.id}
-                        aria-controls={`news-panel-${cat.id}`}
-                        id={`news-tab-${cat.id}`}
-                        onClick={() => setActiveTab(cat.id)}
-                        className={cn(
-                            "text-base md:text-lg font-bold transition-all relative whitespace-nowrap px-3 py-1 rounded-full",
-                            activeTab === cat.id
-                                ? `${cat.color} ${cat.textColor}`
-                                : "text-muted-foreground hover:text-foreground"
-                        )}
-                    >
-                        {cat.label}
-                    </button>
-                ))}
-            </div>
-
-            {/* News List - Scrollable with Hidden Scrollbar */}
-            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 md:gap-x-6 md:gap-y-4 content-start pb-4">
-                    {filteredNews.map((item, index) => (
-                        <Link
-                            key={item.id}
-                            href={`/news/${item.id}`}
+            {/* Header & Tabs */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+                <div className="flex items-center gap-2 bg-muted/50 p-1 rounded-full overflow-x-auto scrollbar-hide max-w-full">
+                    {categories.map((cat) => (
+                        <button
+                            key={cat.id}
+                            onClick={() => setActiveTab(cat.id)}
                             className={cn(
-                                "flex gap-3 md:gap-4 p-2 md:p-3 rounded-xl hover:bg-accent/50 transition-all group border border-transparent hover:border-border/50",
-                                // Show all items, let container handle overflow
+                                "px-4 py-1.5 rounded-full text-sm font-medium transition-all whitespace-nowrap",
+                                activeTab === cat.id
+                                    ? "bg-background text-foreground shadow-sm"
+                                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                             )}
                         >
-                            {/* Thumbnail Image - Responsive Sizes */}
-                            <div className="relative w-28 h-20 sm:w-32 sm:h-20 md:w-40 md:h-24 flex-shrink-0 overflow-hidden rounded-lg bg-muted shadow-sm">
-                                <Image
-                                    src={item.image}
-                                    alt={item.title}
-                                    fill
-                                    sizes="(max-width: 768px) 100px, 160px"
-                                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                                />
-                                {/* NEW Badge - Dynamic */}
-                                {(new Date() - new Date(item.date.split('/').reverse().join('-'))) / (1000 * 60 * 60 * 24) <= 7 && (
-                                    <div className="absolute top-0 left-0 bg-red-600 text-white text-[9px] md:text-[10px] font-bold px-1.5 py-0.5 md:px-2 md:py-0.5 shadow-md">
-                                        NEW
-                                    </div>
-                                )}
-                            </div>
-
-                            {/* Content */}
-                            <div className="flex-1 min-w-0 flex flex-col justify-between py-0.5">
-                                <div>
-                                    <h3 className="font-bold text-sm md:text-base leading-tight mb-1 line-clamp-2 group-hover:text-red-500 transition-colors">
-                                        {item.title}
-                                    </h3>
-                                    <p className="text-xs text-muted-foreground line-clamp-2 hidden sm:block">
-                                        {item.excerpt}
-                                    </p>
-                                </div>
-
-                                {/* Meta Footer */}
-                                <div className="flex items-center gap-2 md:gap-3 text-[10px] md:text-xs text-muted-foreground mt-1">
-                                    <div className="flex items-center gap-1 text-primary/80">
-                                        <Tag className="w-3 h-3" />
-                                        <span>{categories.find(c => c.id === item.category)?.label}</span>
-                                    </div>
-                                    <div className="w-px h-3 bg-border" />
-                                    <div className="flex items-center gap-1">
-                                        <CalendarDays className="w-3 h-3" />
-                                        <span>{item.date}</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </Link>
+                            {cat.label}
+                        </button>
                     ))}
                 </div>
+            </div>
+
+            {/* News Content */}
+            <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide -mx-4 px-4 pb-8">
+                {!featuredNews ? (
+                    <div className="text-center py-20 text-muted-foreground">ไม่พบข่าวสารในหมวดหมู่นี้</div>
+                ) : (
+                    <div className="space-y-8">
+                        {/* Featured News (Big Card) */}
+                        <Link href={`/news/${featuredNews.id}`} className="group block relative rounded-3xl overflow-hidden bg-muted/30 aspect-[2/1] md:aspect-[2.5/1]">
+                            <Image
+                                src={featuredNews.image}
+                                alt={featuredNews.title}
+                                fill
+                                className="object-cover transition-transform duration-700 group-hover:scale-105"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+                            <div className="absolute bottom-0 left-0 p-6 md:p-10 w-full max-w-3xl">
+                                <div className="flex items-center gap-3 mb-3">
+                                    <span className={cn("px-2.5 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider bg-primary text-primary-foreground")}>
+                                        {categories.find(c => c.id === featuredNews.category)?.label}
+                                    </span>
+                                    <span className="text-gray-300 text-xs flex items-center gap-1">
+                                        <CalendarDays className="w-3 h-3" />
+                                        {featuredNews.date}
+                                    </span>
+                                </div>
+                                <h3 className="text-2xl md:text-4xl font-bold text-white mb-2 leading-tight group-hover:text-primary transition-colors">
+                                    {featuredNews.title}
+                                </h3>
+                                <p className="text-gray-300 line-clamp-2 md:text-lg">
+                                    {featuredNews.excerpt}
+                                </p>
+                            </div>
+                        </Link>
+
+                        {/* Grid Layout for Other News */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {otherNews.map((item) => (
+                                <Link
+                                    key={item.id}
+                                    href={`/news/${item.id}`}
+                                    className="group flex flex-col gap-4 p-4 rounded-3xl hover:bg-muted/40 transition-colors"
+                                >
+                                    {/* Image */}
+                                    <div className="relative aspect-video rounded-2xl overflow-hidden bg-muted">
+                                        <Image
+                                            src={item.image}
+                                            alt={item.title}
+                                            fill
+                                            className="object-cover transition-transform duration-500 group-hover:scale-110"
+                                        />
+                                        {/* Category Badge */}
+                                        <div className="absolute top-3 left-3">
+                                            <span className={cn(
+                                                "px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider backdrop-blur-md",
+                                                "bg-background/80 text-foreground"
+                                            )}>
+                                                {categories.find(c => c.id === item.category)?.label}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    {/* Content */}
+                                    <div className="flex-1 flex flex-col">
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                                            <CalendarDays className="w-3 h-3" />
+                                            <span>{item.date}</span>
+                                        </div>
+                                        <h3 className="font-bold text-lg leading-snug mb-2 group-hover:text-primary transition-colors line-clamp-2">
+                                            {item.title}
+                                        </h3>
+                                        <p className="text-sm text-muted-foreground line-clamp-2">
+                                            {item.excerpt}
+                                        </p>
+                                    </div>
+                                </Link>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );
