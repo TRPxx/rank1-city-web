@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Loader2, Save, AlertCircle, CheckCircle, Plus, Trash2, Users, Shield, Zap, Car, Briefcase, Home, Star, Heart, Trophy, Target, Flag, MapPin, Gift, Activity, Settings, MessageCircle, PlayCircle, Gamepad2, Info, HelpCircle, Search, Newspaper } from 'lucide-react';
+import { Loader2, Save, AlertCircle, CheckCircle, Plus, Trash2, Users, Shield, Zap, Car, Briefcase, Home, Star, Heart, Trophy, Target, Flag, MapPin, Gift, Activity, Settings, MessageCircle, PlayCircle, Gamepad2, Info, HelpCircle, Search, Newspaper, Ticket } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Image from 'next/image';
 import { cn } from "@/lib/utils";
@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select";
 import RoadmapEditor from '@/components/admin/RoadmapEditor';
 import RewardsEditor from '@/components/admin/RewardsEditor';
+import LuckyDrawEditor from '@/components/admin/LuckyDrawEditor';
 
 const iconList = [
     { name: 'Users', icon: Users },
@@ -131,9 +132,43 @@ export default function AdminSettingsPage() {
             });
 
             if (!res.ok) throw new Error('Failed to save');
+
+            // Update local state if needed
+            if (type === 'site') setSiteConfig(data);
+            if (type === 'preregister') setPreregisterConfig(data);
+
             toast.success("Settings saved successfully");
         } catch (error) {
             toast.error("Failed to save settings");
+        } finally {
+            setIsSaving(false);
+        }
+    };
+
+    const handleSaveLuckyDraw = async (newLuckyDrawConfig) => {
+        setIsSaving(true);
+        try {
+            // Merge with existing preregister config
+            const updatedConfig = {
+                ...preregisterConfig,
+                luckyDraw: newLuckyDrawConfig
+            };
+
+            const res = await fetch('/api/admin/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    type: 'preregister',
+                    data: updatedConfig
+                })
+            });
+
+            if (!res.ok) throw new Error('Failed to save');
+
+            setPreregisterConfig(updatedConfig);
+            toast.success("Lucky Draw settings saved successfully");
+        } catch (error) {
+            toast.error("Failed to save Lucky Draw settings");
         } finally {
             setIsSaving(false);
         }
@@ -292,6 +327,13 @@ export default function AdminSettingsPage() {
                             >
                                 <Star className="mr-2 h-4 w-4" />
                                 ฟีเจอร์
+                            </TabsTrigger>
+                            <TabsTrigger
+                                value="luckydraw"
+                                className="w-full justify-start px-4 py-3 rounded-xl data-[state=active]:bg-muted data-[state=active]:text-foreground hover:bg-muted/50 transition-all text-muted-foreground"
+                            >
+                                <Ticket className="mr-2 h-4 w-4" />
+                                Lucky Draw
                             </TabsTrigger>
                             <TabsTrigger
                                 value="news"
@@ -586,6 +628,16 @@ export default function AdminSettingsPage() {
                                         )}
                                     </div>
                                 </div>
+                            </div>
+                        </TabsContent>
+
+                        {/* Lucky Draw Settings */}
+                        <TabsContent value="luckydraw" className="mt-0">
+                            <div className="bg-card rounded-[2rem] border border-border/50 shadow-sm overflow-hidden h-[600px] flex flex-col">
+                                <LuckyDrawEditor
+                                    initialData={preregisterConfig?.luckyDraw}
+                                    onSave={handleSaveLuckyDraw}
+                                />
                             </div>
                         </TabsContent>
 
