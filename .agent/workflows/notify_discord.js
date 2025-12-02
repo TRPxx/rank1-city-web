@@ -2,17 +2,12 @@ const fs = require('fs');
 const { execSync } = require('child_process');
 const https = require('https');
 
-const commitMessage = `Update System: Maintenance Mode & Database Optimization
-
-001 Maintenance Mode (Realtime)
-├── app/layout.js : เพิ่มระบบตรวจสอบสถานะเซิร์ฟเวอร์แบบ Realtime
-├── components/MaintenanceListener.js : เพิ่ม Script เช็คสถานะทุก 5 วินาที
-└── components/MaintenancePage.js : ปรับปรุงหน้า Maintenance ให้สวยงามและปลอดภัย
-
-002 Database Optimization (Read Replica)
-├── lib/db.js : เพิ่มระบบ Intelligent Routing แยก Read/Write (Master/Slave)
-├── .env : เพิ่ม Config รองรับ Port 3307 สำหรับ Slave Database
-└── web_tables_schema.sql : เพิ่มไฟล์ SQL สำหรับสร้างตารางฝั่งเว็บ`;
+let commitMessage = "";
+try {
+  commitMessage = execSync('git log -1 --pretty=%B').toString().trim();
+} catch (e) {
+  commitMessage = "Manual Update (No commit message found)";
+}
 
 const branch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
 const shortHash = execSync('git rev-parse --short HEAD').toString().trim();
