@@ -83,10 +83,23 @@ export async function POST(request) {
                 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
             `);
 
+            console.log(`Inserting into claim_queue: DiscordID=${discordId}, ItemID=${selectedItem.id}, Name=${selectedItem.name}`);
+
             await connection.query(
                 'INSERT INTO claim_queue (discord_id, item_id, item_name, amount, status) VALUES (?, ?, ?, 1, "pending")',
                 [discordId, selectedItem.id, selectedItem.name]
             );
+
+            console.log('Claim queue insert successful');
+
+            await connection.commit();
+            console.log('Transaction committed');
+
+            return NextResponse.json({
+                success: true,
+                reward: selectedItem,
+                remainingTickets: currentTickets - 1
+            });
 
             await connection.commit();
 
