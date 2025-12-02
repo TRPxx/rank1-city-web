@@ -248,6 +248,80 @@ export default function RewardsEditor({ config, setConfig, onSave }) {
                                         )}
                                     </div>
                                 </div>
+
+                                <div className="space-y-4 pt-4 border-t">
+                                    <div className="flex items-center justify-between">
+                                        <Label>รายการไอเทมในรางวัลนี้</Label>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => {
+                                                const currentItems = selectedReward.items || [];
+                                                updateReward(selectedIndex, 'items', [...currentItems, { name: 'New Item', amount: 1, image: '' }]);
+                                            }}
+                                        >
+                                            <Plus className="w-3 h-3 mr-1" /> เพิ่มไอเทม
+                                        </Button>
+                                    </div>
+
+                                    <div className="space-y-3">
+                                        {(selectedReward.items || []).map((item, itemIndex) => (
+                                            <div key={itemIndex} className="flex gap-2 items-start p-3 bg-muted/30 rounded-lg border">
+                                                <div className="grid gap-2 flex-1">
+                                                    <div className="flex gap-2">
+                                                        <Input
+                                                            placeholder="ชื่อไอเทม"
+                                                            value={item.name}
+                                                            onChange={(e) => {
+                                                                const newItems = [...(selectedReward.items || [])];
+                                                                newItems[itemIndex] = { ...item, name: e.target.value };
+                                                                updateReward(selectedIndex, 'items', newItems);
+                                                            }}
+                                                            className="h-8 text-sm"
+                                                        />
+                                                        <Input
+                                                            type="number"
+                                                            placeholder="จำนวน"
+                                                            value={item.amount}
+                                                            onChange={(e) => {
+                                                                const newItems = [...(selectedReward.items || [])];
+                                                                newItems[itemIndex] = { ...item, amount: parseInt(e.target.value) || 0 };
+                                                                updateReward(selectedIndex, 'items', newItems);
+                                                            }}
+                                                            className="w-24 h-8 text-sm"
+                                                        />
+                                                    </div>
+                                                    <Input
+                                                        placeholder="URL รูปภาพไอเทม (Optional)"
+                                                        value={item.image || ''}
+                                                        onChange={(e) => {
+                                                            const newItems = [...(selectedReward.items || [])];
+                                                            newItems[itemIndex] = { ...item, image: e.target.value };
+                                                            updateReward(selectedIndex, 'items', newItems);
+                                                        }}
+                                                        className="h-8 text-sm"
+                                                    />
+                                                </div>
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                                                    onClick={() => {
+                                                        const newItems = (selectedReward.items || []).filter((_, i) => i !== itemIndex);
+                                                        updateReward(selectedIndex, 'items', newItems);
+                                                    }}
+                                                >
+                                                    <Trash2 className="w-4 h-4" />
+                                                </Button>
+                                            </div>
+                                        ))}
+                                        {(!selectedReward.items || selectedReward.items.length === 0) && (
+                                            <div className="text-center py-4 text-sm text-muted-foreground bg-muted/20 rounded-lg border border-dashed">
+                                                ยังไม่มีไอเทมในรางวัลนี้
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     ) : (
