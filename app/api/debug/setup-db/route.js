@@ -69,43 +69,45 @@ SET FOREIGN_KEY_CHECKS = 1;
 `;
 
 export async function GET() {
-    let logs = [];
-    const log = (msg) => logs.push(msg);
+  let logs = [];
+  const log = (msg) => logs.push(msg);
 
-    try {
-        log('Starting DB Setup...');
+  try {
+    log('Starting DB Setup...');
 
-        const host = process.env.WEB_DB_HOST || process.env.DB_HOST || 'localhost';
-        const port = parseInt(process.env.WEB_DB_PORT || '3307');
-        const user = process.env.WEB_DB_USER || process.env.DB_USER || 'root';
-        const password = process.env.WEB_DB_PASSWORD || process.env.DB_PASSWORD || '';
+    const host = process.env.WEB_DB_HOST || process.env.DB_HOST || 'localhost';
+    const port = parseInt(process.env.WEB_DB_PORT || '3307');
+    const user = process.env.WEB_DB_USER || process.env.DB_USER || 'root';
+    // Fix: Only fallback to DB_PASSWORD if WEB_DB_PASSWORD is strictly undefined.
+    // If it is empty string "", we should use empty string.
+    const password = process.env.WEB_DB_PASSWORD !== undefined ? process.env.WEB_DB_PASSWORD : (process.env.DB_PASSWORD || '');
 
-        log(`Config: Host=${host}, Port=${port}, User=${user}`);
+    log(`Config: Host=${host}, Port=${port}, User=${user}`);
 
-        // 1. Try connecting without DB selected to create it
-        const connection = await mysql.createConnection({
-            host, port, user, password,
-            multipleStatements: true
-        });
+    // 1. Try connecting without DB selected to create it
+    const connection = await mysql.createConnection({
+      host, port, user, password,
+      multipleStatements: true
+    });
 
-        log('Connected to MySQL Server successfully.');
+    log('Connected to MySQL Server successfully.');
 
-        // 2. Run Schema
-        log('Executing Schema...');
-        await connection.query(schemaSql);
-        log('Schema executed successfully.');
+    // 2. Run Schema
+    log('Executing Schema...');
+    await connection.query(schemaSql);
+    log('Schema executed successfully.');
 
-        await connection.end();
-        log('Connection closed.');
+    await connection.end();
+    log('Connection closed.');
 
-        return NextResponse.json({ success: true, logs });
+    return NextResponse.json({ success: true, logs });
 
-    } catch (error) {
-        console.error('Setup Error:', error);
-        return NextResponse.json({
-            success: false,
-            error: error.message,
-            logs
-        }, { status: 500 });
-    }
+  } catch (error) {
+    console.error('Setup Error:', error);
+    return NextResponse.json({
+      success: false,
+      error: error.message,
+      logs
+    }, { status: 500 });
+  }
 }
