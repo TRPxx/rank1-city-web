@@ -72,12 +72,12 @@ export function useLuckyDraw({ onDrawComplete }) {
                 setTimeout(() => {
                     if (tapeRef.current) {
                         // Get actual card width and gap from DOM for accuracy
-                        // Use .children to get direct card children, not nested divs
                         const cards = tapeRef.current.children;
+                        const winningCard = cards[WIN_INDEX];
                         const firstCard = cards[0];
                         const secondCard = cards[1];
 
-                        if (!firstCard || !secondCard) {
+                        if (!firstCard || !secondCard || !winningCard) {
                             console.error('Cards not found in DOM');
                             return;
                         }
@@ -93,23 +93,37 @@ export function useLuckyDraw({ onDrawComplete }) {
                         const containerWidth = tapeRef.current.parentElement.offsetWidth;
                         const itemTotalWidth = actualCardWidth + actualGap;
 
-                        // Calculate exact position to center the winning item
-                        const randomOffset = 0; // Temporarily disabled for testing - (Math.random() * 0.6 - 0.3) * actualCardWidth;
-                        const targetPosition = (WIN_INDEX * itemTotalWidth) - (containerWidth / 2) + (actualCardWidth / 2) + randomOffset;
+                        // Calculate where the center of screen is (marker position)
+                        const centerOfScreen = containerWidth / 2;
+
+                        // Calculate the current position of winning card's center relative to the tape start
+                        const winningCardLeft = winningCard.offsetLeft;
+                        const winningCardCenter = winningCardLeft + (actualCardWidth / 2);
+
+                        // We need to move the tape so that winningCardCenter aligns with centerOfScreen
+                        // targetPosition is how much we translate the tape to the LEFT (negative X)
+                        const randomOffset = 0; // Temporarily disabled for testing
+                        const targetPosition = winningCardCenter - centerOfScreen + randomOffset;
+
+                        // Debug: Show all items in tape
+                        const tapeItemsDebug = Array.from(cards).map((card, idx) => {
+                            const itemName = newTape[idx]?.name || 'Unknown';
+                            return `[${idx}] ${itemName}${idx === WIN_INDEX ? ' ⭐ WIN' : ''}`;
+                        });
 
                         console.log('🎯 Lucky Draw Debug:', {
-                            resultItem: result.name,
-                            winIndex: WIN_INDEX,
-                            actualCardWidth,
-                            actualGap,
-                            expectedGap: CARD_GAP,
-                            containerWidth,
-                            itemTotalWidth,
-                            randomOffset,
-                            targetPosition,
-                            firstCardLeft: firstCard.offsetLeft,
-                            firstCardRight,
-                            secondCardLeft
+                            '📦 Result Item': result.name,
+                            '🎲 Win Index': WIN_INDEX,
+                            '📏 Card Width': actualCardWidth,
+                            '↔️ Gap': actualGap,
+                            '📐 Item Total Width': itemTotalWidth,
+                            '🖥️ Container Width': containerWidth,
+                            '🎯 Center of Screen': centerOfScreen,
+                            '📍 Winning Card Left': winningCardLeft,
+                            '⭐ Winning Card Center': winningCardCenter,
+                            '🚀 Target Position': targetPosition,
+                            '🔀 Random Offset': randomOffset,
+                            '📋 Tape Items': tapeItemsDebug.join('\n')
                         });
 
                         // Reset position instantly
