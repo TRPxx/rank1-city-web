@@ -153,8 +153,15 @@ export default function HomeClient({ initialFeatures, siteConfig }) {
                 />
 
                 {/* Slide 1: Hero Section */}
-                <div className="w-full h-dvh snap-start flex flex-col relative overflow-hidden">
-                    <div className="absolute inset-0 opacity-20">
+                <div className="w-full h-dvh snap-start flex flex-col relative overflow-hidden bg-background">
+                    {/* Mobile Background: Grid Pattern */}
+                    <div className="absolute inset-0 md:hidden">
+                        <div className="absolute inset-0 h-full w-full bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
+                    </div>
+
+                    {/* Desktop Background: Image */}
+                    <div className="absolute inset-0 opacity-20 hidden md:block">
                         <Image
                             src="/images/hero-bg-fivem.webp"
                             alt="Rank1 City FiveM Server Atmosphere"
@@ -165,7 +172,7 @@ export default function HomeClient({ initialFeatures, siteConfig }) {
                             sizes="100vw"
                         />
                     </div>
-                    <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/50 to-background" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-background/80 via-background/50 to-background hidden md:block" />
 
                     <div className="flex-1 container flex items-center relative z-10">
                         {isServerLive ? (
