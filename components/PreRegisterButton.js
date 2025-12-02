@@ -102,7 +102,7 @@ export default function PreRegisterButton({ onRegisterSuccess }) {
                                 initial={{ opacity: 0, scale: 0.9, y: 20 }}
                                 animate={{ opacity: 1, scale: 1, y: 0 }}
                                 exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                                className="bg-card border border-border p-6 rounded-xl w-full max-w-md shadow-2xl relative z-10"
+                                className="bg-background/95 backdrop-blur-xl border-none p-8 rounded-3xl w-full max-w-md shadow-2xl relative z-10"
                             >
                                 <h2 className="text-2xl font-bold mb-4 text-center flex items-center justify-center gap-2">
                                     <Gift className="text-primary" /> ยืนยันการลงทะเบียน

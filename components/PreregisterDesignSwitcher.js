@@ -32,19 +32,19 @@ const PreregisterRewards = ({ totalRegistrations, isRegistered, data }) => {
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <div className="w-3 h-3 rounded-full bg-primary" /> ปลดล็อคแล้ว
-                    <div className="w-3 h-3 rounded-full bg-muted border" /> ยังไม่ปลดล็อค
+                    <div className="w-3 h-3 rounded-full bg-muted" /> ยังไม่ปลดล็อค
                 </div>
             </div>
 
             {/* --- MOBILE LAYOUT (< md) --- */}
-            <div className="flex flex-col gap-6 md:hidden pb-20">
+            <div className="flex flex-col gap-8 md:hidden pb-20">
                 {/* 1. Progress Bar (Top Priority) */}
-                <div className="w-full bg-card border rounded-2xl p-4 shadow-sm">
+                <div className="w-full">
                     <div className="flex justify-between w-full mb-2">
                         <span className="text-sm font-medium text-muted-foreground">ความคืบหน้า</span>
                         <span className="text-xl font-black text-primary">{Math.round(progressPercent)}%</span>
                     </div>
-                    <Progress value={progressPercent} className="h-4 w-full" />
+                    <Progress value={progressPercent} className="h-3 w-full" />
                     <div className="flex justify-between w-full mt-2 text-xs text-muted-foreground">
                         <span>0</span>
                         <span>{finalReward.count.toLocaleString()}</span>
@@ -52,38 +52,37 @@ const PreregisterRewards = ({ totalRegistrations, isRegistered, data }) => {
                 </div>
 
                 {/* 2. Grand Prize (Featured) */}
-                <div className="relative rounded-3xl border bg-card overflow-hidden p-6 text-center shadow-lg">
-                    <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-50" />
+                <div className="relative overflow-hidden p-6 text-center rounded-3xl bg-muted/20">
                     <div className="relative z-10">
-                        <Badge className="mb-4">รางวัลใหญ่สุด</Badge>
-                        <div className="relative w-32 h-32 mx-auto mb-4">
+                        <Badge variant="secondary" className="mb-4 bg-background/50 backdrop-blur-sm">รางวัลใหญ่สุด</Badge>
+                        <div className="relative w-40 h-40 mx-auto mb-4">
                             {finalReward.image ? (
                                 <Image src={finalReward.image} alt="Grand Prize" fill className="object-contain drop-shadow-xl" />
                             ) : (
                                 <Trophy className="w-full h-full text-primary" />
                             )}
                         </div>
-                        <h3 className="text-xl font-bold">{finalReward.name}</h3>
+                        <h3 className="text-2xl font-bold">{finalReward.name}</h3>
                         <p className="text-sm text-muted-foreground mt-1">เมื่อครบ {finalReward.count.toLocaleString()} คน</p>
                     </div>
                 </div>
 
                 {/* 3. Other Rewards (Horizontal Scroll) */}
                 <div>
-                    <h3 className="text-sm font-semibold text-muted-foreground mb-3 px-1">รางวัลอื่นๆ</h3>
-                    <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-4 px-1">รางวัลอื่นๆ</h3>
+                    <div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
                         {globalRewards.slice(0, globalRewards.length - 1).map((reward, index) => {
                             const isUnlocked = totalRegistrations >= reward.count;
                             return (
                                 <div key={index} className={cn(
-                                    "flex-none w-[160px] snap-center relative rounded-2xl border p-4 flex flex-col justify-between transition-all",
-                                    isUnlocked ? "bg-card border-primary/30 shadow-sm" : "bg-muted/30 grayscale opacity-70"
+                                    "flex-none w-[160px] snap-center relative rounded-2xl p-4 flex flex-col justify-between transition-all",
+                                    isUnlocked ? "bg-primary/5" : "bg-muted/10 grayscale opacity-70"
                                 )}>
-                                    <div className="flex justify-between items-start mb-2">
+                                    <div className="flex justify-between items-start mb-4">
                                         <span className="font-mono text-[10px] text-muted-foreground">#{index + 1}</span>
-                                        {isUnlocked && <CheckCircle className="w-3 h-3 text-primary" />}
+                                        {isUnlocked && <CheckCircle className="w-4 h-4 text-primary" />}
                                     </div>
-                                    <div className="relative w-16 h-16 mx-auto mb-2">
+                                    <div className="relative w-20 h-20 mx-auto mb-4">
                                         {reward.image ? (
                                             <Image src={reward.image} alt={reward.name} fill className="object-contain" />
                                         ) : (
@@ -102,24 +101,23 @@ const PreregisterRewards = ({ totalRegistrations, isRegistered, data }) => {
             </div>
 
             {/* --- DESKTOP LAYOUT (>= md) --- */}
-            <div className="hidden md:grid grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-[180px]">
+            <div className="hidden md:grid grid-cols-3 lg:grid-cols-4 gap-6 auto-rows-[200px]">
                 {/* Large Featured Item (Final Goal) */}
-                <div className="col-span-2 row-span-2 relative rounded-3xl border bg-card overflow-hidden group">
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-50" />
-                    <div className="p-8 h-full flex flex-col justify-between relative z-10">
+                <div className="col-span-2 row-span-2 relative rounded-[2.5rem] bg-muted/20 overflow-hidden group hover:bg-muted/30 transition-colors">
+                    <div className="p-10 h-full flex flex-col justify-between relative z-10">
                         <div className="flex justify-between items-start">
-                            <Badge className="text-lg px-3 py-1">เป้าหมาย {finalReward.count / 1000}k</Badge>
+                            <Badge variant="secondary" className="text-lg px-4 py-1.5 bg-background/50 backdrop-blur-sm">เป้าหมาย {finalReward.count / 1000}k</Badge>
                             <Star className="w-8 h-8 text-yellow-500 fill-yellow-500" />
                         </div>
                         <div className="text-center">
-                            <div className="relative w-40 h-40 mx-auto mb-4 transition-transform duration-500 group-hover:scale-110">
+                            <div className="relative w-48 h-48 mx-auto mb-6 transition-transform duration-500 group-hover:scale-110">
                                 {finalReward.image ? (
                                     <Image src={finalReward.image} alt="Grand Prize" fill className="object-contain drop-shadow-2xl" />
                                 ) : (
                                     <Trophy className="w-full h-full text-primary" />
                                 )}
                             </div>
-                            <h3 className="text-2xl font-bold">{finalReward.name}</h3>
+                            <h3 className="text-3xl font-bold tracking-tight">{finalReward.name}</h3>
                         </div>
                     </div>
                 </div>
@@ -129,15 +127,15 @@ const PreregisterRewards = ({ totalRegistrations, isRegistered, data }) => {
                     const isUnlocked = totalRegistrations >= reward.count;
                     return (
                         <div key={index} className={cn(
-                            "relative rounded-3xl border p-6 flex flex-col justify-between transition-all hover:shadow-lg group overflow-hidden",
-                            isUnlocked ? "bg-card border-primary/30" : "bg-muted/30 grayscale"
+                            "relative rounded-[2rem] p-6 flex flex-col justify-between transition-all hover:scale-[1.02] group overflow-hidden",
+                            isUnlocked ? "bg-primary/5 hover:bg-primary/10" : "bg-muted/10 grayscale opacity-60"
                         )}>
                             <div className="flex justify-between items-start">
                                 <span className="font-mono text-xs text-muted-foreground">#{index + 1}</span>
-                                {isUnlocked && <CheckCircle className="w-4 h-4 text-primary" />}
+                                {isUnlocked && <CheckCircle className="w-5 h-5 text-primary" />}
                             </div>
 
-                            <div className="absolute right-[-20px] bottom-[-20px] w-32 h-32 opacity-20 group-hover:opacity-40 transition-opacity rotate-12">
+                            <div className="absolute right-[-10px] bottom-[-10px] w-36 h-36 opacity-10 group-hover:opacity-30 transition-opacity rotate-12">
                                 {reward.image ? (
                                     <Image src={reward.image} alt={reward.name} fill className="object-contain" />
                                 ) : (
@@ -145,23 +143,23 @@ const PreregisterRewards = ({ totalRegistrations, isRegistered, data }) => {
                                 )}
                             </div>
 
-                            <div>
-                                <div className="text-2xl font-bold mb-1">{reward.count}</div>
-                                <div className="text-sm font-medium leading-tight line-clamp-2">{reward.name}</div>
+                            <div className="relative z-10">
+                                <div className="text-3xl font-bold mb-1 tracking-tight">{reward.count}</div>
+                                <div className="text-sm font-medium text-muted-foreground leading-tight line-clamp-2">{reward.name}</div>
                             </div>
                         </div>
                     );
                 })}
 
                 {/* Full Width Stats Block - Minimal */}
-                <div className="col-span-3 lg:col-span-4 flex flex-col justify-center items-center text-center relative pt-4">
-                    <div className="relative z-10 w-full flex flex-col items-center">
-                        <div className="flex justify-between w-full mb-2 px-1">
+                <div className="col-span-3 lg:col-span-4 flex flex-col justify-center items-center text-center relative pt-8">
+                    <div className="relative z-10 w-full max-w-2xl flex flex-col items-center">
+                        <div className="flex justify-between w-full mb-3 px-1">
                             <span className="text-lg font-medium text-muted-foreground">ความคืบหน้า</span>
                             <span className="text-2xl font-black text-primary">{Math.round(progressPercent)}%</span>
                         </div>
-                        <Progress value={progressPercent} className="h-8 w-full border border-primary/20 bg-muted/50" indicatorClassName="bg-primary shadow-[0_0_15px_rgba(var(--primary),0.5)]" />
-                        <div className="flex justify-between w-full mt-2 text-sm text-muted-foreground px-1">
+                        <Progress value={progressPercent} className="h-4 w-full bg-muted/50" indicatorClassName="bg-primary shadow-[0_0_20px_rgba(var(--primary),0.3)]" />
+                        <div className="flex justify-between w-full mt-3 text-sm text-muted-foreground px-1">
                             <span>0 ผู้ลงทะเบียน</span>
                             <span>เป้าหมาย {finalReward.count.toLocaleString()}</span>
                         </div>
