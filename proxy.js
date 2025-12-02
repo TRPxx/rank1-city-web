@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-export async function middleware(request) {
+export default async function proxy(request) {
     const { pathname } = request.nextUrl;
 
     // Allow access to admin routes regardless of maintenance mode
