@@ -362,6 +362,7 @@ export default function AdminSettingsPage() {
                                             </Select>
                                         </div>
                                     </div>
+                                </div>
                             </ScrollArea>
                         </div>
                     </TabsContent>
