@@ -34,7 +34,7 @@
             "sub": "DEVELOPMENT"
         }
     },
-    "serverStatus": "maintenance",
+    "serverStatus": "preregister",
     "serverApiUrl": "http://127.0.0.1:30120/players.json",
     "roadmap": [
         {
@@ -83,5 +83,5 @@
             "image": "/images/roadmap/championship.png"
         }
     ],
-    "serverStatusBadge": "beta"
+    "serverStatusBadge": "soon"
 }
