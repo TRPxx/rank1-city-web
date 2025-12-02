@@ -19,44 +19,14 @@ export default function GiftInventory() {
             const res = await fetch('/api/user/inventory');
             const data = await res.json();
 
-            // SIMULATION: If no items found, use mock data to show the design
-            if (data.items && data.items.length > 0) {
+            if (data.items && Array.isArray(data.items)) {
                 setItems(data.items);
             } else {
-                // Mock Data for simulation (25+ items)
-                const mockItems = [];
-
-                // Generate Pending Items
-                for (let i = 1; i <= 15; i++) {
-                    mockItems.push({
-                        id: `mock_pending_${i}`,
-                        item_name: `Lucky Box #${i}`,
-                        amount: Math.floor(Math.random() * 5) + 1,
-                        status: 'pending',
-                        created_at: new Date(Date.now() - i * 3600000).toISOString()
-                    });
-                }
-
-                // Generate Claimed Items
-                for (let i = 1; i <= 10; i++) {
-                    mockItems.push({
-                        id: `mock_claimed_${i}`,
-                        item_name: `Reward Item #${i}`,
-                        amount: 1,
-                        status: 'claimed',
-                        claimed_at: new Date(Date.now() - i * 86400000).toISOString()
-                    });
-                }
-
-                setItems(mockItems);
+                setItems([]);
             }
         } catch (error) {
             console.error("Failed to fetch inventory", error);
-            // Fallback mock data on error
-            setItems([
-                { id: 'mock1', item_name: 'Starter Pack', amount: 1, status: 'pending', created_at: new Date().toISOString() },
-                { id: 'mock2', item_name: 'Cash $50,000', amount: 1, status: 'pending', created_at: new Date().toISOString() },
-            ]);
+            setItems([]);
         } finally {
             setLoading(false);
         }
