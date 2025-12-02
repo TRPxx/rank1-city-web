@@ -20,6 +20,15 @@ const getRarityColor = (rarity) => {
     }
 };
 
+const getCardBorderClass = (rarity) => {
+    switch (rarity) {
+        case 'LEGENDARY': return 'border-2 border-yellow-500/60 shadow-[0_0_12px_rgba(234,179,8,0.2)] bg-yellow-500/5';
+        case 'EPIC': return 'border-2 border-purple-500/60 shadow-[0_0_12px_rgba(168,85,247,0.2)] bg-purple-500/5';
+        case 'RARE': return 'border-2 border-blue-500/60 shadow-[0_0_12px_rgba(59,130,246,0.2)] bg-blue-500/5';
+        default: return 'border border-border/50 bg-card';
+    }
+};
+
 export default function LuckyDraw({ ticketCount, onDrawComplete }) {
     const {
         isSpinning,
@@ -163,7 +172,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                             {tapeItems.map((item, index) => (
                                 <div
                                     key={index}
-                                    className="flex h-[130px] w-[130px] sm:h-[140px] sm:w-[140px] shrink-0 flex-col items-center justify-between rounded-xl bg-card p-3 sm:p-4 shadow-sm transition-all border-0"
+                                    className={`flex h-[130px] w-[130px] sm:h-[140px] sm:w-[140px] shrink-0 flex-col items-center justify-between rounded-xl p-3 sm:p-4 transition-all ${getCardBorderClass(item.rarity)}`}
                                 >
                                     <div className={`flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full p-2 ${getRarityColor(item.rarity)}`}>
                                         {item.image ? (
