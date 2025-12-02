@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Package, Clock, CheckCircle2, AlertCircle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -71,16 +72,26 @@ export default function GiftInventory() {
                                 <div key={item.id} className="bg-background rounded-3xl p-4 border border-border/50 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center gap-3 group relative overflow-hidden">
                                     <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-bl-[2rem] -mr-4 -mt-4 transition-transform group-hover:scale-110" />
 
-                                    <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 text-primary relative z-10 mt-2">
-                                        <Package className="w-7 h-7" />
+                                    <div className="absolute top-3 right-3 z-10">
+                                        <Badge variant="outline" className="text-[10px] h-5 bg-background/50 border-primary/20 text-primary">
+                                            x{item.amount}
+                                        </Badge>
                                     </div>
-                                    <div className="relative z-10 min-w-0 w-full">
+
+                                    <div className="relative w-20 h-20 my-2 transition-transform duration-500 group-hover:scale-110 drop-shadow-sm">
+                                        <Image
+                                            src={`/items/${item.item_id}.png`}
+                                            alt={item.item_name}
+                                            fill
+                                            className="object-contain"
+                                            onError={(e) => {
+                                                e.target.src = "/items/placeholder.png"
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="relative z-10 min-w-0 w-full mt-auto">
                                         <h4 className="font-bold text-foreground truncate text-sm" title={item.item_name}>{item.item_name}</h4>
-                                        <div className="flex items-center justify-center gap-2 mt-2">
-                                            <Badge variant="outline" className="text-[10px] h-5 bg-background/50 border-primary/20 text-primary">
-                                                x{item.amount}
-                                            </Badge>
-                                        </div>
                                         <div className="mt-2 text-[10px] text-muted-foreground flex items-center justify-center gap-1">
                                             <Clock className="w-3 h-3" /> รอรับ
                                         </div>
@@ -101,14 +112,24 @@ export default function GiftInventory() {
                         {claimedItems.length > 0 ? (
                             claimedItems.map((item) => (
                                 <div key={item.id} className="bg-muted/20 rounded-3xl p-4 border border-transparent hover:border-border/50 transition-all flex flex-col items-center text-center gap-3 shrink-0">
-                                    <div className="w-12 h-12 rounded-2xl bg-green-500/10 flex items-center justify-center shrink-0 text-green-500 mt-2">
-                                        <CheckCircle2 className="w-6 h-6" />
+                                    <div className="absolute top-3 right-3 z-10">
+                                        <Badge variant="secondary" className="text-[10px] h-5 px-1.5">x{item.amount}</Badge>
                                     </div>
-                                    <div className="min-w-0 w-full">
+
+                                    <div className="relative w-20 h-20 my-2 transition-transform duration-500 group-hover:scale-110 drop-shadow-sm opacity-60">
+                                        <Image
+                                            src={`/items/${item.item_id}.png`}
+                                            alt={item.item_name}
+                                            fill
+                                            className="object-contain grayscale"
+                                            onError={(e) => {
+                                                e.target.src = "/items/placeholder.png"
+                                            }}
+                                        />
+                                    </div>
+
+                                    <div className="min-w-0 w-full mt-auto">
                                         <h4 className="font-bold text-foreground truncate text-sm" title={item.item_name}>{item.item_name}</h4>
-                                        <div className="flex items-center justify-center gap-2 mt-2">
-                                            <Badge variant="secondary" className="text-[10px] h-5 px-1.5">x{item.amount}</Badge>
-                                        </div>
                                         <div className="mt-2 text-[10px] text-muted-foreground">
                                             {new Date(item.claimed_at).toLocaleDateString('th-TH')}
                                         </div>
