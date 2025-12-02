@@ -113,8 +113,8 @@ export default function LiveServerHero({ siteConfig }) {
                         </motion.div>
                     </div>
 
-                    {/* Right Content - Server Card */}
-                    <div className="relative flex justify-center lg:justify-end mt-8 lg:mt-0">
+                    {/* Right Content - Server Card (Hidden on Mobile) */}
+                    <div className="relative hidden lg:flex justify-end">
                         <div className="absolute inset-0 bg-gradient-to-tr from-primary/20 to-purple-500/20 dark:from-primary/20 dark:to-purple-500/20 blur-[100px] rounded-full opacity-50" />
                         <motion.div
                             initial={{ opacity: 0, scale: 0.9, x: 50 }}
