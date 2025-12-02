@@ -65,91 +65,14 @@ export default function RoadmapSlide({ siteConfig }) {
                     </div>
                 </div>
 
-                {/* --- MOBILE LAYOUT: Vertical Timeline (< md) --- */}
-                <div className="flex flex-col md:hidden space-y-8 pb-20 relative">
-                    {/* Vertical Line */}
-                    <div className="absolute left-[19px] top-4 bottom-0 w-[2px] bg-muted-foreground/20" />
-
-                    {milestones.map((item, index) => {
-                        const isCompleted = item.status === 'completed';
-                        const isCurrent = item.status === 'current';
-
-                        return (
-                            <div key={index} className="relative pl-12">
-                                {/* Dot Connector */}
-                                <div className={cn(
-                                    "absolute left-0 top-0 flex h-10 w-10 items-center justify-center rounded-full border-4 border-background z-10 transition-colors",
-                                    isCompleted ? "bg-primary text-primary-foreground" :
-                                        isCurrent ? "bg-blue-500 text-white" :
-                                            "bg-muted text-muted-foreground"
-                                )}>
-                                    <span className="text-xs font-bold">{index + 1}</span>
-                                </div>
-
-                                {/* Content Card */}
-                                <div className="space-y-2">
-                                    <div className="flex items-center justify-between">
-                                        <Badge variant="outline" className="text-[10px] font-mono text-muted-foreground bg-background/50">
-                                            {item.date}
-                                        </Badge>
-                                        <div className={cn(
-                                            "text-xs font-medium flex items-center gap-1",
-                                            isCompleted ? "text-green-500" :
-                                                isCurrent ? "text-blue-500" : "text-muted-foreground"
-                                        )}>
-                                            {isCompleted ? <CheckCircle2 className="w-3 h-3" /> :
-                                                isCurrent ? <Timer className="w-3 h-3 animate-pulse" /> :
-                                                    <Circle className="w-3 h-3" />}
-                                            {item.status === 'completed' ? 'Completed' : item.status === 'current' ? 'In Progress' : 'Planned'}
-                                        </div>
-                                    </div>
-
-                                    <Card className={cn(
-                                        "overflow-hidden border-muted",
-                                        isCurrent && "border-blue-500/50 shadow-md shadow-blue-500/10"
-                                    )}>
-                                        <div className="aspect-video relative bg-muted/50">
-                                            {item.image ? (
-                                                <Image
-                                                    src={item.image}
-                                                    alt={item.title}
-                                                    fill
-                                                    className={cn("object-cover", !isCurrent && !isCompleted && "grayscale opacity-70")}
-                                                />
-                                            ) : (
-                                                <div className="flex items-center justify-center h-full text-muted-foreground/20">
-                                                    <Clock className="w-8 h-8" />
-                                                </div>
-                                            )}
-                                            <div className="absolute top-2 left-2">
-                                                <Badge variant="secondary" className="bg-background/80 backdrop-blur-sm text-xs">
-                                                    {item.phase}
-                                                </Badge>
-                                            </div>
-                                        </div>
-                                        <CardHeader className="p-4 pb-2">
-                                            <CardTitle className="text-lg">{item.title}</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="p-4 pt-0">
-                                            <CardDescription className="text-xs line-clamp-3">
-                                                {item.desc}
-                                            </CardDescription>
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                            </div>
-                        );
-                    })}
-                </div>
-
-                {/* --- DESKTOP LAYOUT: Horizontal Scroll (>= md) --- */}
+                {/* --- HORIZONTAL SCROLL LAYOUT (ALL SCREEN SIZES) --- */}
                 <div
                     ref={containerRef}
                     onMouseDown={handleMouseDown}
                     onMouseLeave={handleMouseLeave}
                     onMouseUp={handleMouseUp}
                     onMouseMove={handleMouseMove}
-                    className={`hidden md:flex flex-1 w-full overflow-x-auto overflow-y-hidden custom-scrollbar items-center pb-8 ${isDragging ? 'cursor-grabbing snap-none' : 'cursor-grab snap-x snap-mandatory'}`}
+                    className={`flex flex-1 w-full overflow-x-auto overflow-y-hidden custom-scrollbar items-center pb-8 ${isDragging ? 'cursor-grabbing snap-none' : 'cursor-grab snap-x snap-mandatory'}`}
                 >
                     <div className="flex gap-6 min-w-max mx-auto py-4">
                         {milestones.map((item, index) => {
@@ -165,7 +88,7 @@ export default function RoadmapSlide({ siteConfig }) {
                                     viewport={{ once: true, root: containerRef }}
                                     className="snap-center group"
                                 >
-                                    <div className="relative flex flex-col w-[380px]">
+                                    <div className="relative flex flex-col w-[280px] sm:w-[320px] md:w-[380px]">
                                         {/* Timeline Connector */}
                                         <div className="flex items-center mb-4 gap-4">
                                             <div className={cn(
@@ -262,8 +185,9 @@ export default function RoadmapSlide({ siteConfig }) {
                 </div>
 
                 {/* Scroll Hint */}
-                <div className="hidden md:flex justify-center items-center gap-2 text-muted-foreground text-sm mt-4">
-                    <span>Drag to explore</span>
+                <div className="flex justify-center items-center gap-2 text-muted-foreground text-sm mt-4">
+                    <span className="hidden sm:inline">Drag to explore</span>
+                    <span className="sm:hidden">Swipe to explore</span>
                     <ChevronRight className="w-4 h-4 animate-bounce-x" />
                 </div>
             </div>
