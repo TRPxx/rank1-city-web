@@ -66,7 +66,7 @@ export default function ProfilePage() {
     if (status === "loading") {
         return (
             <div className="min-h-screen flex items-center justify-center bg-background">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
             </div>
         );
     }
@@ -76,244 +76,191 @@ export default function ProfilePage() {
             <div className="min-h-screen flex flex-col bg-background">
                 <Navbar />
                 <div className="flex-1 flex items-center justify-center p-4">
-                    <Card className="w-full max-w-md">
-                        <CardHeader className="text-center">
-                            <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
-                                <User className="w-6 h-6 text-primary" />
-                            </div>
-                            <CardTitle>เข้าสู่ระบบ</CardTitle>
-                            <CardDescription>กรุณาเข้าสู่ระบบด้วย Discord เพื่อดูข้อมูลตัวละคร</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Button onClick={() => signIn('discord')} className="w-full" size="lg">
-                                เข้าสู่ระบบด้วย Discord
-                            </Button>
-                        </CardContent>
-                    </Card>
+                    <div className="w-full max-w-md bg-muted/30 p-8 rounded-[2.5rem] text-center">
+                        <div className="mx-auto w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mb-6">
+                            <User className="w-8 h-8 text-primary" />
+                        </div>
+                        <h2 className="text-2xl font-bold mb-2">เข้าสู่ระบบ</h2>
+                        <p className="text-muted-foreground mb-8">กรุณาเข้าสู่ระบบด้วย Discord เพื่อดูข้อมูลตัวละคร</p>
+                        <Button onClick={() => signIn('discord')} className="w-full h-12 rounded-xl text-lg" size="lg">
+                            เข้าสู่ระบบด้วย Discord
+                        </Button>
+                    </div>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-background flex flex-col">
+        <div className="min-h-screen bg-background flex flex-col font-sans">
             <Navbar />
 
-            <main className="flex-1 container py-8 pt-24 space-y-8">
+            <main className="flex-1 container max-w-7xl py-8 pt-24 space-y-8 px-4">
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div className="space-y-1">
-                        <h2 className="text-3xl font-bold tracking-tight">โปรไฟล์</h2>
-                        <p className="text-muted-foreground">
+                        <h2 className="text-4xl font-bold tracking-tight">โปรไฟล์</h2>
+                        <p className="text-lg text-muted-foreground">
                             จัดการข้อมูลตัวละครและทรัพย์สินของคุณ
                         </p>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" onClick={() => signOut({ callbackUrl: '/' })}>
-                            <LogOut className="mr-2 h-4 w-4" /> ออกจากระบบ
-                        </Button>
-                    </div>
+                    <Button variant="outline" onClick={() => signOut({ callbackUrl: '/' })} className="rounded-full px-6 border-muted-foreground/20 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20">
+                        <LogOut className="mr-2 h-4 w-4" /> ออกจากระบบ
+                    </Button>
                 </div>
 
-                <Separator />
-
                 {loading ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                        {/* Skeleton Sidebar */}
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                         <div className="lg:col-span-4 space-y-6">
-                            <Card>
-                                <CardHeader className="pb-0">
-                                    <Skeleton className="h-6 w-16 absolute top-4 right-4 rounded-full" />
-                                </CardHeader>
-                                <CardContent className="flex flex-col items-center pt-6">
-                                    <Skeleton className="h-32 w-32 rounded-full mb-4" />
-                                    <Skeleton className="h-8 w-48 mb-2" />
-                                    <Skeleton className="h-4 w-32 mb-8" />
-
-                                    <div className="grid grid-cols-2 gap-4 w-full">
-                                        <Skeleton className="h-20 w-full rounded-lg" />
-                                        <Skeleton className="h-20 w-full rounded-lg" />
-                                    </div>
-
-                                    <div className="w-full space-y-4 mt-8">
-                                        <Skeleton className="h-8 w-full" />
-                                        <Skeleton className="h-8 w-full" />
-                                        <Skeleton className="h-8 w-full" />
-                                    </div>
-                                </CardContent>
-                            </Card>
+                            <Skeleton className="h-[500px] w-full rounded-[2.5rem]" />
                         </div>
-
-                        {/* Skeleton Content */}
-                        <div className="lg:col-span-8">
-                            <div className="space-y-4">
-                                <div className="flex justify-between">
-                                    <div className="flex gap-2">
-                                        <Skeleton className="h-10 w-24" />
-                                        <Skeleton className="h-10 w-24" />
-                                        <Skeleton className="h-10 w-24" />
-                                    </div>
-                                    <Skeleton className="h-10 w-64 hidden sm:block" />
-                                </div>
-                                <Card>
-                                    <CardHeader>
-                                        <Skeleton className="h-6 w-32 mb-2" />
-                                        <Skeleton className="h-4 w-48" />
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                                            {[...Array(10)].map((_, i) => (
-                                                <Skeleton key={i} className="h-32 w-full rounded-lg" />
-                                            ))}
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </div>
+                        <div className="lg:col-span-8 space-y-6">
+                            <Skeleton className="h-12 w-full rounded-full" />
+                            <Skeleton className="h-[400px] w-full rounded-[2.5rem]" />
                         </div>
                     </div>
                 ) : error ? (
-                    <Card className="border-destructive/50 bg-destructive/5">
-                        <CardContent className="flex flex-col items-center justify-center py-12 text-center">
-                            <Shield className="h-12 w-12 text-destructive mb-4 opacity-50" />
-                            <h3 className="text-lg font-semibold text-destructive">ไม่พบข้อมูล</h3>
-                            <p className="text-muted-foreground">{error}</p>
-                        </CardContent>
-                    </Card>
+                    <div className="bg-destructive/5 border border-destructive/20 rounded-[2rem] p-12 text-center">
+                        <Shield className="h-16 w-16 text-destructive mx-auto mb-4 opacity-50" />
+                        <h3 className="text-xl font-bold text-destructive mb-2">ไม่พบข้อมูล</h3>
+                        <p className="text-muted-foreground">{error}</p>
+                    </div>
                 ) : gameData ? (
-                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                         {/* Sidebar / Profile Card */}
-                        <div className="lg:col-span-4 space-y-6">
-                            <Card>
-                                <CardHeader className="relative pb-0">
-                                    <div className="absolute top-4 right-4">
-                                        <Badge variant={gameData.sex === 'm' ? 'default' : 'secondary'}>
+                        <div className="lg:col-span-4">
+                            <div className="bg-muted/30 rounded-[2.5rem] p-8 relative overflow-hidden">
+                                <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary/10 to-transparent" />
+
+                                <div className="relative flex flex-col items-center text-center">
+                                    <div className="relative mb-6">
+                                        <Avatar className="h-40 w-40 border-4 border-background shadow-2xl">
+                                            <AvatarImage src={`https://nui-img/${gameData.citizenid}`} alt={gameData.firstname} />
+                                            <AvatarFallback className="text-5xl bg-muted">
+                                                {gameData.firstname?.[0]}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <Badge className={cn(
+                                            "absolute bottom-2 right-2 px-3 py-1 text-sm shadow-lg border-2 border-background",
+                                            gameData.sex === 'm' ? 'bg-blue-500' : 'bg-pink-500'
+                                        )}>
                                             {gameData.sex === 'm' ? 'ชาย' : 'หญิง'}
                                         </Badge>
                                     </div>
-                                </CardHeader>
-                                <CardContent className="flex flex-col items-center text-center pt-6">
-                                    <Avatar className="h-32 w-32 border-4 border-background shadow-xl mb-4">
-                                        <AvatarImage src={`https://nui-img/${gameData.citizenid}`} alt={gameData.firstname} />
-                                        <AvatarFallback className="text-4xl bg-muted">
-                                            {gameData.firstname?.[0]}
-                                        </AvatarFallback>
-                                    </Avatar>
 
-                                    <h3 className="text-2xl font-bold">{gameData.firstname} {gameData.lastname}</h3>
-                                    <div className="mt-2">
-                                        <Badge variant="secondary" className="px-3 py-1 text-sm font-medium bg-primary/10 text-primary hover:bg-primary/20 border-primary/20 transition-colors">
+                                    <h3 className="text-3xl font-bold mb-2 tracking-tight">{gameData.firstname} {gameData.lastname}</h3>
+
+                                    <div className="mb-8">
+                                        <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-background/50 backdrop-blur-sm border border-border/50 text-sm font-medium text-foreground/80">
                                             {(() => {
                                                 const job = gameData.job?.toLowerCase() || '';
-                                                if (job.includes('police') || job.includes('sheriff')) return <Shield className="w-4 h-4 mr-2" />;
-                                                if (job.includes('ambulance') || job.includes('medic') || job.includes('doctor')) return <Stethoscope className="w-4 h-4 mr-2" />;
-                                                if (job.includes('mechanic') || job.includes('fix')) return <Wrench className="w-4 h-4 mr-2" />;
-                                                if (job.includes('taxi') || job.includes('driver')) return <Car className="w-4 h-4 mr-2" />;
-                                                if (job.includes('judge') || job.includes('lawyer')) return <Gavel className="w-4 h-4 mr-2" />;
-                                                return <Briefcase className="w-4 h-4 mr-2" />;
+                                                if (job.includes('police') || job.includes('sheriff')) return <Shield className="w-4 h-4 mr-2 text-blue-500" />;
+                                                if (job.includes('ambulance') || job.includes('medic') || job.includes('doctor')) return <Stethoscope className="w-4 h-4 mr-2 text-red-500" />;
+                                                if (job.includes('mechanic') || job.includes('fix')) return <Wrench className="w-4 h-4 mr-2 text-orange-500" />;
+                                                if (job.includes('taxi') || job.includes('driver')) return <Car className="w-4 h-4 mr-2 text-yellow-500" />;
+                                                if (job.includes('judge') || job.includes('lawyer')) return <Gavel className="w-4 h-4 mr-2 text-purple-500" />;
+                                                return <Briefcase className="w-4 h-4 mr-2 text-gray-500" />;
                                             })()}
                                             {gameData.job_label}
-                                        </Badge>
-                                    </div>
-
-                                    <div className="grid grid-cols-2 gap-4 w-full mt-8">
-                                        <div className="flex flex-col items-center p-3 bg-muted/50 rounded-lg">
-                                            <Wallet className="w-5 h-5 text-emerald-500 mb-1" />
-                                            <span className="text-xs text-muted-foreground">เงินสด</span>
-                                            <span className="font-bold text-lg">${gameData.money.toLocaleString()}</span>
-                                        </div>
-                                        <div className="flex flex-col items-center p-3 bg-muted/50 rounded-lg">
-                                            <CreditCard className="w-5 h-5 text-blue-500 mb-1" />
-                                            <span className="text-xs text-muted-foreground">ธนาคาร</span>
-                                            <span className="font-bold text-lg">${gameData.bank.toLocaleString()}</span>
                                         </div>
                                     </div>
 
-                                    <div className="w-full space-y-3 mt-6 text-left">
-                                        <div className="flex justify-between py-2 border-b text-sm">
-                                            <span className="text-muted-foreground flex items-center gap-2">
-                                                <Phone className="w-4 h-4" /> เบอร์โทรศัพท์
+                                    <div className="grid grid-cols-2 gap-4 w-full mb-8">
+                                        <div className="flex flex-col items-center p-4 bg-background/60 rounded-3xl shadow-sm">
+                                            <div className="p-2 bg-emerald-500/10 rounded-xl mb-2">
+                                                <Wallet className="w-6 h-6 text-emerald-500" />
+                                            </div>
+                                            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">เงินสด</span>
+                                            <span className="font-bold text-xl">${gameData.money.toLocaleString()}</span>
+                                        </div>
+                                        <div className="flex flex-col items-center p-4 bg-background/60 rounded-3xl shadow-sm">
+                                            <div className="p-2 bg-blue-500/10 rounded-xl mb-2">
+                                                <CreditCard className="w-6 h-6 text-blue-500" />
+                                            </div>
+                                            <span className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">ธนาคาร</span>
+                                            <span className="font-bold text-xl">${gameData.bank.toLocaleString()}</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="w-full space-y-4 bg-background/40 p-6 rounded-3xl">
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-muted-foreground flex items-center gap-3">
+                                                <div className="p-1.5 bg-background rounded-lg"><Phone className="w-3.5 h-3.5" /></div>
+                                                เบอร์โทรศัพท์
                                             </span>
                                             <span className="font-medium">{gameData.phone}</span>
                                         </div>
-                                        <div className="flex justify-between py-2 border-b text-sm">
-                                            <span className="text-muted-foreground flex items-center gap-2">
-                                                <Calendar className="w-4 h-4" /> วันเกิด
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-muted-foreground flex items-center gap-3">
+                                                <div className="p-1.5 bg-background rounded-lg"><Calendar className="w-3.5 h-3.5" /></div>
+                                                วันเกิด
                                             </span>
                                             <span className="font-medium">{gameData.dob}</span>
                                         </div>
-                                        <div className="flex justify-between py-2 border-b text-sm">
-                                            <span className="text-muted-foreground flex items-center gap-2">
-                                                <MapPin className="w-4 h-4" /> Citizen ID
+                                        <div className="flex justify-between items-center text-sm">
+                                            <span className="text-muted-foreground flex items-center gap-3">
+                                                <div className="p-1.5 bg-background rounded-lg"><MapPin className="w-3.5 h-3.5" /></div>
+                                                Citizen ID
                                             </span>
-                                            <span className="font-mono font-medium">{gameData.citizenid}</span>
+                                            <span className="font-mono font-medium bg-background px-2 py-0.5 rounded-md text-xs">{gameData.citizenid}</span>
                                         </div>
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         </div>
 
                         {/* Main Content / Inventory */}
                         <div className="lg:col-span-8">
                             <Tabs defaultValue="inventory" className="w-full">
-                                <div className="flex items-center justify-between mb-4">
-                                    <TabsList>
-                                        <TabsTrigger value="inventory" className="gap-2">
-                                            <Backpack className="w-4 h-4" /> กระเป๋า
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
+                                    <TabsList className="bg-muted/50 p-1 rounded-full h-auto">
+                                        <TabsTrigger value="inventory" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                                            <Backpack className="w-4 h-4 mr-2" /> กระเป๋า
                                         </TabsTrigger>
-                                        <TabsTrigger value="weapons" className="gap-2">
-                                            <Swords className="w-4 h-4" /> อาวุธ
+                                        <TabsTrigger value="weapons" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                                            <Swords className="w-4 h-4 mr-2" /> อาวุธ
                                         </TabsTrigger>
-                                        <TabsTrigger value="safe" className="gap-2">
-                                            <Vault className="w-4 h-4" /> ตู้เซฟ
+                                        <TabsTrigger value="safe" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                                            <Vault className="w-4 h-4 mr-2" /> ตู้เซฟ
                                         </TabsTrigger>
                                     </TabsList>
 
-                                    <div className="relative w-full max-w-xs hidden sm:block">
-                                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                    <div className="relative w-full sm:w-72">
+                                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
                                             placeholder="ค้นหาไอเทม..."
-                                            className="pl-8"
+                                            className="pl-10 h-11 rounded-2xl bg-muted/30 border-transparent focus:bg-background transition-all"
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                         />
                                     </div>
                                 </div>
 
-                                <TabsContent value="inventory" className="mt-0">
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle>รายการไอเทม</CardTitle>
-                                            <CardDescription>ไอเทมทั้งหมดในกระเป๋าของคุณ</CardDescription>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <InventoryGrid items={filterItems(gameData.inventory)} type="item" />
-                                        </CardContent>
-                                    </Card>
-                                </TabsContent>
+                                <div className="bg-muted/20 rounded-[2.5rem] p-6 min-h-[500px]">
+                                    <TabsContent value="inventory" className="mt-0 focus-visible:ring-0">
+                                        <div className="mb-6 px-2">
+                                            <h3 className="text-xl font-bold">รายการไอเทม</h3>
+                                            <p className="text-muted-foreground">ไอเทมทั้งหมดในกระเป๋าของคุณ</p>
+                                        </div>
+                                        <InventoryGrid items={filterItems(gameData.inventory)} type="item" />
+                                    </TabsContent>
 
-                                <TabsContent value="weapons" className="mt-0">
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle>อาวุธยุทโธปกรณ์</CardTitle>
-                                            <CardDescription>อาวุธที่พกพาอยู่</CardDescription>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <InventoryGrid items={filterItems(gameData.loadout)} type="weapon" />
-                                        </CardContent>
-                                    </Card>
-                                </TabsContent>
+                                    <TabsContent value="weapons" className="mt-0 focus-visible:ring-0">
+                                        <div className="mb-6 px-2">
+                                            <h3 className="text-xl font-bold">อาวุธยุทโธปกรณ์</h3>
+                                            <p className="text-muted-foreground">อาวุธที่พกพาอยู่</p>
+                                        </div>
+                                        <InventoryGrid items={filterItems(gameData.loadout)} type="weapon" />
+                                    </TabsContent>
 
-                                <TabsContent value="safe" className="mt-0">
-                                    <Card>
-                                        <CardHeader>
-                                            <CardTitle>ตู้เซฟส่วนตัว</CardTitle>
-                                            <CardDescription>ไอเทมที่เก็บไว้ในตู้เซฟ</CardDescription>
-                                        </CardHeader>
-                                        <CardContent>
-                                            <InventoryGrid items={filterItems(gameData.safe)} type="item" />
-                                        </CardContent>
-                                    </Card>
-                                </TabsContent>
+                                    <TabsContent value="safe" className="mt-0 focus-visible:ring-0">
+                                        <div className="mb-6 px-2">
+                                            <h3 className="text-xl font-bold">ตู้เซฟส่วนตัว</h3>
+                                            <p className="text-muted-foreground">ไอเทมที่เก็บไว้ในตู้เซฟ</p>
+                                        </div>
+                                        <InventoryGrid items={filterItems(gameData.safe)} type="item" />
+                                    </TabsContent>
+                                </div>
                             </Tabs>
                         </div>
                     </div>
@@ -326,9 +273,11 @@ export default function ProfilePage() {
 function InventoryGrid({ items, type }) {
     if (items.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-12 text-muted-foreground">
-                <Backpack className="h-12 w-12 mb-4 opacity-20" />
-                <p>ไม่พบไอเทม</p>
+            <div className="flex flex-col items-center justify-center py-20 text-muted-foreground/50">
+                <div className="p-6 bg-muted/30 rounded-full mb-4">
+                    <Backpack className="h-10 w-10 opacity-50" />
+                </div>
+                <p className="text-lg font-medium">ไม่พบไอเทม</p>
             </div>
         );
     }
@@ -338,15 +287,15 @@ function InventoryGrid({ items, type }) {
             {items.map((item, index) => (
                 <div
                     key={index}
-                    className="group relative flex flex-col items-center p-4 rounded-lg border bg-card hover:bg-accent/50 transition-colors cursor-pointer"
+                    className="group relative flex flex-col items-center p-4 rounded-3xl bg-background hover:shadow-md transition-all duration-300 cursor-pointer border border-transparent hover:border-border/50"
                 >
-                    <div className="absolute top-2 right-2">
-                        <Badge variant="secondary" className="text-[10px] h-5 px-1.5">
+                    <div className="absolute top-3 right-3 z-10">
+                        <Badge variant="secondary" className="text-[10px] h-6 px-2 rounded-lg bg-muted font-bold">
                             {type === 'weapon' ? item.ammo : `x${item.count}`}
                         </Badge>
                     </div>
 
-                    <div className="relative w-16 h-16 my-2 transition-transform group-hover:scale-110">
+                    <div className="relative w-20 h-20 my-4 transition-transform duration-500 group-hover:scale-110 drop-shadow-sm">
                         <Image
                             src={`/items/${item.name}.png`}
                             alt={item.label || item.name}
@@ -358,10 +307,11 @@ function InventoryGrid({ items, type }) {
                         />
                     </div>
 
-                    <div className="mt-2 text-center w-full">
-                        <p className="text-sm font-medium truncate" title={item.label || item.name}>
+                    <div className="mt-auto text-center w-full px-1">
+                        <p className="text-sm font-bold truncate text-foreground/90 group-hover:text-primary transition-colors" title={item.label || item.name}>
                             {item.label || item.name}
                         </p>
+                        <p className="text-[10px] text-muted-foreground uppercase tracking-wider mt-0.5">{type === 'weapon' ? 'WEAPON' : 'ITEM'}</p>
                     </div>
                 </div>
             ))}
