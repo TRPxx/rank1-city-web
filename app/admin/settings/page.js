@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { Loader2, Save, AlertCircle, CheckCircle, Plus, Trash2, Users, Shield, Zap, Car, Briefcase, Home, Star, Heart, Trophy, Target, Flag, MapPin, Gift, Activity, Settings, MessageCircle, PlayCircle, Gamepad2, Info, HelpCircle, Search, Newspaper } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import Image from 'next/image';
+import { cn } from "@/lib/utils";
 import { categories as newsCategories } from '@/lib/news-data';
 import {
     Select,
@@ -242,7 +243,7 @@ export default function AdminSettingsPage() {
     if (status === 'loading' || isLoading) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
-                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                <Loader2 className="h-10 w-10 animate-spin text-primary" />
             </div>
         );
     }
@@ -255,195 +256,213 @@ export default function AdminSettingsPage() {
     const selectedNews = newsConfig[selectedNewsIndex];
 
     return (
-        <div className="min-h-screen bg-background pb-20">
+        <div className="min-h-screen bg-background pb-20 font-sans">
             <Navbar />
-            <div className="container pt-24">
-                <div className="flex items-center justify-between mb-8">
+            <div className="container max-w-7xl pt-24 px-4">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-10">
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight">ตั้งค่าระบบ</h1>
-                        <p className="text-muted-foreground">จัดการการตั้งค่าเว็บไซต์ทั้งหมด</p>
+                        <h1 className="text-4xl font-bold tracking-tight mb-2">ตั้งค่าระบบ</h1>
+                        <p className="text-lg text-muted-foreground">จัดการการตั้งค่าเว็บไซต์ทั้งหมด</p>
                     </div>
-                    <Button disabled={isSaving} onClick={() => window.location.reload()}>
+                    <Button disabled={isSaving} onClick={() => window.location.reload()} variant="outline" className="rounded-full px-6 border-muted-foreground/20 hover:bg-muted">
                         รีเฟรชข้อมูล
                     </Button>
                 </div>
 
-                <Tabs defaultValue="general" className="space-y-4">
-                    <TabsList>
-                        <TabsTrigger value="general">ทั่วไป</TabsTrigger>
-                        <TabsTrigger value="game">เกมและกิจกรรม</TabsTrigger>
-                        <TabsTrigger value="features">ฟีเจอร์</TabsTrigger>
-                        <TabsTrigger value="news">ข่าวสาร</TabsTrigger>
-                        <TabsTrigger value="roadmap">แผนงาน</TabsTrigger>
+                <Tabs defaultValue="general" className="space-y-8">
+                    <TabsList className="bg-muted/50 p-1 rounded-full h-auto inline-flex flex-wrap gap-1">
+                        <TabsTrigger value="general" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">ทั่วไป</TabsTrigger>
+                        <TabsTrigger value="game" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">เกมและกิจกรรม</TabsTrigger>
+                        <TabsTrigger value="features" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">ฟีเจอร์</TabsTrigger>
+                        <TabsTrigger value="news" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">ข่าวสาร</TabsTrigger>
+                        <TabsTrigger value="roadmap" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">แผนงาน</TabsTrigger>
                     </TabsList>
 
                     {/* General Settings */}
-                    <TabsContent value="general">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>ข้อมูลทั่วไป</CardTitle>
-                                <CardDescription>ข้อมูลพื้นฐานของเว็บไซต์และการตั้งค่า SEO</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid gap-2">
-                                    <Label>ชื่อเว็บไซต์</Label>
-                                    <Input
-                                        value={siteConfig?.name || ''}
-                                        onChange={(e) => setSiteConfig({ ...siteConfig, name: e.target.value })}
-                                    />
+                    <TabsContent value="general" className="mt-0">
+                        <div className="bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden p-8">
+                            <div className="flex items-center justify-between mb-8">
+                                <div>
+                                    <h3 className="text-2xl font-bold mb-1">ข้อมูลทั่วไป</h3>
+                                    <p className="text-muted-foreground">ข้อมูลพื้นฐานของเว็บไซต์และการตั้งค่า SEO</p>
                                 </div>
-                                <div className="grid gap-2">
-                                    <Label>คำอธิบาย</Label>
-                                    <Textarea
-                                        value={siteConfig?.description || ''}
-                                        onChange={(e) => setSiteConfig({ ...siteConfig, description: e.target.value })}
-                                    />
-                                </div>
-                                <div className="grid gap-2">
-                                    <Label>ลิงก์ Discord</Label>
-                                    <Input
-                                        value={siteConfig?.links?.discord || ''}
-                                        onChange={(e) => setSiteConfig({ ...siteConfig, links: { ...siteConfig.links, discord: e.target.value } })}
-                                    />
-                                </div>
-                                <div className="grid gap-2 pt-4 border-t">
-                                    <Label>สถานะเซิร์ฟเวอร์</Label>
-                                    <Select
-                                        value={siteConfig?.serverStatus || 'preregister'}
-                                        onValueChange={(value) => setSiteConfig({ ...siteConfig, serverStatus: value })}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="เลือกโหมด" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="preregister">ลงทะเบียนล่วงหน้า (เร็วๆ นี้)</SelectItem>
-                                            <SelectItem value="live">เปิดให้บริการ (เล่นเลย)</SelectItem>
-                                            <SelectItem value="maintenance">ปิดปรับปรุง</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <p className="text-xs text-muted-foreground">
-                                        โหมดหลักของเว็บไซต์: <br />
-                                        - <b>ลงทะเบียนล่วงหน้า</b>: แสดงหน้า Landing Page สำหรับลงทะเบียน<br />
-                                        - <b>เปิดให้บริการ</b>: แสดงหน้าหลักพร้อมข้อมูลเซิร์ฟเวอร์
-                                    </p>
-                                </div>
-
-                                <div className="grid gap-2 pt-4 border-t">
-                                    <Label>สถานะเซิร์ฟเวอร์ (Badge)</Label>
-                                    <Select
-                                        value={siteConfig?.serverStatusBadge || 'online'}
-                                        onValueChange={(value) => setSiteConfig({ ...siteConfig, serverStatusBadge: value })}
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="เลือกสถานะ" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="online">🟢 ONLINE (เปิดให้บริการ)</SelectItem>
-                                            <SelectItem value="offline">🔴 OFFLINE (ปิดให้บริการ)</SelectItem>
-                                            <SelectItem value="maintenance">🟠 MAINTENANCE (ปิดปรับปรุง)</SelectItem>
-                                            <SelectItem value="beta">🔵 BETA (เปิดทดสอบ)</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <p className="text-xs text-muted-foreground">
-                                        สถานะที่จะแสดงบนการ์ด Server Status
-                                    </p>
-                                </div>
-                            </CardContent>
-                            <CardFooter>
-                                <Button onClick={() => handleSave('site', siteConfig)} disabled={isSaving}>
+                                <Button onClick={() => handleSave('site', siteConfig)} disabled={isSaving} className="rounded-full px-6">
                                     {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
                                     บันทึกการเปลี่ยนแปลง
                                 </Button>
-                            </CardFooter>
-                        </Card>
+                            </div>
+
+                            <div className="space-y-6 max-w-3xl">
+                                <div className="grid gap-3">
+                                    <Label className="text-base">ชื่อเว็บไซต์</Label>
+                                    <Input
+                                        value={siteConfig?.name || ''}
+                                        onChange={(e) => setSiteConfig({ ...siteConfig, name: e.target.value })}
+                                        className="h-12 rounded-xl bg-muted/30 border-transparent focus:bg-background"
+                                    />
+                                </div>
+                                <div className="grid gap-3">
+                                    <Label className="text-base">คำอธิบาย</Label>
+                                    <Textarea
+                                        value={siteConfig?.description || ''}
+                                        onChange={(e) => setSiteConfig({ ...siteConfig, description: e.target.value })}
+                                        className="min-h-[120px] rounded-xl bg-muted/30 border-transparent focus:bg-background resize-none"
+                                    />
+                                </div>
+                                <div className="grid gap-3">
+                                    <Label className="text-base">ลิงก์ Discord</Label>
+                                    <Input
+                                        value={siteConfig?.links?.discord || ''}
+                                        onChange={(e) => setSiteConfig({ ...siteConfig, links: { ...siteConfig.links, discord: e.target.value } })}
+                                        className="h-12 rounded-xl bg-muted/30 border-transparent focus:bg-background"
+                                    />
+                                </div>
+
+                                <div className="grid gap-6 pt-8 mt-4 border-t border-border/50">
+                                    <div className="grid gap-3">
+                                        <Label className="text-base">สถานะเซิร์ฟเวอร์</Label>
+                                        <Select
+                                            value={siteConfig?.serverStatus || 'preregister'}
+                                            onValueChange={(value) => setSiteConfig({ ...siteConfig, serverStatus: value })}
+                                        >
+                                            <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-transparent focus:bg-background">
+                                                <SelectValue placeholder="เลือกโหมด" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="preregister">ลงทะเบียนล่วงหน้า (เร็วๆ นี้)</SelectItem>
+                                                <SelectItem value="live">เปิดให้บริการ (เล่นเลย)</SelectItem>
+                                                <SelectItem value="maintenance">ปิดปรับปรุง</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                        <div className="bg-muted/30 p-4 rounded-xl text-sm text-muted-foreground">
+                                            <p className="font-medium mb-1 text-foreground">คำอธิบายโหมด:</p>
+                                            <ul className="list-disc list-inside space-y-1 ml-1">
+                                                <li><b>ลงทะเบียนล่วงหน้า</b>: แสดงหน้า Landing Page สำหรับลงทะเบียน</li>
+                                                <li><b>เปิดให้บริการ</b>: แสดงหน้าหลักพร้อมข้อมูลเซิร์ฟเวอร์</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid gap-3">
+                                        <Label className="text-base">สถานะเซิร์ฟเวอร์ (Badge)</Label>
+                                        <Select
+                                            value={siteConfig?.serverStatusBadge || 'online'}
+                                            onValueChange={(value) => setSiteConfig({ ...siteConfig, serverStatusBadge: value })}
+                                        >
+                                            <SelectTrigger className="h-12 rounded-xl bg-muted/30 border-transparent focus:bg-background">
+                                                <SelectValue placeholder="เลือกสถานะ" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                <SelectItem value="online">🟢 ONLINE (เปิดให้บริการ)</SelectItem>
+                                                <SelectItem value="offline">🔴 OFFLINE (ปิดให้บริการ)</SelectItem>
+                                                <SelectItem value="maintenance">🟠 MAINTENANCE (ปิดปรับปรุง)</SelectItem>
+                                                <SelectItem value="beta">🔵 BETA (เปิดทดสอบ)</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </TabsContent>
 
                     {/* Game Settings */}
-                    {/* Game Settings */}
-                    <TabsContent value="game">
-                        <RewardsEditor
-                            config={preregisterConfig}
-                            setConfig={setPreregisterConfig}
-                            onSave={handleSave}
-                        />
+                    <TabsContent value="game" className="mt-0">
+                        <div className="bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden p-8">
+                            <RewardsEditor
+                                config={preregisterConfig}
+                                setConfig={setPreregisterConfig}
+                                onSave={handleSave}
+                            />
+                        </div>
                     </TabsContent>
 
                     {/* Features Settings */}
-                    <TabsContent value="features" className="space-y-4 mt-4">
-                        <Card className="h-[800px] flex flex-col">
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <CardTitle>ฟีเจอร์เด่น</CardTitle>
-                                        <CardDescription>จัดการฟีเจอร์ที่จะแสดงบนหน้าแรก</CardDescription>
-                                    </div>
-                                    <Button onClick={handleSaveFeatures} disabled={isSaving}>
-                                        {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                        บันทึกฟีเจอร์ทั้งหมด
-                                    </Button>
+                    <TabsContent value="features" className="mt-0">
+                        <div className="bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden h-[800px] flex flex-col">
+                            <div className="p-8 border-b border-border/50 flex items-center justify-between shrink-0">
+                                <div>
+                                    <h3 className="text-2xl font-bold mb-1">ฟีเจอร์เด่น</h3>
+                                    <p className="text-muted-foreground">จัดการฟีเจอร์ที่จะแสดงบนหน้าแรก</p>
                                 </div>
-                            </CardHeader>
-                            <CardContent className="flex-1 flex gap-6 overflow-hidden pt-0">
+                                <Button onClick={handleSaveFeatures} disabled={isSaving} className="rounded-full px-6">
+                                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                    บันทึกฟีเจอร์ทั้งหมด
+                                </Button>
+                            </div>
+
+                            <div className="flex-1 flex overflow-hidden">
                                 {/* Left Sidebar: List of Features */}
-                                <div className="w-64 shrink-0 flex flex-col border-r pr-6">
-                                    <Button onClick={addFeature} className="w-full mb-4" variant="outline">
-                                        <Plus className="mr-2 h-4 w-4" /> เพิ่มฟีเจอร์
-                                    </Button>
-                                    <ScrollArea className="flex-1">
+                                <div className="w-72 shrink-0 flex flex-col border-r border-border/50 bg-muted/10">
+                                    <div className="p-4">
+                                        <Button onClick={addFeature} className="w-full rounded-xl" variant="outline">
+                                            <Plus className="mr-2 h-4 w-4" /> เพิ่มฟีเจอร์
+                                        </Button>
+                                    </div>
+                                    <ScrollArea className="flex-1 px-4 pb-4">
                                         <div className="space-y-2">
                                             {featuresConfig.map((feature, index) => (
-                                                <Button
+                                                <div
                                                     key={index}
-                                                    variant={selectedFeatureIndex === index ? "secondary" : "ghost"}
-                                                    className="w-full justify-start font-normal"
                                                     onClick={() => setSelectedFeatureIndex(index)}
+                                                    className={cn(
+                                                        "w-full p-3 rounded-xl text-left cursor-pointer transition-all border border-transparent",
+                                                        selectedFeatureIndex === index
+                                                            ? "bg-background shadow-sm border-border/50 font-medium text-primary"
+                                                            : "hover:bg-muted/50 text-muted-foreground"
+                                                    )}
                                                 >
-                                                    <span className="truncate">{feature.title || "ฟีเจอร์ไม่มีชื่อ"}</span>
-                                                </Button>
+                                                    <div className="truncate">{feature.title || "ฟีเจอร์ไม่มีชื่อ"}</div>
+                                                </div>
                                             ))}
                                         </div>
                                     </ScrollArea>
                                 </div>
 
                                 {/* Right Content: Editor */}
-                                <div className="flex-1 overflow-y-auto pr-2">
+                                <div className="flex-1 overflow-y-auto p-8">
                                     {selectedFeature ? (
-                                        <div className="space-y-6">
+                                        <div className="space-y-8 max-w-3xl mx-auto">
                                             <div className="flex items-center justify-between">
-                                                <h3 className="text-lg font-semibold">แก้ไขฟีเจอร์</h3>
-                                                <Button variant="destructive" size="sm" onClick={() => removeFeature(selectedFeatureIndex)}>
+                                                <h3 className="text-lg font-bold flex items-center gap-2">
+                                                    <div className="p-2 bg-primary/10 rounded-lg">
+                                                        <SelectedIcon className="h-5 w-5 text-primary" />
+                                                    </div>
+                                                    แก้ไขฟีเจอร์
+                                                </h3>
+                                                <Button variant="destructive" size="sm" onClick={() => removeFeature(selectedFeatureIndex)} className="rounded-full px-4">
                                                     <Trash2 className="mr-2 h-4 w-4" /> ลบ
                                                 </Button>
                                             </div>
 
-                                            <div className="grid gap-4">
-                                                <div className="grid gap-2">
+                                            <div className="grid gap-6">
+                                                <div className="grid gap-3">
                                                     <Label>ID (ห้ามซ้ำ)</Label>
                                                     <Input
                                                         value={selectedFeature.id}
                                                         onChange={(e) => updateFeature(selectedFeatureIndex, 'id', e.target.value)}
+                                                        className="h-11 rounded-xl bg-muted/30 border-transparent focus:bg-background"
                                                     />
                                                 </div>
 
-                                                <div className="grid gap-2">
+                                                <div className="grid gap-3">
                                                     <Label>ไอคอน</Label>
                                                     <div className="relative">
                                                         <Button
                                                             variant="outline"
-                                                            className="w-full justify-start text-left font-normal"
+                                                            className="w-full justify-start text-left font-normal h-11 rounded-xl bg-muted/30 border-transparent hover:bg-muted/50"
                                                             onClick={() => setShowIconPicker(!showIconPicker)}
                                                         >
                                                             <SelectedIcon className="mr-2 h-4 w-4" />
                                                             {selectedFeature.icon}
                                                         </Button>
                                                         {showIconPicker && (
-                                                            <div className="absolute top-full left-0 z-50 mt-2 w-64 p-2 bg-popover border rounded-md shadow-md grid grid-cols-4 gap-2">
+                                                            <div className="absolute top-full left-0 z-50 mt-2 w-80 p-4 bg-popover border rounded-2xl shadow-xl grid grid-cols-5 gap-2">
                                                                 {iconList.map((item) => (
                                                                     <Button
                                                                         key={item.name}
                                                                         variant="ghost"
                                                                         size="icon"
-                                                                        className="h-10 w-10"
+                                                                        className="h-10 w-10 rounded-lg hover:bg-muted"
                                                                         onClick={() => {
                                                                             updateFeature(selectedFeatureIndex, 'icon', item.name);
                                                                             setShowIconPicker(false);
@@ -457,30 +476,33 @@ export default function AdminSettingsPage() {
                                                     </div>
                                                 </div>
 
-                                                <div className="grid gap-2">
+                                                <div className="grid gap-3">
                                                     <Label>หัวข้อ</Label>
                                                     <Input
                                                         value={selectedFeature.title}
                                                         onChange={(e) => updateFeature(selectedFeatureIndex, 'title', e.target.value)}
+                                                        className="h-11 rounded-xl bg-muted/30 border-transparent focus:bg-background"
                                                     />
                                                 </div>
 
-                                                <div className="grid gap-2">
+                                                <div className="grid gap-3">
                                                     <Label>คำอธิบาย</Label>
                                                     <Textarea
                                                         value={selectedFeature.description}
                                                         onChange={(e) => updateFeature(selectedFeatureIndex, 'description', e.target.value)}
+                                                        className="min-h-[100px] rounded-xl bg-muted/30 border-transparent focus:bg-background resize-none"
                                                     />
                                                 </div>
 
-                                                <div className="grid gap-2">
+                                                <div className="grid gap-3">
                                                     <Label>URL รูปภาพ</Label>
                                                     <Input
                                                         value={selectedFeature.image}
                                                         onChange={(e) => updateFeature(selectedFeatureIndex, 'image', e.target.value)}
+                                                        className="h-11 rounded-xl bg-muted/30 border-transparent focus:bg-background"
                                                     />
                                                     {/* Image Preview */}
-                                                    <div className="mt-2 relative w-full h-48 rounded-md overflow-hidden border bg-muted">
+                                                    <div className="mt-2 relative w-full h-64 rounded-2xl overflow-hidden border bg-muted/30">
                                                         {selectedFeature.image ? (
                                                             <Image
                                                                 src={selectedFeature.image}
@@ -495,19 +517,21 @@ export default function AdminSettingsPage() {
                                                     </div>
                                                 </div>
 
-                                                <div className="space-y-2">
-                                                    <Label>สถิติ</Label>
+                                                <div className="space-y-4 pt-4 border-t border-border/50">
+                                                    <Label className="text-base">สถิติ</Label>
                                                     {selectedFeature.stats.map((stat, sIndex) => (
-                                                        <div key={sIndex} className="flex gap-2">
+                                                        <div key={sIndex} className="flex gap-3">
                                                             <Input
                                                                 placeholder="ชื่อสถิติ"
                                                                 value={stat.label}
                                                                 onChange={(e) => updateFeatureStat(selectedFeatureIndex, sIndex, 'label', e.target.value)}
+                                                                className="h-11 rounded-xl bg-muted/30 border-transparent focus:bg-background"
                                                             />
                                                             <Input
                                                                 placeholder="ค่า"
                                                                 value={stat.value}
                                                                 onChange={(e) => updateFeatureStat(selectedFeatureIndex, sIndex, 'value', e.target.value)}
+                                                                className="h-11 rounded-xl bg-muted/30 border-transparent focus:bg-background"
                                                             />
                                                         </div>
                                                     ))}
@@ -515,71 +539,85 @@ export default function AdminSettingsPage() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="h-full flex items-center justify-center text-muted-foreground">
-                                            เลือกฟีเจอร์เพื่อแก้ไข
+                                        <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+                                            <div className="p-4 bg-muted/30 rounded-full mb-4">
+                                                <Star className="h-8 w-8 opacity-50" />
+                                            </div>
+                                            <p>เลือกฟีเจอร์ทางซ้ายเพื่อเริ่มแก้ไข</p>
                                         </div>
                                     )}
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </TabsContent>
 
                     {/* News Settings */}
-                    <TabsContent value="news" className="space-y-4 mt-4">
-                        <Card className="h-[800px] flex flex-col">
-                            <CardHeader>
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <CardTitle>ข่าวสารและประกาศ</CardTitle>
-                                        <CardDescription>จัดการข่าวสาร อัปเดต และโปรโมชั่น</CardDescription>
-                                    </div>
-                                    <Button onClick={handleSaveNews} disabled={isSaving}>
-                                        {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
-                                        บันทึกข่าวสารทั้งหมด
-                                    </Button>
+                    <TabsContent value="news" className="mt-0">
+                        <div className="bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden h-[800px] flex flex-col">
+                            <div className="p-8 border-b border-border/50 flex items-center justify-between shrink-0">
+                                <div>
+                                    <h3 className="text-2xl font-bold mb-1">ข่าวสารและประกาศ</h3>
+                                    <p className="text-muted-foreground">จัดการข่าวสาร อัปเดต และโปรโมชั่น</p>
                                 </div>
-                            </CardHeader>
-                            <CardContent className="flex-1 flex gap-6 overflow-hidden pt-0">
+                                <Button onClick={handleSaveNews} disabled={isSaving} className="rounded-full px-6">
+                                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                    บันทึกข่าวสารทั้งหมด
+                                </Button>
+                            </div>
+
+                            <div className="flex-1 flex overflow-hidden">
                                 {/* Left Sidebar: List of News */}
-                                <div className="w-64 shrink-0 flex flex-col border-r pr-6">
-                                    <Button onClick={addNews} className="w-full mb-4" variant="outline">
-                                        <Plus className="mr-2 h-4 w-4" /> เพิ่มข่าวสาร
-                                    </Button>
-                                    <ScrollArea className="flex-1">
+                                <div className="w-72 shrink-0 flex flex-col border-r border-border/50 bg-muted/10">
+                                    <div className="p-4">
+                                        <Button onClick={addNews} className="w-full rounded-xl" variant="outline">
+                                            <Plus className="mr-2 h-4 w-4" /> เพิ่มข่าวสาร
+                                        </Button>
+                                    </div>
+                                    <ScrollArea className="flex-1 px-4 pb-4">
                                         <div className="space-y-2">
                                             {newsConfig.map((item, index) => (
-                                                <Button
+                                                <div
                                                     key={index}
-                                                    variant={selectedNewsIndex === index ? "secondary" : "ghost"}
-                                                    className="w-full justify-start font-normal"
                                                     onClick={() => setSelectedNewsIndex(index)}
+                                                    className={cn(
+                                                        "w-full p-3 rounded-xl text-left cursor-pointer transition-all border border-transparent",
+                                                        selectedNewsIndex === index
+                                                            ? "bg-background shadow-sm border-border/50 font-medium text-primary"
+                                                            : "hover:bg-muted/50 text-muted-foreground"
+                                                    )}
                                                 >
-                                                    <span className="truncate">{item.title || "ข่าวสารไม่มีชื่อ"}</span>
-                                                </Button>
+                                                    <div className="truncate font-medium">{item.title || "ข่าวสารไม่มีชื่อ"}</div>
+                                                    <div className="text-xs text-muted-foreground mt-1">{item.date}</div>
+                                                </div>
                                             ))}
                                         </div>
                                     </ScrollArea>
                                 </div>
 
                                 {/* Right Content: Editor */}
-                                <div className="flex-1 overflow-y-auto pr-2">
+                                <div className="flex-1 overflow-y-auto p-8">
                                     {selectedNews ? (
-                                        <div className="space-y-6">
+                                        <div className="space-y-8 max-w-3xl mx-auto">
                                             <div className="flex items-center justify-between">
-                                                <h3 className="text-lg font-semibold">แก้ไขข่าวสาร</h3>
-                                                <Button variant="destructive" size="sm" onClick={() => removeNews(selectedNewsIndex)}>
+                                                <h3 className="text-lg font-bold flex items-center gap-2">
+                                                    <div className="p-2 bg-primary/10 rounded-lg">
+                                                        <Newspaper className="h-5 w-5 text-primary" />
+                                                    </div>
+                                                    แก้ไขข่าวสาร
+                                                </h3>
+                                                <Button variant="destructive" size="sm" onClick={() => removeNews(selectedNewsIndex)} className="rounded-full px-4">
                                                     <Trash2 className="mr-2 h-4 w-4" /> ลบ
                                                 </Button>
                                             </div>
 
-                                            <div className="grid gap-4">
-                                                <div className="grid gap-2">
+                                            <div className="grid gap-6">
+                                                <div className="grid gap-3">
                                                     <Label>หมวดหมู่</Label>
                                                     <Select
                                                         value={selectedNews.category}
                                                         onValueChange={(value) => updateNews(selectedNewsIndex, 'category', value)}
                                                     >
-                                                        <SelectTrigger>
+                                                        <SelectTrigger className="h-11 rounded-xl bg-muted/30 border-transparent focus:bg-background">
                                                             <SelectValue placeholder="เลือกหมวดหมู่" />
                                                         </SelectTrigger>
                                                         <SelectContent>
@@ -592,38 +630,42 @@ export default function AdminSettingsPage() {
                                                     </Select>
                                                 </div>
 
-                                                <div className="grid gap-2">
+                                                <div className="grid gap-3">
                                                     <Label>หัวข้อ</Label>
                                                     <Input
                                                         value={selectedNews.title}
                                                         onChange={(e) => updateNews(selectedNewsIndex, 'title', e.target.value)}
+                                                        className="h-11 rounded-xl bg-muted/30 border-transparent focus:bg-background"
                                                     />
                                                 </div>
 
-                                                <div className="grid gap-2">
+                                                <div className="grid gap-3">
                                                     <Label>วันที่ (วว/ดด/ปปปป)</Label>
                                                     <Input
                                                         value={selectedNews.date}
                                                         onChange={(e) => updateNews(selectedNewsIndex, 'date', e.target.value)}
+                                                        className="h-11 rounded-xl bg-muted/30 border-transparent focus:bg-background"
                                                     />
                                                 </div>
 
-                                                <div className="grid gap-2">
+                                                <div className="grid gap-3">
                                                     <Label>เนื้อหาย่อ (คำอธิบายสั้นๆ)</Label>
                                                     <Textarea
                                                         value={selectedNews.excerpt}
                                                         onChange={(e) => updateNews(selectedNewsIndex, 'excerpt', e.target.value)}
+                                                        className="min-h-[100px] rounded-xl bg-muted/30 border-transparent focus:bg-background resize-none"
                                                     />
                                                 </div>
 
-                                                <div className="grid gap-2">
+                                                <div className="grid gap-3">
                                                     <Label>URL รูปภาพ</Label>
                                                     <Input
                                                         value={selectedNews.image}
                                                         onChange={(e) => updateNews(selectedNewsIndex, 'image', e.target.value)}
+                                                        className="h-11 rounded-xl bg-muted/30 border-transparent focus:bg-background"
                                                     />
                                                     {/* Image Preview */}
-                                                    <div className="mt-2 relative w-full h-48 rounded-md overflow-hidden border bg-muted">
+                                                    <div className="mt-2 relative w-full h-64 rounded-2xl overflow-hidden border bg-muted/30">
                                                         {selectedNews.image ? (
                                                             <Image
                                                                 src={selectedNews.image}
@@ -638,10 +680,10 @@ export default function AdminSettingsPage() {
                                                     </div>
                                                 </div>
 
-                                                <div className="grid gap-2">
+                                                <div className="grid gap-3">
                                                     <Label>เนื้อหา (รองรับ HTML)</Label>
                                                     <Textarea
-                                                        className="min-h-[200px] font-mono text-sm"
+                                                        className="min-h-[300px] font-mono text-sm rounded-xl bg-muted/30 border-transparent focus:bg-background"
                                                         value={selectedNews.content}
                                                         onChange={(e) => updateNews(selectedNewsIndex, 'content', e.target.value)}
                                                     />
@@ -649,22 +691,27 @@ export default function AdminSettingsPage() {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div className="h-full flex items-center justify-center text-muted-foreground">
-                                            เลือกข่าวสารเพื่อแก้ไข
+                                        <div className="h-full flex flex-col items-center justify-center text-muted-foreground">
+                                            <div className="p-4 bg-muted/30 rounded-full mb-4">
+                                                <Newspaper className="h-8 w-8 opacity-50" />
+                                            </div>
+                                            <p>เลือกข่าวสารทางซ้ายเพื่อเริ่มแก้ไข</p>
                                         </div>
                                     )}
                                 </div>
-                            </CardContent>
-                        </Card>
+                            </div>
+                        </div>
                     </TabsContent>
 
                     {/* Roadmap Settings */}
-                    <TabsContent value="roadmap">
-                        <RoadmapEditor
-                            siteConfig={siteConfig}
-                            setSiteConfig={setSiteConfig}
-                            onSave={handleSave}
-                        />
+                    <TabsContent value="roadmap" className="mt-0">
+                        <div className="bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden p-8">
+                            <RoadmapEditor
+                                siteConfig={siteConfig}
+                                setSiteConfig={setSiteConfig}
+                                onSave={handleSave}
+                            />
+                        </div>
                     </TabsContent>
                 </Tabs>
             </div>
