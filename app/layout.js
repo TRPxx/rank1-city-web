@@ -1,16 +1,8 @@
-import { Inter, Kanit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider"
 import SessionProviderWrapper from "@/components/SessionProviderWrapper";
 import ClientToaster from "@/components/ClientToaster";
 import Navbar from "@/components/Navbar";
-
-const inter = Inter({ subsets: ["latin"] });
-const kanit = Kanit({
-  weight: ['300', '400', '500', '600', '700'],
-  subsets: ['thai', 'latin'],
-  variable: '--font-kanit',
-});
 
 export const metadata = {
   title: "Rank1 City - Roleplay Server",
@@ -60,7 +52,7 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang="th" suppressHydrationWarning>
-      <body className={`${inter.className} ${kanit.variable} font-sans bg-background`}>
+      <body className={`font-sans bg-background`}>
         <SessionProviderWrapper>
           <ThemeProvider
             attribute="class"
