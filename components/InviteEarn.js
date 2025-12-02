@@ -61,7 +61,7 @@ export default function InviteEarn({ referralCode, inviteCount }) {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 gap-3">
                             <Button
                                 size="lg"
                                 className="w-full shadow-lg shadow-primary/20"
@@ -69,16 +69,6 @@ export default function InviteEarn({ referralCode, inviteCount }) {
                             >
                                 {copiedCode ? <CheckCircle2 className="w-5 h-5 mr-2" /> : <Copy className="w-5 h-5 mr-2" />}
                                 {copiedCode ? 'คัดลอกรหัสแล้ว' : 'คัดลอกรหัส'}
-                            </Button>
-
-                            <Button
-                                size="lg"
-                                variant="outline"
-                                className="w-full border-0 bg-background/50 hover:bg-background/80"
-                                onClick={copyLink}
-                            >
-                                {copiedLink ? <CheckCircle2 className="w-5 h-5 mr-2" /> : <LinkIcon className="w-5 h-5 mr-2" />}
-                                {copiedLink ? 'คัดลอกลิงก์แล้ว' : 'คัดลอกลิงก์'}
                             </Button>
                         </div>
 
