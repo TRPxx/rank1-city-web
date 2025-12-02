@@ -23,7 +23,18 @@ export default function RecentRegistrations() {
         };
 
         fetchRecent();
-        const interval = setInterval(fetchRecent, 30000); // Refresh every 30s
+
+        // --- MOCK SIMULATION START ---
+        const mockNames = ["TeeGa", "Admin", "PlayerOne", "RoleplayKing", "CityMaster", "DriverPro", "MedicHero"];
+        const interval = setInterval(() => {
+            const newMockUser = {
+                discord_name: mockNames[Math.floor(Math.random() * mockNames.length)] + Math.floor(Math.random() * 100),
+                created_at: new Date().toISOString()
+            };
+            setRegistrations(prev => [newMockUser, ...prev].slice(0, 10)); // Add new user to top, keep only 10
+        }, 3000); // Add new user every 3 seconds
+        // --- MOCK SIMULATION END ---
+
         return () => clearInterval(interval);
     }, []);
 
