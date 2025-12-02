@@ -40,8 +40,7 @@ export default function RecentRegistrations() {
 
             <div className="relative h-[400px] overflow-hidden mask-gradient-b">
                 {/* Fade masks for smooth scrolling effect */}
-                <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-background to-transparent z-10" />
-                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent z-10" />
+                {/* Fade masks removed for transparency */}
 
                 <div className="space-y-3 py-4">
                     {registrations.length === 0 ? (
