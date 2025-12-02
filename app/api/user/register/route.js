@@ -131,20 +131,6 @@ export async function POST(request) {
             }
         }
 
-        // Sync to Web DB
-        try {
-            const { webDb } = await import('@/lib/db'); // Dynamic import to avoid circular dep issues if any, or just cleaner
-            await webDb.query(
-                `INSERT INTO users (discord_id, firstname, lastname, avatar) 
-                 VALUES (?, ?, ?, ?) 
-                 ON DUPLICATE KEY UPDATE firstname = VALUES(firstname), lastname = VALUES(lastname), avatar = VALUES(avatar)`,
-                [rawDiscordId, formattedFirstname, formattedLastname, session.user.image || null]
-            );
-        } catch (syncError) {
-            console.error('Web DB Sync Error:', syncError);
-            // Don't fail the request if sync fails, just log it.
-        }
-
         if (!registered) {
             throw new Error('Server Busy: Unable to generate unique SSN after multiple attempts.');
         }
