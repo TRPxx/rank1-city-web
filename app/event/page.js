@@ -70,13 +70,16 @@ const CountdownTimer = ({ targetDate }) => {
     }, [targetDate]);
 
     return (
-        <div className="flex gap-4 justify-center py-8">
+        <div className="flex gap-4 sm:gap-8 justify-center py-10">
             {Object.entries(timeLeft).map(([unit, value]) => (
-                <div key={unit} className="flex flex-col items-center">
-                    <div className="bg-background/80 backdrop-blur-md border border-primary/30 rounded-lg p-4 w-20 h-24 flex items-center justify-center shadow-[0_0_15px_rgba(var(--primary),0.3)]">
-                        <span className="text-4xl font-black text-primary">{value}</span>
+                <div key={unit} className="flex flex-col items-center group">
+                    <div className="relative">
+                        <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                        <div className="bg-background/50 backdrop-blur-md rounded-2xl p-4 sm:p-6 min-w-[80px] sm:min-w-[100px] flex items-center justify-center relative z-10">
+                            <span className="text-4xl sm:text-6xl font-black text-foreground tracking-tighter tabular-nums">{value}</span>
+                        </div>
                     </div>
-                    <span className="text-xs uppercase mt-2 text-muted-foreground font-medium">{unit}</span>
+                    <span className="text-xs sm:text-sm uppercase mt-3 text-muted-foreground font-medium tracking-widest">{unit}</span>
                 </div>
             ))}
         </div>
@@ -102,23 +105,23 @@ export default function SpecialEventPage() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.8 }}
                     >
-                        <Badge variant="outline" className="mb-4 px-4 py-1 text-lg border-primary text-primary bg-primary/10 backdrop-blur">
-                            SPECIAL EVENT
+                        <Badge variant="secondary" className="mb-6 px-4 py-1.5 text-sm font-medium tracking-wider bg-primary/10 text-primary hover:bg-primary/20 transition-colors rounded-full backdrop-blur-sm">
+                            ✨ SPECIAL EVENT
                         </Badge>
-                        <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-4 text-transparent bg-clip-text bg-gradient-to-b from-zinc-900 to-zinc-500 dark:from-white dark:to-white/60 drop-shadow-2xl">
+                        <h1 className="text-5xl md:text-8xl font-black tracking-tighter mb-6 text-foreground drop-shadow-sm">
                             {EVENT_DATA.title}
                         </h1>
-                        <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-8 font-light">
+                        <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-10 font-light leading-relaxed">
                             {EVENT_DATA.subtitle}
                         </p>
 
                         <CountdownTimer targetDate={EVENT_DATA.startDate} />
 
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-                            <Button size="lg" className="text-lg px-8 py-6 bg-primary hover:bg-primary/90 text-primary-foreground shadow-[0_0_30px_rgba(var(--primary),0.5)] transition-all hover:scale-105">
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-10">
+                            <Button size="lg" className="text-lg px-10 py-7 rounded-2xl shadow-lg shadow-primary/25 hover:shadow-primary/40 transition-all hover:scale-105">
                                 เข้าร่วมกิจกรรม
                             </Button>
-                            <Button size="lg" variant="outline" className="text-lg px-8 py-6 border-input hover:bg-accent hover:text-accent-foreground backdrop-blur transition-all hover:scale-105">
+                            <Button size="lg" variant="outline" className="text-lg px-10 py-7 rounded-2xl border-0 bg-background/50 hover:bg-background/80 backdrop-blur-sm transition-all hover:scale-105">
                                 อ่านรายละเอียด
                             </Button>
                         </div>
@@ -155,22 +158,24 @@ export default function SpecialEventPage() {
                                 transition={{ delay: index * 0.2 }}
                                 viewport={{ once: true }}
                             >
-                                <Card className="bg-card border-border overflow-hidden hover:border-primary/50 transition-colors group h-full shadow-sm hover:shadow-md">
-                                    <div className="relative h-48 overflow-hidden">
-                                        <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent z-10" />
+                                <div className="h-full bg-muted/5 rounded-[2.5rem] overflow-hidden hover:bg-muted/10 transition-colors duration-500 group">
+                                    <div className="relative h-64 overflow-hidden">
+                                        <div className="absolute inset-0 bg-gradient-to-t from-background/80 to-transparent z-10" />
                                         {/* Placeholder for Image */}
-                                        <div className="w-full h-full bg-muted group-hover:scale-110 transition-transform duration-500 flex items-center justify-center">
-                                            <item.icon className="w-16 h-16 text-muted-foreground/50 group-hover:text-primary/50 transition-colors" />
+                                        <div className="w-full h-full bg-muted/20 group-hover:scale-110 transition-transform duration-700 flex items-center justify-center">
+                                            <item.icon className="w-24 h-24 text-muted-foreground/20 group-hover:text-primary/20 transition-colors" />
+                                        </div>
+                                        <div className="absolute bottom-4 left-6 z-20">
+                                            <div className="w-14 h-14 rounded-2xl bg-background/80 backdrop-blur-md flex items-center justify-center shadow-lg mb-4 group-hover:scale-110 transition-transform duration-300">
+                                                <item.icon className="w-7 h-7 text-primary" />
+                                            </div>
                                         </div>
                                     </div>
-                                    <CardContent className="p-6 relative z-20 -mt-12">
-                                        <div className="w-12 h-12 rounded-lg bg-primary flex items-center justify-center mb-4 shadow-lg group-hover:scale-110 transition-transform">
-                                            <item.icon className="w-6 h-6 text-primary-foreground" />
-                                        </div>
-                                        <h3 className="text-xl font-bold mb-2 group-hover:text-primary transition-colors">{item.title}</h3>
-                                        <p className="text-muted-foreground">{item.description}</p>
-                                    </CardContent>
-                                </Card>
+                                    <div className="p-8 pt-2">
+                                        <h3 className="text-2xl font-bold mb-3 group-hover:text-primary transition-colors">{item.title}</h3>
+                                        <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+                                    </div>
+                                </div>
                             </motion.div>
                         ))}
                     </div>
@@ -207,23 +212,34 @@ export default function SpecialEventPage() {
 
                         <div className="relative">
                             <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-purple-500/20 blur-3xl rounded-full opacity-30" />
-                            <Card className="relative bg-card/80 border-border backdrop-blur-xl p-8">
-                                <div className="flex items-start gap-4 mb-6">
-                                    <AlertCircle className="w-6 h-6 text-primary shrink-0 mt-1" />
+                            <div className="relative bg-muted/5 backdrop-blur-xl p-8 rounded-[2.5rem] overflow-hidden">
+                                <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+
+                                <div className="flex items-start gap-5 mb-8 relative z-10">
+                                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0">
+                                        <AlertCircle className="w-6 h-6 text-primary" />
+                                    </div>
                                     <div>
-                                        <h3 className="text-xl font-bold mb-2">ข้อกำหนดและเงื่อนไข</h3>
-                                        <ul className="list-disc list-inside space-y-2 text-muted-foreground text-sm">
-                                            <li>ผู้เข้าร่วมกิจกรรมต้องมีเลเวล 1 ขึ้นไป</li>
-                                            <li>ของรางวัลจะถูกส่งเข้าตัวละครภายใน 24 ชม.</li>
-                                            <li>การตัดสินของทีมงานถือเป็นที่สิ้นสุด</li>
-                                            <li>ห้ามใช้โปรแกรมช่วยเล่นทุกชนิด</li>
+                                        <h3 className="text-2xl font-bold mb-4">ข้อกำหนดและเงื่อนไข</h3>
+                                        <ul className="space-y-3 text-muted-foreground">
+                                            {[
+                                                "ผู้เข้าร่วมกิจกรรมต้องมีเลเวล 1 ขึ้นไป",
+                                                "ของรางวัลจะถูกส่งเข้าตัวละครภายใน 24 ชม.",
+                                                "การตัดสินของทีมงานถือเป็นที่สิ้นสุด",
+                                                "ห้ามใช้โปรแกรมช่วยเล่นทุกชนิด"
+                                            ].map((rule, i) => (
+                                                <li key={i} className="flex items-center gap-3">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-primary/50" />
+                                                    {rule}
+                                                </li>
+                                            ))}
                                         </ul>
                                     </div>
                                 </div>
-                                <Button className="w-full" variant="secondary">
+                                <Button className="w-full h-12 rounded-xl text-base" variant="secondary">
                                     อ่านกติกาฉบับเต็ม
                                 </Button>
-                            </Card>
+                            </div>
                         </div>
                     </div>
                 </div>
