@@ -38,23 +38,22 @@ export default function InviteEarn({ referralCode, inviteCount }) {
             {/* Left Column: Stats & Link */}
             <div className="space-y-6 lg:col-span-2">
                 {/* Referral Code Card */}
-                <Card className="border-primary/20 bg-primary/5 overflow-hidden relative">
+                <div className="relative overflow-hidden rounded-3xl bg-muted/10 p-8">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
 
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
-                            <Share2 className="w-5 h-5 text-primary" />
-                            รหัสแนะนำเพื่อน
-                        </CardTitle>
-                        <CardDescription>
-                            ส่งรหัสนี้ให้เพื่อน หรือแชร์ลิงก์เพื่อรับรางวัลทั้งคู่!
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        {/* Code Display */}
-                        <div className="flex flex-col items-center justify-center p-8 bg-background rounded-xl border-2 border-dashed border-primary/30 relative overflow-hidden group hover:border-primary/50 transition-colors">
-                            <div className="absolute inset-0 bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="relative z-10">
+                        <div className="mb-6">
+                            <h3 className="text-xl font-bold flex items-center gap-2 mb-1">
+                                <Share2 className="w-5 h-5 text-primary" />
+                                รหัสแนะนำเพื่อน
+                            </h3>
+                            <p className="text-muted-foreground text-sm">
+                                ส่งรหัสนี้ให้เพื่อน หรือแชร์ลิงก์เพื่อรับรางวัลทั้งคู่!
+                            </p>
+                        </div>
 
+                        {/* Code Display */}
+                        <div className="flex flex-col items-center justify-center p-8 bg-background/50 backdrop-blur-sm rounded-2xl mb-6 relative overflow-hidden group">
                             <p className="text-sm text-muted-foreground mb-2 font-medium">รหัสของคุณ</p>
                             <code className="text-5xl font-mono font-bold text-primary tracking-wider relative z-10 drop-shadow-sm">
                                 {referralCode || '.......'}
@@ -65,7 +64,7 @@ export default function InviteEarn({ referralCode, inviteCount }) {
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <Button
                                 size="lg"
-                                className="w-full"
+                                className="w-full shadow-lg shadow-primary/20"
                                 onClick={copyCode}
                             >
                                 {copiedCode ? <CheckCircle2 className="w-5 h-5 mr-2" /> : <Copy className="w-5 h-5 mr-2" />}
@@ -75,7 +74,7 @@ export default function InviteEarn({ referralCode, inviteCount }) {
                             <Button
                                 size="lg"
                                 variant="outline"
-                                className="w-full"
+                                className="w-full border-0 bg-background/50 hover:bg-background/80"
                                 onClick={copyLink}
                             >
                                 {copiedLink ? <CheckCircle2 className="w-5 h-5 mr-2" /> : <LinkIcon className="w-5 h-5 mr-2" />}
@@ -84,85 +83,83 @@ export default function InviteEarn({ referralCode, inviteCount }) {
                         </div>
 
                         {/* Stats */}
-                        <div className="grid grid-cols-2 gap-4 mt-4">
-                            <div className="bg-background/50 p-4 rounded-lg border text-center">
+                        <div className="grid grid-cols-2 gap-4 mt-6">
+                            <div className="bg-background/30 p-4 rounded-2xl text-center">
                                 <div className="text-3xl font-bold text-primary">{inviteCount}</div>
                                 <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">เพื่อนที่เชิญ</div>
                             </div>
-                            <div className="bg-background/50 p-4 rounded-lg border text-center">
+                            <div className="bg-background/30 p-4 rounded-2xl text-center">
                                 <div className="text-3xl font-bold text-primary">{Math.floor(inviteCount * 1)}</div>
                                 <div className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">ตั๋วที่ได้รับ</div>
                             </div>
                         </div>
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
 
                 {/* Progress Card */}
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2">
+                <div className="rounded-3xl bg-muted/10 p-8">
+                    <div className="mb-4">
+                        <h3 className="text-lg font-bold flex items-center gap-2 mb-1">
                             <Gift className="w-5 h-5 text-primary" />
                             รางวัลถัดไป
-                        </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="space-y-4">
-                            <div className="flex justify-between items-end">
-                                <div>
-                                    <h4 className="font-semibold">{nextReward.name}</h4>
-                                    <p className="text-sm text-muted-foreground">เชิญเพื่อนอีก {Math.max(0, nextReward.count - inviteCount)} คนเพื่อปลดล็อก</p>
-                                </div>
-                                <Badge variant="secondary">{inviteCount} / {nextReward.count}</Badge>
+                        </h3>
+                    </div>
+                    <div className="space-y-4">
+                        <div className="flex justify-between items-end">
+                            <div>
+                                <h4 className="font-semibold text-lg">{nextReward.name}</h4>
+                                <p className="text-sm text-muted-foreground">เชิญเพื่อนอีก {Math.max(0, nextReward.count - inviteCount)} คนเพื่อปลดล็อก</p>
                             </div>
-                            <div className="h-3 w-full bg-secondary rounded-full overflow-hidden">
-                                <motion.div
-                                    className="h-full bg-primary"
-                                    initial={{ width: 0 }}
-                                    animate={{ width: `${progress}%` }}
-                                    transition={{ duration: 1, ease: "easeOut" }}
-                                />
-                            </div>
+                            <Badge variant="secondary" className="text-base px-3 py-1 bg-background/50">{inviteCount} / {nextReward.count}</Badge>
                         </div>
-                    </CardContent>
-                </Card>
+                        <div className="h-4 w-full bg-background/50 rounded-full overflow-hidden">
+                            <motion.div
+                                className="h-full bg-primary shadow-[0_0_10px_rgba(var(--primary),0.5)]"
+                                initial={{ width: 0 }}
+                                animate={{ width: `${progress}%` }}
+                                transition={{ duration: 1, ease: "easeOut" }}
+                            />
+                        </div>
+                    </div>
+                </div>
             </div>
 
             {/* Right Column: Rewards List */}
-            <Card className="h-full flex flex-col">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2">
-                        <Gift className="w-5 h-5" />
+            <div className="h-full flex flex-col rounded-3xl bg-muted/10 p-8">
+                <div className="mb-6">
+                    <h3 className="text-xl font-bold flex items-center gap-2 mb-1">
+                        <Gift className="w-5 h-5 text-primary" />
                         ระดับรางวัล
-                    </CardTitle>
-                    <CardDescription>ปลดล็อกไอเทมพิเศษโดยการเชิญเพื่อนเพิ่ม</CardDescription>
-                </CardHeader>
-                <CardContent className="flex-1 overflow-y-auto pr-2">
+                    </h3>
+                    <p className="text-muted-foreground text-sm">ปลดล็อกไอเทมพิเศษโดยการเชิญเพื่อนเพิ่ม</p>
+                </div>
+                <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
                     <div className="space-y-4">
                         {rewards.map((reward, index) => {
                             const isUnlocked = inviteCount >= reward.count;
                             return (
                                 <div
                                     key={index}
-                                    className={`relative p-4 rounded-lg border transition-all ${isUnlocked
-                                            ? 'bg-primary/5 border-primary/50'
-                                            : 'bg-muted/30 border-border hover:border-primary/30'
+                                    className={`relative p-5 rounded-2xl transition-all ${isUnlocked
+                                        ? 'bg-primary/10'
+                                        : 'bg-background/30 opacity-60'
                                         }`}
                                 >
                                     {isUnlocked && (
-                                        <div className="absolute top-2 right-2">
-                                            <CheckCircle2 className="w-4 h-4 text-primary" />
+                                        <div className="absolute top-4 right-4">
+                                            <CheckCircle2 className="w-5 h-5 text-primary" />
                                         </div>
                                     )}
-                                    <div className="flex items-start gap-3">
-                                        <div className={`w-10 h-10 rounded-lg flex items-center justify-center shrink-0 ${isUnlocked ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
+                                    <div className="flex items-start gap-4">
+                                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${isUnlocked ? 'bg-primary text-primary-foreground shadow-lg shadow-primary/20' : 'bg-muted text-muted-foreground'
                                             }`}>
-                                            <Users className="w-5 h-5" />
+                                            <Users className="w-6 h-6" />
                                         </div>
                                         <div>
-                                            <div className="text-xs font-bold text-muted-foreground uppercase mb-1">
+                                            <div className="text-xs font-bold text-muted-foreground uppercase mb-1 tracking-wider">
                                                 เชิญ {reward.count} คน
                                             </div>
-                                            <h4 className={`font-semibold ${isUnlocked ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                            <h4 className={`font-bold text-lg ${isUnlocked ? 'text-foreground' : 'text-muted-foreground'}`}>
                                                 {reward.name}
                                             </h4>
                                         </div>
@@ -171,8 +168,8 @@ export default function InviteEarn({ referralCode, inviteCount }) {
                             );
                         })}
                     </div>
-                </CardContent>
-            </Card>
+                </div>
+            </div>
         </div>
     );
 }

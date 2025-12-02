@@ -137,72 +137,72 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
 
             {/* Main Game Area */}
             <div className="lg:col-span-2 space-y-6">
-                <Card className="overflow-hidden border-none shadow-none bg-transparent sm:border sm:shadow-sm sm:bg-card">
-                    <CardHeader className="px-4 sm:px-6">
-                        <CardTitle>Lucky Draw</CardTitle>
-                        <CardDescription>หมุนวงล้อเพื่อลุ้นรับรางวัลพิเศษ</CardDescription>
-                    </CardHeader>
-                    <CardContent className="p-0 sm:p-6">
-                        {/* Tape Container */}
-                        <div className="relative h-[180px] sm:h-[200px] w-full overflow-hidden bg-muted/30 sm:rounded-xl border-y sm:border">
-                            {/* Center Marker */}
-                            <div className="absolute left-1/2 top-0 bottom-0 z-20 w-[2px] bg-primary">
-                                <div className="absolute -top-1 -left-[5px] border-l-[6px] border-r-[6px] border-t-[8px] border-l-transparent border-r-transparent border-t-primary" />
-                                <div className="absolute -bottom-1 -left-[5px] border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-primary" />
-                            </div>
+                <div className="overflow-hidden rounded-3xl bg-muted/10 p-6 sm:p-8">
+                    <div className="mb-6">
+                        <h3 className="text-xl font-bold mb-1">Lucky Draw</h3>
+                        <p className="text-muted-foreground text-sm">หมุนวงล้อเพื่อลุ้นรับรางวัลพิเศษ</p>
+                    </div>
 
-                            {/* Gradient Fade */}
-                            <div className="absolute inset-0 z-10 bg-gradient-to-r from-background via-transparent to-background pointer-events-none" />
-
-                            {/* Tape */}
-                            <div
-                                ref={tapeRef}
-                                className="flex h-full items-center px-[50%]"
-                                style={{ gap: CARD_GAP }}
-                            >
-                                {tapeItems.map((item, index) => (
-                                    <div
-                                        key={index}
-                                        className={`flex h-[130px] w-[130px] sm:h-[140px] sm:w-[140px] shrink-0 flex-col items-center justify-between rounded-lg border bg-card p-3 sm:p-4 shadow-sm transition-all ${isSpinning && index === WIN_INDEX ? 'ring-2 ring-primary ring-offset-2' : ''
-                                            }`}
-                                    >
-                                        <div className={`flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-muted/50 p-2 ${item.rarity === 'LEGENDARY' ? 'text-yellow-500' :
-                                            item.rarity === 'EPIC' ? 'text-purple-500' : 'text-muted-foreground'
-                                            }`}>
-                                            {item.image ? (
-                                                <div className="relative w-full h-full">
-                                                    <Image
-                                                        src={item.image}
-                                                        alt={item.name}
-                                                        fill
-                                                        className="object-contain drop-shadow-sm"
-                                                    />
-                                                </div>
-                                            ) : (
-                                                item.rarity === 'LEGENDARY' ? <Sparkles className="h-6 w-6 sm:h-8 sm:w-8" /> :
-                                                    item.rarity === 'EPIC' ? <Zap className="h-6 w-6 sm:h-8 sm:w-8" /> :
-                                                        <Gift className="h-6 w-6 sm:h-8 sm:w-8" />
-                                            )}
-                                        </div>
-                                        <div className="text-center w-full">
-                                            <p className="line-clamp-2 text-[10px] sm:text-xs font-medium leading-tight h-8 flex items-center justify-center">{item.name}</p>
-                                            <p className="mt-1 text-[9px] sm:text-[10px] text-muted-foreground uppercase">{item.rarity}</p>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
+                    {/* Tape Container */}
+                    <div className="relative h-[180px] sm:h-[200px] w-full overflow-hidden bg-background/50 rounded-2xl border-0 shadow-inner mb-6">
+                        {/* Center Marker */}
+                        <div className="absolute left-1/2 top-0 bottom-0 z-20 w-[2px] bg-primary shadow-[0_0_10px_rgba(var(--primary),0.8)]">
+                            <div className="absolute -top-1 -left-[5px] border-l-[6px] border-r-[6px] border-t-[8px] border-l-transparent border-r-transparent border-t-primary" />
+                            <div className="absolute -bottom-1 -left-[5px] border-l-[6px] border-r-[6px] border-b-[8px] border-l-transparent border-r-transparent border-b-primary" />
                         </div>
-                    </CardContent>
-                    <CardFooter className="flex flex-col items-center justify-center gap-4 border-t bg-muted/50 p-4 sm:p-6 sm:flex-row sm:justify-between">
+
+                        {/* Gradient Fade */}
+                        <div className="absolute inset-0 z-10 bg-gradient-to-r from-background via-transparent to-background pointer-events-none" />
+
+                        {/* Tape */}
+                        <div
+                            ref={tapeRef}
+                            className="flex h-full items-center px-[50%]"
+                            style={{ gap: CARD_GAP }}
+                        >
+                            {tapeItems.map((item, index) => (
+                                <div
+                                    key={index}
+                                    className={`flex h-[130px] w-[130px] sm:h-[140px] sm:w-[140px] shrink-0 flex-col items-center justify-between rounded-xl bg-card p-3 sm:p-4 shadow-sm transition-all border-0 ${isSpinning && index === WIN_INDEX ? 'ring-2 ring-primary ring-offset-2' : ''
+                                        }`}
+                                >
+                                    <div className={`flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full bg-muted/50 p-2 ${item.rarity === 'LEGENDARY' ? 'text-yellow-500' :
+                                        item.rarity === 'EPIC' ? 'text-purple-500' : 'text-muted-foreground'
+                                        }`}>
+                                        {item.image ? (
+                                            <div className="relative w-full h-full">
+                                                <Image
+                                                    src={item.image}
+                                                    alt={item.name}
+                                                    fill
+                                                    className="object-contain drop-shadow-sm"
+                                                />
+                                            </div>
+                                        ) : (
+                                            item.rarity === 'LEGENDARY' ? <Sparkles className="h-6 w-6 sm:h-8 sm:w-8" /> :
+                                                item.rarity === 'EPIC' ? <Zap className="h-6 w-6 sm:h-8 sm:w-8" /> :
+                                                    <Gift className="h-6 w-6 sm:h-8 sm:w-8" />
+                                        )}
+                                    </div>
+                                    <div className="text-center w-full">
+                                        <p className="line-clamp-2 text-[10px] sm:text-xs font-medium leading-tight h-8 flex items-center justify-center">{item.name}</p>
+                                        <p className="mt-1 text-[9px] sm:text-[10px] text-muted-foreground uppercase">{item.rarity}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:justify-between bg-background/30 p-4 rounded-xl">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Ticket className="h-4 w-4" />
-                            <span>ตั๋วคงเหลือ: <span className="font-medium text-foreground">{ticketCount}</span></span>
+                            <Ticket className="h-4 w-4 text-primary" />
+                            <span>ตั๋วคงเหลือ: <span className="font-bold text-foreground text-lg ml-1">{ticketCount}</span></span>
                         </div>
                         <Button
                             size="lg"
                             onClick={() => spin(ticketCount)}
                             disabled={isSpinning || ticketCount <= 0}
-                            className="w-full sm:w-auto min-w-[160px]"
+                            className="w-full sm:w-auto min-w-[160px] shadow-lg shadow-primary/20"
                         >
                             {isSpinning ? (
                                 <>
@@ -214,26 +214,24 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                                 </>
                             )}
                         </Button>
-                    </CardFooter>
-                </Card>
+                    </div>
+                </div>
             </div>
 
             {/* History Sidebar */}
-            <Card className="h-[400px] lg:h-auto lg:max-h-[600px] flex flex-col">
-                <CardHeader className="px-4 py-4">
-                    <CardTitle className="text-lg flex items-center gap-2">
-                        <History className="h-4 w-4" /> ประวัติการสุ่ม
-                    </CardTitle>
-                </CardHeader>
-                <Separator />
-                <ScrollArea className="flex-1">
-                    <div className="p-4 space-y-4">
+            <div className="h-[400px] lg:h-auto lg:max-h-[600px] flex flex-col rounded-3xl bg-muted/10 p-6">
+                <div className="mb-4 flex items-center gap-2">
+                    <History className="h-4 w-4 text-primary" />
+                    <h3 className="font-bold">ประวัติการสุ่ม</h3>
+                </div>
+                <ScrollArea className="flex-1 -mr-4 pr-4">
+                    <div className="space-y-3">
                         {history.length > 0 ? (
                             history.map((item, index) => (
-                                <div key={index} className="flex items-center justify-between gap-4 text-sm">
+                                <div key={index} className="flex items-center justify-between gap-4 text-sm bg-background/40 p-3 rounded-xl">
                                     <div className="flex items-center gap-3 overflow-hidden">
-                                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border bg-muted/50 p-1 ${item.rarity === 'LEGENDARY' ? 'text-yellow-500 border-yellow-500/20' :
-                                            item.rarity === 'EPIC' ? 'text-purple-500 border-purple-500/20' : 'text-muted-foreground'
+                                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 p-1 ${item.rarity === 'LEGENDARY' ? 'text-yellow-500' :
+                                            item.rarity === 'EPIC' ? 'text-purple-500' : 'text-muted-foreground'
                                             }`}>
                                             <Gift className="h-4 w-4" />
                                         </div>
@@ -242,7 +240,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                                             <span className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleDateString()}</span>
                                         </div>
                                     </div>
-                                    <Badge variant="outline" className="shrink-0 text-[10px]">
+                                    <Badge variant="secondary" className="shrink-0 text-[10px] bg-background/50">
                                         {item.rarity}
                                     </Badge>
                                 </div>
@@ -255,7 +253,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                         )}
                     </div>
                 </ScrollArea>
-            </Card>
+            </div>
         </div>
     );
 }

@@ -53,13 +53,13 @@ export default function PreRegisterDashboard({ userData }) {
                     <p className="text-muted-foreground">ยินดีต้อนรับกลับ, {localUserData?.name}</p>
                 </div>
 
-                <div className="bg-muted/50 p-1 rounded-lg">
+                <div className="bg-muted/30 p-1.5 rounded-2xl backdrop-blur-sm">
                     <div className="flex items-center gap-1">
                         <Button
                             variant={activeTab === 'invite' ? 'secondary' : 'ghost'}
                             size="sm"
                             onClick={() => setActiveTab('invite')}
-                            className="gap-2"
+                            className={`gap-2 rounded-xl transition-all ${activeTab === 'invite' ? 'bg-background shadow-sm' : 'hover:bg-background/50'}`}
                         >
                             <Users className="w-4 h-4" />
                             ชวนเพื่อน
@@ -70,7 +70,7 @@ export default function PreRegisterDashboard({ userData }) {
                                 variant={activeTab === 'luckydraw' ? 'secondary' : 'ghost'}
                                 size="sm"
                                 onClick={() => setActiveTab('luckydraw')}
-                                className="gap-2"
+                                className={`gap-2 rounded-xl transition-all ${activeTab === 'luckydraw' ? 'bg-background shadow-sm' : 'hover:bg-background/50'}`}
                             >
                                 <Ticket className="w-4 h-4" />
                                 สุ่มรางวัล
@@ -82,7 +82,7 @@ export default function PreRegisterDashboard({ userData }) {
                                 variant={activeTab === 'gang' ? 'secondary' : 'ghost'}
                                 size="sm"
                                 onClick={() => setActiveTab('gang')}
-                                className="gap-2"
+                                className={`gap-2 rounded-xl transition-all ${activeTab === 'gang' ? 'bg-background shadow-sm' : 'hover:bg-background/50'}`}
                             >
                                 <Shield className="w-4 h-4" />
                                 ระบบแก๊ง
