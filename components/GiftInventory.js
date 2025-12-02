@@ -96,23 +96,23 @@ export default function GiftInventory() {
                             </div>
                         </div>
                     ) : pendingItems.length > 0 ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar p-1">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar p-1">
                             {pendingItems.map((item) => (
-                                <div key={item.id} className="bg-background rounded-3xl p-4 border border-border/50 shadow-sm hover:shadow-md transition-all flex items-center gap-4 group relative overflow-hidden shrink-0 h-24">
-                                    <div className="absolute top-0 right-0 w-20 h-20 bg-primary/5 rounded-bl-[3rem] -mr-4 -mt-4 transition-transform group-hover:scale-110" />
+                                <div key={item.id} className="bg-background rounded-3xl p-4 border border-border/50 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center gap-3 group relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-16 h-16 bg-primary/5 rounded-bl-[2rem] -mr-4 -mt-4 transition-transform group-hover:scale-110" />
 
-                                    <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 text-primary relative z-10">
-                                        <Package className="w-6 h-6" />
+                                    <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center shrink-0 text-primary relative z-10 mt-2">
+                                        <Package className="w-7 h-7" />
                                     </div>
-                                    <div className="relative z-10 min-w-0 flex-1">
-                                        <h4 className="font-bold text-foreground truncate" title={item.item_name}>{item.item_name}</h4>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <Badge variant="outline" className="text-xs h-5 bg-background/50 border-primary/20 text-primary">
+                                    <div className="relative z-10 min-w-0 w-full">
+                                        <h4 className="font-bold text-foreground truncate text-sm" title={item.item_name}>{item.item_name}</h4>
+                                        <div className="flex items-center justify-center gap-2 mt-2">
+                                            <Badge variant="outline" className="text-[10px] h-5 bg-background/50 border-primary/20 text-primary">
                                                 x{item.amount}
                                             </Badge>
-                                            <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                                                <Clock className="w-3 h-3" /> รอรับ
-                                            </span>
+                                        </div>
+                                        <div className="mt-2 text-[10px] text-muted-foreground flex items-center justify-center gap-1">
+                                            <Clock className="w-3 h-3" /> รอรับ
                                         </div>
                                     </div>
                                 </div>
@@ -127,20 +127,20 @@ export default function GiftInventory() {
                 </TabsContent>
 
                 <TabsContent value="history" className="mt-0 focus-visible:ring-0">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar p-1">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar p-1">
                         {claimedItems.length > 0 ? (
                             claimedItems.map((item) => (
-                                <div key={item.id} className="bg-muted/20 rounded-3xl p-4 border border-transparent hover:border-border/50 transition-all flex items-center gap-4 shrink-0 h-24">
-                                    <div className="w-12 h-12 rounded-2xl bg-green-500/10 flex items-center justify-center shrink-0 text-green-500">
+                                <div key={item.id} className="bg-muted/20 rounded-3xl p-4 border border-transparent hover:border-border/50 transition-all flex flex-col items-center text-center gap-3 shrink-0">
+                                    <div className="w-12 h-12 rounded-2xl bg-green-500/10 flex items-center justify-center shrink-0 text-green-500 mt-2">
                                         <CheckCircle2 className="w-6 h-6" />
                                     </div>
-                                    <div className="min-w-0 flex-1">
-                                        <h4 className="font-bold text-foreground truncate" title={item.item_name}>{item.item_name}</h4>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <Badge variant="secondary" className="text-xs h-5 px-1.5">x{item.amount}</Badge>
-                                            <span className="text-[10px] text-muted-foreground">
-                                                {new Date(item.claimed_at).toLocaleDateString('th-TH')}
-                                            </span>
+                                    <div className="min-w-0 w-full">
+                                        <h4 className="font-bold text-foreground truncate text-sm" title={item.item_name}>{item.item_name}</h4>
+                                        <div className="flex items-center justify-center gap-2 mt-2">
+                                            <Badge variant="secondary" className="text-[10px] h-5 px-1.5">x{item.amount}</Badge>
+                                        </div>
+                                        <div className="mt-2 text-[10px] text-muted-foreground">
+                                            {new Date(item.claimed_at).toLocaleDateString('th-TH')}
                                         </div>
                                     </div>
                                 </div>
