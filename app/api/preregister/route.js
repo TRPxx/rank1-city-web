@@ -73,11 +73,12 @@ export async function POST(request) {
 
             const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
             const discordName = session.user.name || 'Unknown';
+            const avatarUrl = session.user.image || null;
 
             await connection.query(
-                `INSERT INTO preregistrations (discord_id, discord_name, referral_code, referred_by, ip_address, ticket_count) 
-                 VALUES (?, ?, ?, ?, ?, ?)`,
-                [discordId, discordName, myReferralCode, validReferredBy, ipAddress, 0]
+                `INSERT INTO preregistrations (discord_id, discord_name, avatar_url, referral_code, referred_by, ip_address, ticket_count) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [discordId, discordName, avatarUrl, myReferralCode, validReferredBy, ipAddress, 0]
             );
 
             await connection.commit();

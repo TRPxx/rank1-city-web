@@ -23,18 +23,7 @@ export default function RecentRegistrations() {
         };
 
         fetchRecent();
-
-        // --- MOCK SIMULATION START ---
-        const mockNames = ["TeeGa", "Admin", "PlayerOne", "RoleplayKing", "CityMaster", "DriverPro", "MedicHero"];
-        const interval = setInterval(() => {
-            const newMockUser = {
-                discord_name: mockNames[Math.floor(Math.random() * mockNames.length)] + Math.floor(Math.random() * 100),
-                created_at: new Date().toISOString()
-            };
-            setRegistrations(prev => [newMockUser, ...prev].slice(0, 10)); // Add new user to top, keep only 10
-        }, 3000); // Add new user every 3 seconds
-        // --- MOCK SIMULATION END ---
-
+        const interval = setInterval(fetchRecent, 30000); // Refresh every 30s
         return () => clearInterval(interval);
     }, []);
 
@@ -50,7 +39,6 @@ export default function RecentRegistrations() {
             </div>
 
             <div className="relative h-[400px] overflow-hidden mask-gradient-b">
-                {/* Fade masks for smooth scrolling effect */}
                 {/* Fade masks removed for transparency */}
 
                 <div className="space-y-3 py-4">
@@ -71,8 +59,13 @@ export default function RecentRegistrations() {
                                     className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-muted/40 transition-colors duration-300"
                                 >
                                     <div className="relative">
-                                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary/20 to-secondary/20 flex items-center justify-center shrink-0 border border-white/5 group-hover:border-primary/30 transition-colors">
-                                            <User className="w-5 h-5 text-foreground/70 group-hover:text-primary transition-colors" />
+                                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary/20 to-secondary/20 flex items-center justify-center shrink-0 border border-white/5 group-hover:border-primary/30 transition-colors overflow-hidden">
+                                            {/* Use real avatar if available, otherwise DiceBear */}
+                                            <img
+                                                src={user.avatar_url || `https://api.dicebear.com/9.x/avataaars/svg?seed=${user.discord_name}`}
+                                                alt={user.discord_name}
+                                                className="w-full h-full object-cover"
+                                            />
                                         </div>
                                         <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
                                     </div>

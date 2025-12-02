@@ -7,7 +7,7 @@ export async function GET() {
     try {
         // Fetch recent 20 registrations
         const [rows] = await pool.query(`
-            SELECT discord_name, created_at 
+            SELECT discord_name, avatar_url, created_at 
             FROM preregistrations 
             ORDER BY created_at DESC 
             LIMIT 20
