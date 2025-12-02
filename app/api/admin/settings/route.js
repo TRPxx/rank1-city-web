@@ -1,15 +1,3 @@
-import { NextResponse } from 'next/server';
-import { revalidatePath } from 'next/cache';
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import fs from 'fs/promises';
-import path from 'path';
-
-// Helper to check admin
-const isAdmin = (session) => {
-    return session?.user?.isAdmin;
-};
-
 export async function GET(request) {
     try {
         const session = await getServerSession(authOptions);

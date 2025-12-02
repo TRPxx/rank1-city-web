@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import pool from '@/lib/db';
+import { webDb as pool } from '@/lib/db';
 
 export const dynamic = 'force-dynamic'; // Disable caching to get real-time data
 
