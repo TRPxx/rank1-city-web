@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { useSession, signIn } from 'next-auth/react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Loader2, CheckCircle, Gift } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 
 export default function PreRegisterButton({ onRegisterSuccess }) {
     const { data: session, status } = useSession();
@@ -16,9 +17,28 @@ export default function PreRegisterButton({ onRegisterSuccess }) {
     const [error, setError] = useState('');
     const [mounted, setMounted] = useState(false);
 
+    const searchParams = useSearchParams();
+
     useEffect(() => {
         setMounted(true);
-    }, []);
+
+        // 1. Try to get ref from URL
+        const refFromUrl = searchParams.get('ref');
+
+        if (refFromUrl) {
+            // Save to storage and state
+            localStorage.setItem('rank1_referral_code', refFromUrl);
+            setReferralCode(refFromUrl);
+
+            if (session) setIsOpen(true);
+        } else {
+            // 2. Try to get from storage if not in URL
+            const storedRef = localStorage.getItem('rank1_referral_code');
+            if (storedRef) {
+                setReferralCode(storedRef);
+            }
+        }
+    }, [searchParams, session]);
 
     const handleRegister = async () => {
         setIsLoading(true);
@@ -39,6 +59,7 @@ export default function PreRegisterButton({ onRegisterSuccess }) {
 
             // Success
             setIsOpen(false);
+            localStorage.removeItem('rank1_referral_code'); // Clear stored code
             if (onRegisterSuccess) onRegisterSuccess();
 
         } catch (err) {
