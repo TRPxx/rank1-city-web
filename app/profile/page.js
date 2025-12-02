@@ -15,11 +15,12 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import {
     User, Wallet, CreditCard, Phone, Calendar, LogOut, Search,
     Backpack, Swords, Shield, Vault, Loader2, Briefcase, MapPin,
-    Stethoscope, Wrench, Car, Gavel
+    Stethoscope, Wrench, Car, Gavel, Package
 } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
+import GiftInventory from "@/components/GiftInventory";
 
 export default function ProfilePage() {
     const { data: session, status } = useSession();
@@ -224,6 +225,9 @@ export default function ProfilePage() {
                                         <TabsTrigger value="safe" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
                                             <Vault className="w-4 h-4 mr-2" /> ตู้เซฟ
                                         </TabsTrigger>
+                                        <TabsTrigger value="gift" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                                            <Package className="w-4 h-4 mr-2" /> ของขวัญ
+                                        </TabsTrigger>
                                     </TabsList>
 
                                     <div className="relative w-full sm:w-72">
@@ -260,6 +264,14 @@ export default function ProfilePage() {
                                             <p className="text-muted-foreground">ไอเทมที่เก็บไว้ในตู้เซฟ</p>
                                         </div>
                                         <InventoryGrid items={filterItems(gameData.safe)} type="item" />
+                                    </TabsContent>
+
+                                    <TabsContent value="gift" className="mt-0 focus-visible:ring-0">
+                                        <div className="mb-6 px-2">
+                                            <h3 className="text-xl font-bold">กล่องของขวัญ</h3>
+                                            <p className="text-muted-foreground">ไอเทมรางวัลที่รอรับเข้าเกม</p>
+                                        </div>
+                                        <GiftInventory />
                                     </TabsContent>
                                 </div>
                             </Tabs>
