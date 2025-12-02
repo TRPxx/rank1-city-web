@@ -6,6 +6,7 @@ import {
     Users,
     Ticket,
     Shield,
+    Package
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -14,6 +15,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InviteEarn from './InviteEarn';
 import LuckyDraw from './LuckyDraw';
 import GangManager from './GangManager';
+import GiftInventory from './GiftInventory';
 
 import { PREREGISTER_CONFIG } from '@/lib/preregister-config';
 
@@ -88,6 +90,16 @@ export default function PreRegisterDashboard({ userData }) {
                                 ระบบแก๊ง
                             </Button>
                         )}
+
+                        <Button
+                            variant={activeTab === 'gift' ? 'secondary' : 'ghost'}
+                            size="sm"
+                            onClick={() => setActiveTab('gift')}
+                            className={`gap-2 rounded-xl transition-all ${activeTab === 'gift' ? 'bg-background shadow-sm' : 'hover:bg-background/50'}`}
+                        >
+                            <Package className="w-4 h-4" />
+                            ของขวัญ
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -117,6 +129,9 @@ export default function PreRegisterDashboard({ userData }) {
                         )}
                         {activeTab === 'gang' && (
                             <GangManager />
+                        )}
+                        {activeTab === 'gift' && (
+                            <GiftInventory />
                         )}
                     </motion.div>
                 </AnimatePresence>
