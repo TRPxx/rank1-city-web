@@ -36,3 +36,6 @@ next-env.d.ts
 
 # lighthouse reports
 lighthouse-report*.json
+
+# item images (synced from game resource)
+/public/items/
