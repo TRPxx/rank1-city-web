@@ -72,7 +72,8 @@ export function useLuckyDraw({ onDrawComplete }) {
                 setTimeout(() => {
                     if (tapeRef.current) {
                         // Get actual card width and gap from DOM for accuracy
-                        const cards = tapeRef.current.querySelectorAll('div');
+                        // Use .children to get direct card children, not nested divs
+                        const cards = tapeRef.current.children;
                         const firstCard = cards[0];
                         const secondCard = cards[1];
 
