@@ -348,12 +348,12 @@ function InventoryGrid({ items, type }) {
 
                     <div className="relative w-16 h-16 my-2 transition-transform group-hover:scale-110">
                         <Image
-                            src={`https://raw.githubusercontent.com/overextended/ox_inventory/web/web/images/${item.name}.png`}
+                            src={`/items/${item.name}.png`}
                             alt={item.label || item.name}
                             fill
                             className="object-contain"
                             onError={(e) => {
-                                e.target.srcset = "https://placehold.co/100x100?text=ITEM"
+                                e.target.src = "/items/placeholder.png"
                             }}
                         />
                     </div>
