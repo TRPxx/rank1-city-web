@@ -241,7 +241,7 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
 
-                                <div className="bg-muted/20 rounded-[2.5rem] p-6 min-h-[500px]">
+                                <div className="bg-muted/30 rounded-[2.5rem] p-8 relative overflow-hidden min-h-[500px]">
                                     <TabsContent value="inventory" className="mt-0 focus-visible:ring-0">
                                         <div className="mb-6 px-2">
                                             <h3 className="text-xl font-bold">รายการไอเทม</h3>
