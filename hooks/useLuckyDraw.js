@@ -10,7 +10,7 @@ export function useLuckyDraw({ onDrawComplete }) {
     const tapeRef = useRef(null);
 
     // Config for tape animation
-    const CARD_WIDTH = 140;
+    const CARD_WIDTH = 130; // Match actual card width in LuckyDraw.js (130px base, sm:140px)
     const CARD_GAP = 16;
     const WIN_INDEX = 40;
 
@@ -32,13 +32,18 @@ export function useLuckyDraw({ onDrawComplete }) {
 
     const getRandomItem = () => {
         const items = PREREGISTER_CONFIG.luckyDraw.items;
-        const rand = Math.random() * 100;
-        let cumulative = 0;
+        const totalChance = items.reduce((sum, item) => sum + item.chance, 0);
+        let random = Math.random() * totalChance;
+        let selectedItem = items[items.length - 1];
+
         for (const item of items) {
-            cumulative += item.chance;
-            if (rand <= cumulative) return item;
+            if (random < item.chance) {
+                selectedItem = item;
+                break;
+            }
+            random -= item.chance;
         }
-        return items[0];
+        return selectedItem;
     };
 
     const spin = async (ticketCount) => {
@@ -62,17 +67,19 @@ export function useLuckyDraw({ onDrawComplete }) {
             }
             setTapeItems(newTape);
 
-            // Calculate random offset for "natural" feel
-            const randomOffset = (Math.random() * 0.6 - 0.3) * CARD_WIDTH;
-
             setTimeout(() => {
                 if (tapeRef.current) {
+                    // Get actual card width from DOM for accuracy
+                    const firstCard = tapeRef.current.querySelector('div');
+                    const actualCardWidth = firstCard ? firstCard.offsetWidth : CARD_WIDTH;
+
                     // Dynamic calculation based on current container width (Responsive!)
                     const containerWidth = tapeRef.current.parentElement.offsetWidth;
-                    const itemTotalWidth = CARD_WIDTH + CARD_GAP;
+                    const itemTotalWidth = actualCardWidth + CARD_GAP;
 
                     // Calculate exact position to center the winning item
-                    const targetPosition = (WIN_INDEX * itemTotalWidth) - (containerWidth / 2) + (CARD_WIDTH / 2) + randomOffset;
+                    const randomOffset = (Math.random() * 0.6 - 0.3) * actualCardWidth;
+                    const targetPosition = (WIN_INDEX * itemTotalWidth) - (containerWidth / 2) + (actualCardWidth / 2) + randomOffset;
 
                     // Reset position instantly
                     tapeRef.current.style.transition = 'none';
