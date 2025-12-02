@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { webDb as pool } from '@/lib/db';
+import { PREREGISTER_CONFIG } from '@/lib/preregister-config';
 
 // Helper to generate random code
 function generateReferralCode() {
@@ -64,10 +65,43 @@ export async function POST(request) {
                 if (referrer.length > 0 && referrer[0].discord_id !== discordId) {
                     validReferredBy = referralCodeInput;
 
+                    // 1. Update Referrer Stats
                     await connection.query(
                         'UPDATE preregistrations SET invite_count = invite_count + 1, ticket_count = ticket_count + 1 WHERE referral_code = ?',
                         [validReferredBy]
                     );
+
+                    // 2. Check & Award Milestone Rewards
+                    const [updatedReferrer] = await connection.query(
+                        'SELECT invite_count FROM preregistrations WHERE referral_code = ?',
+                        [validReferredBy]
+                    );
+
+                    const newInviteCount = updatedReferrer[0].invite_count;
+                    const referrerDiscordId = referrer[0].discord_id;
+                    const rewards = PREREGISTER_CONFIG.rewards.individual;
+
+                    for (const reward of rewards) {
+                        if (newInviteCount >= reward.count) {
+                            // Unique ID for this specific milestone reward
+                            const rewardItemId = `ref_reward_${reward.count}`;
+
+                            // Check if already in queue (to avoid duplicates)
+                            const [existingClaim] = await connection.query(
+                                'SELECT id FROM claim_queue WHERE discord_id = ? AND item_id = ?',
+                                [referrerDiscordId, rewardItemId]
+                            );
+
+                            if (existingClaim.length === 0) {
+                                // Insert into claim_queue
+                                await connection.query(
+                                    'INSERT INTO claim_queue (discord_id, item_id, item_name, amount, status) VALUES (?, ?, ?, 1, "pending")',
+                                    [referrerDiscordId, rewardItemId, `Referral Reward: ${reward.name}`]
+                                );
+                                console.log(`Awarded referral reward to ${referrerDiscordId}: ${reward.name}`);
+                            }
+                        }
+                    }
                 }
             }
 
