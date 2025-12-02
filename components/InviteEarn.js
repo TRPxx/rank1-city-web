@@ -12,11 +12,37 @@ export default function InviteEarn({ referralCode, inviteCount }) {
     const [copiedCode, setCopiedCode] = useState(false);
     const [copiedLink, setCopiedLink] = useState(false);
 
-    const copyCode = () => {
-        if (referralCode) {
-            navigator.clipboard.writeText(referralCode);
+    const copyCode = async () => {
+        if (!referralCode) return;
+
+        try {
+            // Try modern API first
+            if (navigator.clipboard && window.isSecureContext) {
+                await navigator.clipboard.writeText(referralCode);
+            } else {
+                // Fallback for HTTP
+                const textArea = document.createElement("textarea");
+                textArea.value = referralCode;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                textArea.style.top = "0";
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+
+                try {
+                    document.execCommand('copy');
+                } catch (err) {
+                    console.error('Fallback: Oops, unable to copy', err);
+                }
+
+                document.body.removeChild(textArea);
+            }
+
             setCopiedCode(true);
             setTimeout(() => setCopiedCode(false), 2000);
+        } catch (err) {
+            console.error('Failed to copy text: ', err);
         }
     };
 
