@@ -185,9 +185,8 @@ export default function RoadmapSlide({ siteConfig }) {
                 </div>
 
                 {/* Scroll Hint */}
-                <div className="flex justify-center items-center gap-2 text-muted-foreground text-sm mt-4">
-                    <span className="hidden sm:inline">Drag to explore</span>
-                    <span className="sm:hidden">Swipe to explore</span>
+                <div className="hidden sm:flex justify-center items-center gap-2 text-muted-foreground text-sm mt-4">
+                    <span>Drag to explore</span>
                     <ChevronRight className="w-4 h-4 animate-bounce-x" />
                 </div>
             </div>
