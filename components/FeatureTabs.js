@@ -44,16 +44,16 @@ export default function FeatureTabs({ features = [] }) {
     };
 
     return (
-        <div className="w-full max-w-6xl mx-auto h-full flex flex-col">
+        <div className="w-full max-w-7xl mx-auto h-full flex flex-col">
             {/* MOBILE/TABLET VIEW (< lg) */}
             <div className="lg:hidden w-full h-full flex flex-col px-4">
-                <div className="flex justify-center gap-1.5 mb-4">
+                <div className="flex justify-center gap-1.5 mb-6">
                     {features.map((_, idx) => (
                         <div
                             key={idx}
                             className={cn(
-                                "h-1.5 rounded-full transition-all duration-300",
-                                activeIndex === idx ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/30"
+                                "h-1 rounded-full transition-all duration-300",
+                                activeIndex === idx ? "w-8 bg-primary" : "w-2 bg-primary/20"
                             )}
                         />
                     ))}
@@ -64,9 +64,9 @@ export default function FeatureTabs({ features = [] }) {
                         <motion.div
                             key={activeIndex}
                             custom={direction}
-                            initial={{ x: direction > 0 ? 300 : -300, opacity: 0 }}
+                            initial={{ x: direction > 0 ? 200 : -200, opacity: 0 }}
                             animate={{ x: 0, opacity: 1 }}
-                            exit={{ x: direction > 0 ? -300 : 300, opacity: 0 }}
+                            exit={{ x: direction > 0 ? -200 : 200, opacity: 0 }}
                             transition={{ x: { type: "spring", stiffness: 300, damping: 30 }, opacity: { duration: 0.2 } }}
                             drag="x"
                             dragConstraints={{ left: 0, right: 0 }}
@@ -76,10 +76,10 @@ export default function FeatureTabs({ features = [] }) {
                                 if (swipe < -swipeConfidenceThreshold) paginate(1);
                                 else if (swipe > swipeConfidenceThreshold) paginate(-1);
                             }}
-                            className="absolute inset-0"
+                            className="absolute inset-0 pb-8"
                         >
-                            <Card className="h-full overflow-hidden border-border shadow-sm">
-                                <div className="relative h-1/2 w-full bg-muted">
+                            <div className="h-full overflow-hidden rounded-3xl bg-muted/30">
+                                <div className="relative h-[55%] w-full">
                                     <Image
                                         src={activeFeature.image}
                                         alt={activeFeature.title}
@@ -88,57 +88,69 @@ export default function FeatureTabs({ features = [] }) {
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-background via-transparent to-transparent" />
                                 </div>
-                                <CardContent className="pt-6 relative">
-                                    <div className="absolute -top-10 left-6 bg-background p-2 rounded-xl border shadow-sm">
-                                        <MobileIcon className="w-8 h-8 text-primary" />
+                                <div className="p-6 relative -mt-12">
+                                    <div className="inline-flex items-center justify-center p-3 rounded-2xl bg-background shadow-sm mb-4">
+                                        <MobileIcon className="w-6 h-6 text-primary" />
                                     </div>
-                                    <h3 className="text-2xl font-bold mb-2">{activeFeature.title}</h3>
-                                    <p className="text-muted-foreground mb-6">{activeFeature.description}</p>
+                                    <h3 className="text-2xl font-bold mb-2 tracking-tight">{activeFeature.title}</h3>
+                                    <p className="text-muted-foreground mb-6 text-sm leading-relaxed">{activeFeature.description}</p>
 
-                                    <div className="grid grid-cols-3 gap-4">
+                                    <div className="grid grid-cols-3 gap-3">
                                         {activeFeature.stats.map((stat, idx) => (
-                                            <div key={idx} className="text-center p-2 bg-muted/50 rounded-lg">
-                                                <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">{stat.label}</div>
+                                            <div key={idx} className="text-center p-3 bg-background/50 rounded-2xl">
+                                                <div className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider mb-1">{stat.label}</div>
                                                 <div className="font-bold text-sm">{stat.value}</div>
                                             </div>
                                         ))}
                                     </div>
-                                </CardContent>
-                            </Card>
+                                </div>
+                            </div>
                         </motion.div>
                     </AnimatePresence>
                 </div>
             </div>
 
             {/* DESKTOP VIEW (≥ lg) */}
-            <div className="hidden lg:flex h-full max-h-[600px] border rounded-xl overflow-hidden bg-card shadow-sm">
+            <div className="hidden lg:flex h-full max-h-[650px] gap-8">
                 {/* Sidebar Navigation */}
-                <div className="w-[350px] border-r bg-muted/10 flex flex-col">
-                    <div className="p-6 border-b">
-                        <h3 className="font-semibold text-lg">System Features</h3>
-                        <p className="text-sm text-muted-foreground">Explore our unique gameplay systems</p>
+                <div className="w-[300px] flex flex-col py-4">
+                    <div className="mb-6 px-4">
+                        <h3 className="font-semibold text-xl tracking-tight">System Features</h3>
+                        <p className="text-sm text-muted-foreground mt-1">Explore our unique gameplay systems</p>
                     </div>
-                    <ScrollArea className="flex-1">
-                        <div className="p-4 space-y-2" role="tablist" aria-orientation="vertical">
+                    <ScrollArea className="flex-1 -mr-4 pr-4">
+                        <div className="space-y-1" role="tablist" aria-orientation="vertical">
                             {features.map((feature) => {
                                 const Icon = iconMap[feature.icon] || Star;
+                                const isActive = activeTab === feature.id;
                                 return (
                                     <button
                                         key={feature.id}
                                         role="tab"
-                                        aria-selected={activeTab === feature.id}
-                                        aria-controls={`panel-${feature.id}`}
+                                        aria-selected={isActive}
                                         onClick={() => setActiveTab(feature.id)}
                                         className={cn(
-                                            "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-all group",
-                                            activeTab === feature.id
-                                                ? "bg-primary text-primary-foreground shadow-sm"
+                                            "w-full flex items-center gap-4 p-4 rounded-2xl text-left transition-all duration-200 group relative overflow-hidden",
+                                            isActive
+                                                ? "bg-primary/10 text-primary font-medium"
                                                 : "hover:bg-muted text-muted-foreground hover:text-foreground"
                                         )}
                                     >
-                                        <Icon className={cn("w-5 h-5", activeTab === feature.id ? "text-primary-foreground" : "text-primary")} />
-                                        <span className="font-medium flex-1">{feature.title}</span>
-                                        {activeTab === feature.id && <ChevronRight className="w-4 h-4 opacity-50" />}
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="activeTabBg"
+                                                className="absolute inset-0 bg-primary/10"
+                                                initial={false}
+                                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                            />
+                                        )}
+                                        <div className={cn(
+                                            "relative p-2 rounded-xl transition-colors",
+                                            isActive ? "bg-background shadow-sm" : "bg-muted group-hover:bg-background"
+                                        )}>
+                                            <Icon className={cn("w-5 h-5", isActive ? "text-primary" : "text-muted-foreground")} />
+                                        </div>
+                                        <span className="relative z-10 text-base">{feature.title}</span>
                                     </button>
                                 );
                             })}
@@ -147,59 +159,58 @@ export default function FeatureTabs({ features = [] }) {
                 </div>
 
                 {/* Main Content Area */}
-                <div className="flex-1 flex flex-col relative">
+                <div className="flex-1 relative bg-muted/30 rounded-[2.5rem] overflow-hidden p-2">
                     <AnimatePresence mode="wait">
                         <motion.div
                             key={activeTab}
-                            initial={{ opacity: 0, y: 10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            exit={{ opacity: 0, y: -10 }}
-                            transition={{ duration: 0.2 }}
-                            className="flex flex-col h-full"
+                            initial={{ opacity: 0, scale: 0.98 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.98 }}
+                            transition={{ duration: 0.3, ease: "easeOut" }}
+                            className="w-full h-full relative rounded-[2rem] overflow-hidden bg-background"
                         >
-                            {/* Feature Header */}
-                            <div className="p-8 pb-6">
-                                <div className="flex items-center gap-3 mb-4">
-                                    <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">
-                                        {activeFeatureByTab.id}
-                                    </Badge>
-                                </div>
-                                <h2 className="text-3xl font-bold tracking-tight mb-2">{activeFeatureByTab.title}</h2>
-                                <p className="text-lg text-muted-foreground max-w-2xl">{activeFeatureByTab.description}</p>
-                            </div>
+                            <Image
+                                src={activeFeatureByTab.image}
+                                alt={activeFeatureByTab.title}
+                                fill
+                                className="object-cover"
+                            />
+                            {/* Gradient Overlay */}
+                            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+                            <div className="absolute inset-0 bg-gradient-to-r from-background/90 via-background/40 to-transparent" />
 
-                            {/* Feature Visuals */}
-                            <div className="flex-1 px-8 pb-8 flex gap-6 min-h-0">
-                                {/* Main Image */}
-                                <div className="flex-1 relative rounded-xl overflow-hidden border bg-muted shadow-sm group">
-                                    <Image
-                                        src={activeFeatureByTab.image}
-                                        alt={activeFeatureByTab.title}
-                                        fill
-                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                                    />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                            {/* Content Overlay */}
+                            <div className="absolute inset-0 p-12 flex flex-col justify-end max-w-2xl">
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.1 }}
+                                >
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="p-3 bg-background/80 backdrop-blur-md rounded-2xl shadow-sm">
+                                            <ActiveIcon className="w-8 h-8 text-primary" />
+                                        </div>
+                                        <Badge variant="secondary" className="bg-background/80 backdrop-blur-md px-3 py-1.5 text-sm font-medium">
+                                            {activeFeatureByTab.id}
+                                        </Badge>
+                                    </div>
 
-                                    {/* Floating Stats */}
-                                    <div className="absolute bottom-6 left-6 right-6 flex gap-4">
+                                    <h2 className="text-4xl md:text-5xl font-bold tracking-tight mb-4 text-foreground">
+                                        {activeFeatureByTab.title}
+                                    </h2>
+                                    <p className="text-lg text-muted-foreground mb-8 leading-relaxed max-w-lg">
+                                        {activeFeatureByTab.description}
+                                    </p>
+
+                                    <div className="flex gap-4">
                                         {activeFeatureByTab.stats.map((stat, idx) => (
-                                            <div key={idx} className="bg-background/10 backdrop-blur-md border border-white/10 rounded-lg p-3 flex-1">
-                                                <div className="text-xs text-white/70 uppercase tracking-wider mb-1">{stat.label}</div>
-                                                <div className="text-xl font-bold text-white">{stat.value}</div>
+                                            <div key={idx} className="bg-background/60 backdrop-blur-md border border-white/10 rounded-2xl p-4 min-w-[120px]">
+                                                <div className="text-xs text-muted-foreground font-medium uppercase tracking-wider mb-1">{stat.label}</div>
+                                                <div className="text-2xl font-bold text-foreground">{stat.value}</div>
                                             </div>
                                         ))}
                                     </div>
-                                </div>
-
-                                {/* Side Details (Optional - can be used for extra info or sub-features) */}
-                                <div className="w-64 flex flex-col gap-4">
-                                    <Card className="flex-1 bg-muted/30 border-dashed flex items-center justify-center p-6 text-center">
-                                        <div>
-                                            <ActiveIcon className="w-12 h-12 text-muted-foreground/20 mx-auto mb-4" />
-                                            <p className="text-sm text-muted-foreground">More details coming soon...</p>
-                                        </div>
-                                    </Card>
-                                </div>
+                                </motion.div>
                             </div>
                         </motion.div>
                     </AnimatePresence>
