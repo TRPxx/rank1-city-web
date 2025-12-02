@@ -163,8 +163,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                             {tapeItems.map((item, index) => (
                                 <div
                                     key={index}
-                                    className={`flex h-[130px] w-[130px] sm:h-[140px] sm:w-[140px] shrink-0 flex-col items-center justify-between rounded-xl bg-card p-3 sm:p-4 shadow-sm transition-all border-0 ${isSpinning && index === WIN_INDEX ? 'ring-2 ring-primary ring-offset-2' : ''
-                                        }`}
+                                    className="flex h-[130px] w-[130px] sm:h-[140px] sm:w-[140px] shrink-0 flex-col items-center justify-between rounded-xl bg-card p-3 sm:p-4 shadow-sm transition-all border-0"
                                 >
                                     <div className={`flex h-12 w-12 sm:h-16 sm:w-16 items-center justify-center rounded-full p-2 ${getRarityColor(item.rarity)}`}>
                                         {item.image ? (
