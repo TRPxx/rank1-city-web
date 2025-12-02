@@ -128,10 +128,10 @@ export default function GiftInventory() {
                     <h3 className="text-lg font-bold text-muted-foreground">ประวัติการรับล่าสุด</h3>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                     {claimedItems.length > 0 ? (
-                        claimedItems.slice(0, 8).map((item) => (
-                            <div key={item.id} className="p-3 rounded-xl bg-muted/20 border border-transparent hover:border-border/50 flex items-center justify-between transition-all">
+                        claimedItems.map((item) => (
+                            <div key={item.id} className="p-3 rounded-xl bg-muted/20 border border-transparent hover:border-border/50 flex items-center justify-between transition-all shrink-0 h-16">
                                 <div className="flex items-center gap-3 min-w-0">
                                     <div className="w-8 h-8 rounded-lg bg-green-500/10 flex items-center justify-center shrink-0">
                                         <CheckCircle2 className="w-4 h-4 text-green-500" />
@@ -143,7 +143,7 @@ export default function GiftInventory() {
                                         </p>
                                     </div>
                                 </div>
-                                <Badge variant="secondary" className="text-xs">x{item.amount}</Badge>
+                                <Badge variant="secondary" className="text-[10px] h-5 px-1.5 ml-2">x{item.amount}</Badge>
                             </div>
                         ))
                     ) : (
