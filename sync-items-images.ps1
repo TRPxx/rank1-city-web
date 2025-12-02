@@ -32,7 +32,6 @@ try {
     Write-Host "✅ Successfully synced $count items" -ForegroundColor Green
     Write-Host "📊 Total size: $([math]::Round($totalSize, 2)) MB" -ForegroundColor Gray
     Write-Host "🎉 Sync completed!" -ForegroundColor Green
-    
 }
 catch {
     Write-Host "❌ Error during sync: $_" -ForegroundColor Red
