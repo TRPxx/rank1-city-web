@@ -67,38 +67,69 @@ export function useLuckyDraw({ onDrawComplete }) {
             }
             setTapeItems(newTape);
 
-            setTimeout(() => {
-                if (tapeRef.current) {
-                    // Get actual card width from DOM for accuracy
-                    const firstCard = tapeRef.current.querySelector('div');
-                    const actualCardWidth = firstCard ? firstCard.offsetWidth : CARD_WIDTH;
+            // Use requestAnimationFrame to ensure DOM is ready
+            requestAnimationFrame(() => {
+                setTimeout(() => {
+                    if (tapeRef.current) {
+                        // Get actual card width and gap from DOM for accuracy
+                        const cards = tapeRef.current.querySelectorAll('div');
+                        const firstCard = cards[0];
+                        const secondCard = cards[1];
 
-                    // Dynamic calculation based on current container width (Responsive!)
-                    const containerWidth = tapeRef.current.parentElement.offsetWidth;
-                    const itemTotalWidth = actualCardWidth + CARD_GAP;
+                        if (!firstCard || !secondCard) {
+                            console.error('Cards not found in DOM');
+                            return;
+                        }
 
-                    // Calculate exact position to center the winning item
-                    const randomOffset = (Math.random() * 0.6 - 0.3) * actualCardWidth;
-                    const targetPosition = (WIN_INDEX * itemTotalWidth) - (containerWidth / 2) + (actualCardWidth / 2) + randomOffset;
+                        const actualCardWidth = firstCard.offsetWidth;
 
-                    // Reset position instantly
-                    tapeRef.current.style.transition = 'none';
-                    tapeRef.current.style.transform = 'translateX(0px)';
-                    tapeRef.current.offsetHeight; // Force reflow
+                        // Calculate actual gap by measuring distance between cards
+                        const firstCardRight = firstCard.offsetLeft + firstCard.offsetWidth;
+                        const secondCardLeft = secondCard.offsetLeft;
+                        const actualGap = secondCardLeft - firstCardRight;
 
-                    // Start animation
-                    tapeRef.current.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.2, 1)';
-                    tapeRef.current.style.transform = `translateX(-${targetPosition}px)`;
+                        // Dynamic calculation based on current container width (Responsive!)
+                        const containerWidth = tapeRef.current.parentElement.offsetWidth;
+                        const itemTotalWidth = actualCardWidth + actualGap;
 
-                    setTimeout(() => {
-                        setIsSpinning(false);
-                        setWinItem(result);
-                        setShowWinnerModal(true);
-                        fetchHistory();
-                        if (onDrawComplete) onDrawComplete();
-                    }, 5000);
-                }
-            }, 50);
+                        // Calculate exact position to center the winning item
+                        const randomOffset = 0; // Temporarily disabled for testing - (Math.random() * 0.6 - 0.3) * actualCardWidth;
+                        const targetPosition = (WIN_INDEX * itemTotalWidth) - (containerWidth / 2) + (actualCardWidth / 2) + randomOffset;
+
+                        console.log('🎯 Lucky Draw Debug:', {
+                            resultItem: result.name,
+                            winIndex: WIN_INDEX,
+                            actualCardWidth,
+                            actualGap,
+                            expectedGap: CARD_GAP,
+                            containerWidth,
+                            itemTotalWidth,
+                            randomOffset,
+                            targetPosition,
+                            firstCardLeft: firstCard.offsetLeft,
+                            firstCardRight,
+                            secondCardLeft
+                        });
+
+                        // Reset position instantly
+                        tapeRef.current.style.transition = 'none';
+                        tapeRef.current.style.transform = 'translateX(0px)';
+                        tapeRef.current.offsetHeight; // Force reflow
+
+                        // Start animation
+                        tapeRef.current.style.transition = 'transform 5s cubic-bezier(0.2, 0.8, 0.2, 1)';
+                        tapeRef.current.style.transform = `translateX(-${targetPosition}px)`;
+
+                        setTimeout(() => {
+                            setIsSpinning(false);
+                            setWinItem(result);
+                            setShowWinnerModal(true);
+                            fetchHistory();
+                            if (onDrawComplete) onDrawComplete();
+                        }, 5000);
+                    }
+                }, 100);
+            });
 
         } catch (err) {
             console.error(err);
