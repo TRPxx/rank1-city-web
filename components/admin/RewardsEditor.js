@@ -270,14 +270,24 @@ export default function RewardsEditor({ config, setConfig, onSave }) {
                                                 <div className="grid gap-2 flex-1">
                                                     <div className="flex gap-2">
                                                         <Input
-                                                            placeholder="ชื่อไอเทม"
+                                                            placeholder="ชื่อไอเทม (Display Name)"
                                                             value={item.name}
                                                             onChange={(e) => {
                                                                 const newItems = [...(selectedReward.items || [])];
                                                                 newItems[itemIndex] = { ...item, name: e.target.value };
                                                                 updateReward(selectedIndex, 'items', newItems);
                                                             }}
-                                                            className="h-8 text-sm"
+                                                            className="h-8 text-sm flex-1"
+                                                        />
+                                                        <Input
+                                                            placeholder="Item ID (e.g. money)"
+                                                            value={item.id || ''}
+                                                            onChange={(e) => {
+                                                                const newItems = [...(selectedReward.items || [])];
+                                                                newItems[itemIndex] = { ...item, id: e.target.value };
+                                                                updateReward(selectedIndex, 'items', newItems);
+                                                            }}
+                                                            className="h-8 text-sm w-32"
                                                         />
                                                         <Input
                                                             type="number"
@@ -288,7 +298,7 @@ export default function RewardsEditor({ config, setConfig, onSave }) {
                                                                 newItems[itemIndex] = { ...item, amount: parseInt(e.target.value) || 0 };
                                                                 updateReward(selectedIndex, 'items', newItems);
                                                             }}
-                                                            className="w-24 h-8 text-sm"
+                                                            className="w-20 h-8 text-sm"
                                                         />
                                                     </div>
                                                     <Input
