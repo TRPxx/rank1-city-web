@@ -258,63 +258,63 @@ export default function AdminSettingsPage() {
     return (
         <div className="min-h-screen bg-background pb-20 font-sans">
             <Navbar />
-            <div className="container max-w-7xl pt-24 px-4">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-10">
+            <div className="container max-w-7xl pt-20 px-4">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-6">
                     <div>
-                        <h1 className="text-4xl font-bold tracking-tight mb-2">ตั้งค่าระบบ</h1>
-                        <p className="text-lg text-muted-foreground">จัดการการตั้งค่าเว็บไซต์ทั้งหมด</p>
+                        <h1 className="text-3xl font-bold tracking-tight mb-1">ตั้งค่าระบบ</h1>
+                        <p className="text-base text-muted-foreground">จัดการการตั้งค่าเว็บไซต์ทั้งหมด</p>
                     </div>
-                    <Button disabled={isSaving} onClick={() => window.location.reload()} variant="outline" className="rounded-full px-6 border-muted-foreground/20 hover:bg-muted">
+                    <Button disabled={isSaving} onClick={() => window.location.reload()} variant="outline" size="sm" className="rounded-full px-4 border-muted-foreground/20 hover:bg-muted">
                         รีเฟรชข้อมูล
                     </Button>
                 </div>
 
-                <Tabs defaultValue="general" className="space-y-8">
+                <Tabs defaultValue="general" className="space-y-4">
                     <TabsList className="bg-muted/50 p-1 rounded-full h-auto inline-flex flex-wrap gap-1">
-                        <TabsTrigger value="general" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">ทั่วไป</TabsTrigger>
-                        <TabsTrigger value="game" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">เกมและกิจกรรม</TabsTrigger>
-                        <TabsTrigger value="features" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">ฟีเจอร์</TabsTrigger>
-                        <TabsTrigger value="news" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">ข่าวสาร</TabsTrigger>
-                        <TabsTrigger value="roadmap" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">แผนงาน</TabsTrigger>
+                        <TabsTrigger value="general" className="rounded-full px-4 py-2 text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">ทั่วไป</TabsTrigger>
+                        <TabsTrigger value="game" className="rounded-full px-4 py-2 text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">เกมและกิจกรรม</TabsTrigger>
+                        <TabsTrigger value="features" className="rounded-full px-4 py-2 text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">ฟีเจอร์</TabsTrigger>
+                        <TabsTrigger value="news" className="rounded-full px-4 py-2 text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">ข่าวสาร</TabsTrigger>
+                        <TabsTrigger value="roadmap" className="rounded-full px-4 py-2 text-sm data-[state=active]:bg-background data-[state=active]:shadow-sm">แผนงาน</TabsTrigger>
                     </TabsList>
 
                     {/* General Settings */}
                     <TabsContent value="general" className="mt-0">
-                        <div className="bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden p-8">
-                            <div className="flex items-center justify-between mb-8">
+                        <div className="bg-card rounded-[2rem] border border-border/50 shadow-sm overflow-hidden p-6">
+                            <div className="flex items-center justify-between mb-6">
                                 <div>
-                                    <h3 className="text-2xl font-bold mb-1">ข้อมูลทั่วไป</h3>
-                                    <p className="text-muted-foreground">ข้อมูลพื้นฐานของเว็บไซต์และการตั้งค่า SEO</p>
+                                    <h3 className="text-xl font-bold mb-1">ข้อมูลทั่วไป</h3>
+                                    <p className="text-sm text-muted-foreground">ข้อมูลพื้นฐานของเว็บไซต์และการตั้งค่า SEO</p>
                                 </div>
-                                <Button onClick={() => handleSave('site', siteConfig)} disabled={isSaving} className="rounded-full px-6">
-                                    {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
+                                <Button onClick={() => handleSave('site', siteConfig)} disabled={isSaving} size="sm" className="rounded-full px-4">
+                                    {isSaving ? <Loader2 className="mr-2 h-3 w-3 animate-spin" /> : <Save className="mr-2 h-3 w-3" />}
                                     บันทึกการเปลี่ยนแปลง
                                 </Button>
                             </div>
 
-                            <div className="space-y-6 max-w-3xl">
-                                <div className="grid gap-3">
-                                    <Label className="text-base">ชื่อเว็บไซต์</Label>
+                            <div className="space-y-4 max-w-3xl">
+                                <div className="grid gap-2">
+                                    <Label className="text-sm">ชื่อเว็บไซต์</Label>
                                     <Input
                                         value={siteConfig?.name || ''}
                                         onChange={(e) => setSiteConfig({ ...siteConfig, name: e.target.value })}
-                                        className="h-12 rounded-xl bg-muted/30 border-transparent focus:bg-background"
+                                        className="h-10 rounded-lg bg-muted/30 border-transparent focus:bg-background text-sm"
                                     />
                                 </div>
-                                <div className="grid gap-3">
-                                    <Label className="text-base">คำอธิบาย</Label>
+                                <div className="grid gap-2">
+                                    <Label className="text-sm">คำอธิบาย</Label>
                                     <Textarea
                                         value={siteConfig?.description || ''}
                                         onChange={(e) => setSiteConfig({ ...siteConfig, description: e.target.value })}
-                                        className="min-h-[120px] rounded-xl bg-muted/30 border-transparent focus:bg-background resize-none"
+                                        className="min-h-[80px] rounded-lg bg-muted/30 border-transparent focus:bg-background resize-none text-sm"
                                     />
                                 </div>
-                                <div className="grid gap-3">
-                                    <Label className="text-base">ลิงก์ Discord</Label>
+                                <div className="grid gap-2">
+                                    <Label className="text-sm">ลิงก์ Discord</Label>
                                     <Input
                                         value={siteConfig?.links?.discord || ''}
                                         onChange={(e) => setSiteConfig({ ...siteConfig, links: { ...siteConfig.links, discord: e.target.value } })}
-                                        className="h-12 rounded-xl bg-muted/30 border-transparent focus:bg-background"
+                                        className="h-10 rounded-lg bg-muted/30 border-transparent focus:bg-background text-sm"
                                     />
                                 </div>
 
@@ -367,7 +367,7 @@ export default function AdminSettingsPage() {
 
                     {/* Game Settings */}
                     <TabsContent value="game" className="mt-0">
-                        <div className="bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden p-8">
+                        <div className="bg-card rounded-[2rem] border border-border/50 shadow-sm overflow-hidden p-6">
                             <RewardsEditor
                                 config={preregisterConfig}
                                 setConfig={setPreregisterConfig}
@@ -378,7 +378,7 @@ export default function AdminSettingsPage() {
 
                     {/* Features Settings */}
                     <TabsContent value="features" className="mt-0">
-                        <div className="bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden h-[800px] flex flex-col">
+                        <div className="bg-card rounded-[2rem] border border-border/50 shadow-sm overflow-hidden h-[600px] flex flex-col">
                             <div className="p-8 border-b border-border/50 flex items-center justify-between shrink-0">
                                 <div>
                                     <h3 className="text-2xl font-bold mb-1">ฟีเจอร์เด่น</h3>
@@ -553,7 +553,7 @@ export default function AdminSettingsPage() {
 
                     {/* News Settings */}
                     <TabsContent value="news" className="mt-0">
-                        <div className="bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden h-[800px] flex flex-col">
+                        <div className="bg-card rounded-[2rem] border border-border/50 shadow-sm overflow-hidden h-[600px] flex flex-col">
                             <div className="p-8 border-b border-border/50 flex items-center justify-between shrink-0">
                                 <div>
                                     <h3 className="text-2xl font-bold mb-1">ข่าวสารและประกาศ</h3>
@@ -705,7 +705,7 @@ export default function AdminSettingsPage() {
 
                     {/* Roadmap Settings */}
                     <TabsContent value="roadmap" className="mt-0">
-                        <div className="bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden p-8">
+                        <div className="bg-card rounded-[2rem] border border-border/50 shadow-sm overflow-hidden p-6">
                             <RoadmapEditor
                                 siteConfig={siteConfig}
                                 setSiteConfig={setSiteConfig}
