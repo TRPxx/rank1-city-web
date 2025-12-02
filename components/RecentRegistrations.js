@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { User, Clock } from 'lucide-react';
+import { User, Clock, Sparkles } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { th } from 'date-fns/locale';
 
@@ -28,45 +28,54 @@ export default function RecentRegistrations() {
     }, []);
 
     return (
-        <div className="w-full max-w-xs md:max-w-sm lg:max-w-md aspect-square bg-card/40 backdrop-blur-md rounded-3xl border border-border/50 shadow-2xl overflow-hidden flex flex-col">
-            <div className="p-4 border-b border-border/50 bg-muted/20">
-                <h3 className="font-bold text-lg flex items-center gap-2">
-                    <User className="w-5 h-5 text-primary" />
-                    ผู้ลงทะเบียนล่าสุด
+        <div className="w-full max-w-md flex flex-col gap-4">
+            <div className="flex items-center gap-2 px-2">
+                <div className="p-1.5 bg-primary/10 rounded-lg">
+                    <Sparkles className="w-4 h-4 text-primary animate-pulse" />
+                </div>
+                <h3 className="font-bold text-lg text-foreground/90">
+                    ชาวเมืองล่าสุด
                 </h3>
-                <p className="text-xs text-muted-foreground">ยินดีต้อนรับชาวเมืองใหม่สู่ Rank1 City</p>
             </div>
 
-            <div className="flex-1 overflow-hidden relative p-4">
-                <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-background/20 pointer-events-none z-10" />
+            <div className="relative h-[400px] overflow-hidden mask-gradient-b">
+                {/* Fade masks for smooth scrolling effect */}
+                <div className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-b from-background to-transparent z-10" />
+                <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-background to-transparent z-10" />
 
-                <div className="space-y-3 animate-marquee-vertical hover:pause">
+                <div className="space-y-3 py-4">
                     {registrations.length === 0 ? (
-                        <div className="text-center text-muted-foreground py-10">
+                        <div className="text-center text-muted-foreground py-10 text-sm">
                             กำลังโหลดข้อมูล...
                         </div>
                     ) : (
-                        // Duplicate list for seamless loop if needed, but simple map is fine for now
-                        // Actually, let's just show a list. If it overflows, it scrolls.
-                        // But user wants "ticker" feel? "คุณ xxxx ได้ลงทะเบียนไปแล้ว เมื่อ 1 นาที"
                         registrations.map((user, index) => (
                             <motion.div
                                 key={`${index}-${user.created_at}`}
-                                initial={{ opacity: 0, x: -20 }}
-                                animate={{ opacity: 1, x: 0 }}
-                                transition={{ delay: index * 0.1 }}
-                                className="flex items-center gap-3 p-3 rounded-xl bg-background/60 border border-border/30 shadow-sm"
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: index * 0.05 }}
+                                className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-muted/40 transition-colors duration-300"
                             >
-                                <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
-                                    <User className="w-5 h-5 text-primary" />
+                                <div className="relative">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-primary/20 to-secondary/20 flex items-center justify-center shrink-0 border border-white/5 group-hover:border-primary/30 transition-colors">
+                                        <User className="w-5 h-5 text-foreground/70 group-hover:text-primary transition-colors" />
+                                    </div>
+                                    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background" />
                                 </div>
+
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium truncate">
-                                        คุณ <span className="text-primary">{user.discord_name || 'Unknown'}</span>
-                                    </p>
-                                    <p className="text-xs text-muted-foreground flex items-center gap-1">
-                                        <Clock className="w-3 h-3" />
-                                        ลงทะเบียนเมื่อ {formatDistanceToNow(new Date(user.created_at), { addSuffix: true, locale: th })}
+                                    <div className="flex items-baseline justify-between gap-2">
+                                        <p className="text-sm font-semibold truncate text-foreground/90 group-hover:text-primary transition-colors">
+                                            {user.discord_name || 'Unknown'}
+                                        </p>
+                                        <span className="text-[10px] text-muted-foreground/60 font-medium uppercase tracking-wider">
+                                            New Citizen
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
+                                        <Clock className="w-3 h-3 opacity-70" />
+                                        <span>ลงทะเบียนเมื่อ {formatDistanceToNow(new Date(user.created_at), { addSuffix: true, locale: th })}</span>
                                     </p>
                                 </div>
                             </motion.div>
