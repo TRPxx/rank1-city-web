@@ -24,10 +24,11 @@ const PreregisterRewards = ({ totalRegistrations, isRegistered, data }) => {
     const progressPercent = Math.min(100, (totalRegistrations / finalReward.count) * 100);
 
     return (
-        <div className="w-full max-w-6xl mx-auto px-4 py-12 flex flex-col justify-center h-full">
-            <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
+        <div className="w-full max-w-6xl mx-auto px-4 py-8 md:py-12 flex flex-col justify-center h-full">
+            {/* Header Section */}
+            <div className="flex flex-col md:flex-row justify-between items-end mb-6 md:mb-8 gap-4">
                 <div>
-                    <h2 className="text-4xl font-bold tracking-tight">รางวัลเป้าหมาย</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold tracking-tight">รางวัลเป้าหมาย</h2>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                     <div className="w-3 h-3 rounded-full bg-primary" /> ปลดล็อคแล้ว
@@ -35,9 +36,75 @@ const PreregisterRewards = ({ totalRegistrations, isRegistered, data }) => {
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-[180px]">
+            {/* --- MOBILE LAYOUT (< md) --- */}
+            <div className="flex flex-col gap-6 md:hidden pb-20">
+                {/* 1. Progress Bar (Top Priority) */}
+                <div className="w-full bg-card border rounded-2xl p-4 shadow-sm">
+                    <div className="flex justify-between w-full mb-2">
+                        <span className="text-sm font-medium text-muted-foreground">ความคืบหน้า</span>
+                        <span className="text-xl font-black text-primary">{Math.round(progressPercent)}%</span>
+                    </div>
+                    <Progress value={progressPercent} className="h-4 w-full" />
+                    <div className="flex justify-between w-full mt-2 text-xs text-muted-foreground">
+                        <span>0</span>
+                        <span>{finalReward.count.toLocaleString()}</span>
+                    </div>
+                </div>
+
+                {/* 2. Grand Prize (Featured) */}
+                <div className="relative rounded-3xl border bg-card overflow-hidden p-6 text-center shadow-lg">
+                    <div className="absolute inset-0 bg-gradient-to-b from-primary/10 to-transparent opacity-50" />
+                    <div className="relative z-10">
+                        <Badge className="mb-4">รางวัลใหญ่สุด</Badge>
+                        <div className="relative w-32 h-32 mx-auto mb-4">
+                            {finalReward.image ? (
+                                <Image src={finalReward.image} alt="Grand Prize" fill className="object-contain drop-shadow-xl" />
+                            ) : (
+                                <Trophy className="w-full h-full text-primary" />
+                            )}
+                        </div>
+                        <h3 className="text-xl font-bold">{finalReward.name}</h3>
+                        <p className="text-sm text-muted-foreground mt-1">เมื่อครบ {finalReward.count.toLocaleString()} คน</p>
+                    </div>
+                </div>
+
+                {/* 3. Other Rewards (Horizontal Scroll) */}
+                <div>
+                    <h3 className="text-sm font-semibold text-muted-foreground mb-3 px-1">รางวัลอื่นๆ</h3>
+                    <div className="flex gap-3 overflow-x-auto pb-4 snap-x snap-mandatory scrollbar-hide -mx-4 px-4">
+                        {globalRewards.slice(0, globalRewards.length - 1).map((reward, index) => {
+                            const isUnlocked = totalRegistrations >= reward.count;
+                            return (
+                                <div key={index} className={cn(
+                                    "flex-none w-[160px] snap-center relative rounded-2xl border p-4 flex flex-col justify-between transition-all",
+                                    isUnlocked ? "bg-card border-primary/30 shadow-sm" : "bg-muted/30 grayscale opacity-70"
+                                )}>
+                                    <div className="flex justify-between items-start mb-2">
+                                        <span className="font-mono text-[10px] text-muted-foreground">#{index + 1}</span>
+                                        {isUnlocked && <CheckCircle className="w-3 h-3 text-primary" />}
+                                    </div>
+                                    <div className="relative w-16 h-16 mx-auto mb-2">
+                                        {reward.image ? (
+                                            <Image src={reward.image} alt={reward.name} fill className="object-contain" />
+                                        ) : (
+                                            <Gift className="w-full h-full text-foreground/20" />
+                                        )}
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="text-lg font-bold">{reward.count}</div>
+                                        <div className="text-xs text-muted-foreground truncate">{reward.name}</div>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+                </div>
+            </div>
+
+            {/* --- DESKTOP LAYOUT (>= md) --- */}
+            <div className="hidden md:grid grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-[180px]">
                 {/* Large Featured Item (Final Goal) */}
-                <div className="md:col-span-2 md:row-span-2 relative rounded-3xl border bg-card overflow-hidden group">
+                <div className="col-span-2 row-span-2 relative rounded-3xl border bg-card overflow-hidden group">
                     <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-transparent to-transparent opacity-50" />
                     <div className="p-8 h-full flex flex-col justify-between relative z-10">
                         <div className="flex justify-between items-start">
@@ -87,7 +154,7 @@ const PreregisterRewards = ({ totalRegistrations, isRegistered, data }) => {
                 })}
 
                 {/* Full Width Stats Block - Minimal */}
-                <div className="md:col-span-3 lg:col-span-4 flex flex-col justify-center items-center text-center relative pt-4">
+                <div className="col-span-3 lg:col-span-4 flex flex-col justify-center items-center text-center relative pt-4">
                     <div className="relative z-10 w-full flex flex-col items-center">
                         <div className="flex justify-between w-full mb-2 px-1">
                             <span className="text-lg font-medium text-muted-foreground">ความคืบหน้า</span>

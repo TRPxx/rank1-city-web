@@ -31,6 +31,7 @@ CREATE TABLE `preregistrations` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `discord_id` varchar(50) NOT NULL,
   `discord_name` varchar(255) NOT NULL,
+  `avatar_url` varchar(255) DEFAULT NULL,
   `referral_code` varchar(50) NOT NULL,
   `referred_by` varchar(50) DEFAULT NULL,
   `gang_id` int(11) DEFAULT NULL,
