@@ -237,7 +237,15 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                                         </div>
                                         <div className="grid gap-0.5">
                                             <span className="font-medium truncate">{item.reward_name}</span>
-                                            <span className="text-xs text-muted-foreground">{new Date(item.created_at).toLocaleDateString()}</span>
+                                            <span className="text-xs text-muted-foreground">
+                                                {new Date(item.created_at).toLocaleString('th-TH', {
+                                                    year: 'numeric',
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </span>
                                         </div>
                                     </div>
                                     <Badge variant="secondary" className="shrink-0 text-[10px] bg-background/50">

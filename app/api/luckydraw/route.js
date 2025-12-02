@@ -61,7 +61,7 @@ export async function POST(request) {
 
             // FIX: Use 'item_id' and 'item_name' to match DB schema
             await connection.query(
-                'INSERT INTO lucky_draw_history (discord_id, item_id, item_name, created_at) VALUES (?, ?, ?, NOW())',
+                'INSERT INTO lucky_draw_history (discord_id, item_id, item_name) VALUES (?, ?, ?)',
                 [discordId, selectedItem.id, selectedItem.name]
             );
 
