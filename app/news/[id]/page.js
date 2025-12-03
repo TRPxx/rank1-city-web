@@ -65,6 +65,7 @@ export default async function NewsDetailPage({ params }) {
                     </div>
 
                     {/* Content */}
+                    {/* Security Note: newsItem.content comes from a static file (lib/news-data.js) and is trusted. */}
                     <div
                         className="prose prose-lg dark:prose-invert max-w-none"
                         dangerouslySetInnerHTML={{ __html: newsItem.content }}

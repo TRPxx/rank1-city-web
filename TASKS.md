@@ -55,7 +55,7 @@
     - [x] **Action:** เพิ่ม `sizes` prop ให้กับรูปภาพใน Lucky Draw และ Rewards Slide
 
 ## � Priority 4: Security & Maintenance (ความปลอดภัยเพิ่มเติม)
-- [ ] **Security Audit Review**
-    - [ ] **Action:** ตรวจสอบ `dangerouslySetInnerHTML` ในหน้าข่าว (ถ้ามี) ว่ามีการ Sanitize ข้อมูลหรือไม่
-- [ ] **Code Cleanup**
-    - [ ] **Action:** ลบ Comment ที่ไม่ได้ใช้และจัด Format Code
+- [x] **Security Audit Review**
+    - [x] **Action:** ตรวจสอบ `dangerouslySetInnerHTML` ในหน้าข่าว (ถ้ามี) ว่ามีการ Sanitize ข้อมูลหรือไม่ (ตรวจสอบแล้ว: ใช้ข้อมูล Static ที่ปลอดภัย)
+- [x] **Code Cleanup**
+    - [x] **Action:** ลบ Comment ที่ไม่ได้ใช้และจัด Format Code

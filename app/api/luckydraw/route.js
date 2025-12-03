@@ -22,8 +22,6 @@ export async function POST(request) {
             return NextResponse.json({ error: 'Lucky draw is disabled' }, { status: 403 });
         }
 
-
-
         const connection = await pool.getConnection();
         await connection.beginTransaction();
 
