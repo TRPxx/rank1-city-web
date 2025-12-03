@@ -38,6 +38,19 @@ export default function AdminDashboard() {
     const [winnersList, setWinnersList] = useState([]); // Paginated list
     const [winnersPage, setWinnersPage] = useState(1);
     const [winnersTotalPages, setWinnersTotalPages] = useState(1);
+    const [isLoadingWinners, setIsLoadingWinners] = useState(false);
+    const [graphs, setGraphs] = useState({ registrations: [], spins: [] });
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
+    const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
+
+    // Transactions State
+    const [transactionsList, setTransactionsList] = useState([]);
+    const [transactionsPage, setTransactionsPage] = useState(1);
+    const [transactionsTotalPages, setTransactionsTotalPages] = useState(1);
+    const [transactionSearchQuery, setTransactionSearchQuery] = useState('');
     const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
 
     // Gangs State
