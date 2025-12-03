@@ -46,7 +46,7 @@ export default function PreRegisterDashboard({ userData }) {
     if (!mounted) return null;
 
     return (
-        <div className="h-full flex flex-col gap-6">
+        <div className="flex flex-col gap-6">
             {/* Header / Tabs Section */}
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 shrink-0">
                 <div>
@@ -107,7 +107,7 @@ export default function PreRegisterDashboard({ userData }) {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 min-h-0 overflow-y-auto pr-2 -mr-2">
+            <div className="mt-2">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={activeTab}
@@ -115,7 +115,7 @@ export default function PreRegisterDashboard({ userData }) {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -10 }}
                         transition={{ duration: 0.2 }}
-                        className="h-full"
+                        className="w-full"
                     >
                         {activeTab === 'invite' && (
                             <InviteEarn
