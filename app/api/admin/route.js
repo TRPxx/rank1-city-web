@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { webDb } from '@/lib/db';
+import { webDb, gameDb } from '@/lib/db';
 
 export async function GET(request) {
     try {
@@ -29,13 +29,39 @@ export async function GET(request) {
             return NextResponse.json({ users });
         } else {
             // Dashboard Stats Mode
-            const [stats] = await webDb.query(`
+            // 1. Web DB Stats
+            const [webStats] = await webDb.query(`
                 SELECT 
                     (SELECT COUNT(*) FROM preregistrations) as total_users,
+                    (SELECT COUNT(*) FROM preregistrations WHERE DATE(created_at) = CURDATE()) as users_today,
                     (SELECT COUNT(*) FROM gangs) as total_gangs,
-                    (SELECT SUM(ticket_count) FROM preregistrations) as total_tickets_held,
-                    (SELECT COUNT(*) FROM lucky_draw_history) as total_spins
+                    (SELECT SUM(ticket_count) FROM preregistrations) as tickets_holding,
+                    (SELECT COUNT(*) FROM lucky_draw_history) as total_spins,
+                    (SELECT COUNT(*) FROM claim_queue WHERE status = 'pending') as pending_claims,
+                    (SELECT COUNT(*) FROM claim_queue WHERE status = 'claimed') as claimed_items,
+                    (SELECT COUNT(*) FROM preregistrations WHERE gang_id IS NOT NULL) as gang_members
             `);
+
+            // 2. Game DB Stats (Characters)
+            let total_characters = 0;
+            try {
+                const [charRows] = await gameDb.query('SELECT COUNT(*) as count FROM users');
+                total_characters = charRows[0].count;
+            } catch (e) {
+                console.error("Failed to fetch game stats", e);
+            }
+
+            const stats = webStats[0];
+            stats.total_characters = total_characters;
+
+            // Calculated Stats
+            stats.tickets_burned = stats.total_spins; // Assuming 1 ticket = 1 spin
+            stats.tickets_distributed = (parseInt(stats.tickets_holding) || 0) + stats.tickets_burned;
+            stats.solo_players = stats.total_users - stats.gang_members;
+
+            // Family Stats (Placeholder)
+            stats.total_families = 0;
+            stats.family_members = 0;
 
             // Recent Registrations
             const [recentUsers] = await webDb.query(`
@@ -52,7 +78,7 @@ export async function GET(request) {
             `);
 
             return NextResponse.json({
-                stats: stats[0],
+                stats,
                 recentUsers,
                 recentWins
             });

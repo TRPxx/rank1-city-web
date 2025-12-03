@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Ticket, Trophy, Search, Settings, Loader2, ShieldAlert } from 'lucide-react';
+import { Users, Ticket, Trophy, Search, Settings, Loader2, ShieldAlert, UserCheck, Package, Home, Swords, History, Activity } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -102,7 +102,9 @@ export default function AdminDashboard() {
                     </Link>
                 </div>
 
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-10">
+                {/* Section 1: User Activity */}
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Users className="h-5 w-5 text-primary" /> ข้อมูลผู้ใช้งาน</h2>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
                     <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
                         <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
                             <Users className="h-24 w-24" />
@@ -118,6 +120,105 @@ export default function AdminDashboard() {
 
                     <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
                         <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Activity className="h-24 w-24" />
+                        </div>
+                        <div className="relative">
+                            <div className="p-3 bg-green-500/10 w-fit rounded-2xl mb-4">
+                                <Activity className="h-6 w-6 text-green-500" />
+                            </div>
+                            <p className="text-sm font-medium text-muted-foreground mb-1">สมัครใหม่วันนี้</p>
+                            <div className="text-3xl font-bold">{stats?.users_today?.toLocaleString() || 0}</div>
+                        </div>
+                    </div>
+
+                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
+                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <UserCheck className="h-24 w-24" />
+                        </div>
+                        <div className="relative">
+                            <div className="p-3 bg-purple-500/10 w-fit rounded-2xl mb-4">
+                                <UserCheck className="h-6 w-6 text-purple-500" />
+                            </div>
+                            <p className="text-sm font-medium text-muted-foreground mb-1">ตัวละครในเกม</p>
+                            <div className="text-3xl font-bold">{stats?.total_characters?.toLocaleString() || 0}</div>
+                        </div>
+                    </div>
+
+                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
+                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <History className="h-24 w-24" />
+                        </div>
+                        <div className="relative">
+                            <div className="p-3 bg-orange-500/10 w-fit rounded-2xl mb-4">
+                                <History className="h-6 w-6 text-orange-500" />
+                            </div>
+                            <p className="text-sm font-medium text-muted-foreground mb-1">ผู้เล่น Solo</p>
+                            <div className="text-3xl font-bold">{stats?.solo_players?.toLocaleString() || 0}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Section 2: Economy & Claims */}
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Trophy className="h-5 w-5 text-primary" /> ระบบเศรษฐกิจ & รางวัล</h2>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
+                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Trophy className="h-24 w-24" />
+                        </div>
+                        <div className="relative">
+                            <div className="p-3 bg-emerald-500/10 w-fit rounded-2xl mb-4">
+                                <Trophy className="h-6 w-6 text-emerald-500" />
+                            </div>
+                            <p className="text-sm font-medium text-muted-foreground mb-1">ยอดการหมุนวงล้อ</p>
+                            <div className="text-3xl font-bold">{stats?.total_spins?.toLocaleString() || 0}</div>
+                        </div>
+                    </div>
+
+                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
+                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Ticket className="h-24 w-24" />
+                        </div>
+                        <div className="relative">
+                            <div className="p-3 bg-amber-500/10 w-fit rounded-2xl mb-4">
+                                <Ticket className="h-6 w-6 text-amber-500" />
+                            </div>
+                            <p className="text-sm font-medium text-muted-foreground mb-1">ตั๋วคงเหลือในระบบ</p>
+                            <div className="text-3xl font-bold">{stats?.tickets_holding?.toLocaleString() || 0}</div>
+                        </div>
+                    </div>
+
+                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
+                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Package className="h-24 w-24" />
+                        </div>
+                        <div className="relative">
+                            <div className="p-3 bg-cyan-500/10 w-fit rounded-2xl mb-4">
+                                <Package className="h-6 w-6 text-cyan-500" />
+                            </div>
+                            <p className="text-sm font-medium text-muted-foreground mb-1">รอรับรางวัล (Pending)</p>
+                            <div className="text-3xl font-bold">{stats?.pending_claims?.toLocaleString() || 0}</div>
+                        </div>
+                    </div>
+
+                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
+                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Package className="h-24 w-24" />
+                        </div>
+                        <div className="relative">
+                            <div className="p-3 bg-teal-500/10 w-fit rounded-2xl mb-4">
+                                <Package className="h-6 w-6 text-teal-500" />
+                            </div>
+                            <p className="text-sm font-medium text-muted-foreground mb-1">รับรางวัลแล้ว (Claimed)</p>
+                            <div className="text-3xl font-bold">{stats?.claimed_items?.toLocaleString() || 0}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Section 3: Gangs & Families */}
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><ShieldAlert className="h-5 w-5 text-primary" /> แก๊ง & ครอบครัว</h2>
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-10">
+                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
+                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
                             <ShieldAlert className="h-24 w-24" />
                         </div>
                         <div className="relative">
@@ -131,27 +232,46 @@ export default function AdminDashboard() {
 
                     <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
                         <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Ticket className="h-24 w-24" />
+                            <Swords className="h-24 w-24" />
                         </div>
                         <div className="relative">
-                            <div className="p-3 bg-amber-500/10 w-fit rounded-2xl mb-4">
-                                <Ticket className="h-6 w-6 text-amber-500" />
+                            <div className="p-3 bg-rose-500/10 w-fit rounded-2xl mb-4">
+                                <Swords className="h-6 w-6 text-rose-500" />
                             </div>
-                            <p className="text-sm font-medium text-muted-foreground mb-1">ตั๋วที่มีในระบบ</p>
-                            <div className="text-3xl font-bold">{stats?.total_tickets_held?.toLocaleString() || 0}</div>
+                            <p className="text-sm font-medium text-muted-foreground mb-1">สมาชิกแก๊ง</p>
+                            <div className="text-3xl font-bold">{stats?.gang_members?.toLocaleString() || 0}</div>
                         </div>
                     </div>
 
-                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
+                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors opacity-60">
                         <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Trophy className="h-24 w-24" />
+                            <Home className="h-24 w-24" />
                         </div>
                         <div className="relative">
-                            <div className="p-3 bg-emerald-500/10 w-fit rounded-2xl mb-4">
-                                <Trophy className="h-6 w-6 text-emerald-500" />
+                            <div className="flex justify-between items-start">
+                                <div className="p-3 bg-indigo-500/10 w-fit rounded-2xl mb-4">
+                                    <Home className="h-6 w-6 text-indigo-500" />
+                                </div>
+                                <Badge variant="outline" className="text-[10px]">Coming Soon</Badge>
                             </div>
-                            <p className="text-sm font-medium text-muted-foreground mb-1">ยอดการหมุนวงล้อ</p>
-                            <div className="text-3xl font-bold">{stats?.total_spins?.toLocaleString() || 0}</div>
+                            <p className="text-sm font-medium text-muted-foreground mb-1">ครอบครัวทั้งหมด</p>
+                            <div className="text-3xl font-bold">{stats?.total_families?.toLocaleString() || 0}</div>
+                        </div>
+                    </div>
+
+                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors opacity-60">
+                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                            <Users className="h-24 w-24" />
+                        </div>
+                        <div className="relative">
+                            <div className="flex justify-between items-start">
+                                <div className="p-3 bg-pink-500/10 w-fit rounded-2xl mb-4">
+                                    <Users className="h-6 w-6 text-pink-500" />
+                                </div>
+                                <Badge variant="outline" className="text-[10px]">Coming Soon</Badge>
+                            </div>
+                            <p className="text-sm font-medium text-muted-foreground mb-1">สมาชิกครอบครัว</p>
+                            <div className="text-3xl font-bold">{stats?.family_members?.toLocaleString() || 0}</div>
                         </div>
                     </div>
                 </div>
