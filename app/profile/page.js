@@ -28,6 +28,7 @@ export default function ProfilePage() {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
     const [searchTerm, setSearchTerm] = useState("");
+    const [activeTab, setActiveTab] = useState("inventory");
 
     useEffect(() => {
         if (session?.user) {
@@ -213,9 +214,9 @@ export default function ProfilePage() {
 
                         {/* Main Content / Inventory */}
                         <div className="lg:col-span-8 flex flex-col">
-                            <Tabs defaultValue="inventory" className="w-full flex flex-col h-full">
+                            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full flex flex-col h-full">
                                 <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8 flex-none">
-                                    <TabsList className="bg-muted/50 p-1 rounded-full h-auto">
+                                    <TabsList className="hidden md:inline-flex bg-muted/50 p-1 rounded-full h-auto">
                                         <TabsTrigger value="inventory" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">
                                             <Backpack className="w-4 h-4 mr-2" /> กระเป๋า
                                         </TabsTrigger>
@@ -241,7 +242,7 @@ export default function ProfilePage() {
                                     </div>
                                 </div>
 
-                                <div className="bg-muted/30 rounded-[2.5rem] p-8 relative overflow-hidden flex-1">
+                                <div className="bg-muted/30 rounded-[2.5rem] p-8 relative overflow-hidden flex-1 pb-24 md:pb-8">
                                     <TabsContent value="inventory" className="mt-0 focus-visible:ring-0 h-full overflow-y-auto custom-scrollbar pr-2">
                                         <div className="mb-6 px-2">
                                             <h3 className="text-xl font-bold">รายการไอเทม</h3>
@@ -278,6 +279,40 @@ export default function ProfilePage() {
                         </div>
                     </div>
                 ) : null}
+
+                {/* Mobile Bottom Navigation (Floating) */}
+                <div className="md:hidden fixed bottom-6 left-4 right-4 z-50">
+                    <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 p-2 rounded-2xl shadow-2xl flex items-center justify-around">
+                        <button
+                            onClick={() => setActiveTab('inventory')}
+                            className={`flex flex-col items-center justify-center p-2 rounded-xl w-full transition-all ${activeTab === 'inventory' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}
+                        >
+                            <Backpack className="w-5 h-5 mb-1" />
+                            <span className="text-[10px] font-medium">กระเป๋า</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('weapons')}
+                            className={`flex flex-col items-center justify-center p-2 rounded-xl w-full transition-all ${activeTab === 'weapons' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}
+                        >
+                            <Swords className="w-5 h-5 mb-1" />
+                            <span className="text-[10px] font-medium">อาวุธ</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('safe')}
+                            className={`flex flex-col items-center justify-center p-2 rounded-xl w-full transition-all ${activeTab === 'safe' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}
+                        >
+                            <Vault className="w-5 h-5 mb-1" />
+                            <span className="text-[10px] font-medium">ตู้เซฟ</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('gift')}
+                            className={`flex flex-col items-center justify-center p-2 rounded-xl w-full transition-all ${activeTab === 'gift' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}
+                        >
+                            <Package className="w-5 h-5 mb-1" />
+                            <span className="text-[10px] font-medium">ของขวัญ</span>
+                        </button>
+                    </div>
+                </div>
             </main>
         </div>
     );
