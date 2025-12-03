@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Ticket, Trophy, Search, Settings, Loader2, ShieldAlert, UserCheck, Package, Home, Swords, History, Activity } from 'lucide-react';
+import { Users, Ticket, Trophy, Search, Settings, Loader2, ShieldAlert, UserCheck, Package, Home, Swords, History, Activity, ScrollText } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -120,6 +120,9 @@ export default function AdminDashboard() {
                             <TabsTrigger value="social" className="rounded-full px-6 py-2.5 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
                                 <ShieldAlert className="h-4 w-4" /> สังคม
                             </TabsTrigger>
+                            <TabsTrigger value="activity" className="rounded-full px-6 py-2.5 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                                <ScrollText className="h-4 w-4" /> กิจกรรม
+                            </TabsTrigger>
                         </TabsList>
                     </div>
 
@@ -224,7 +227,11 @@ export default function AdminDashboard() {
                             </div>
                         </div>
 
-                        {/* Recent Activity */}
+
+                    </TabsContent>
+
+                    {/* ==================== TAB: ACTIVITY ==================== */}
+                    <TabsContent value="activity" className="space-y-6 mt-0 animate-in fade-in-50 duration-500">
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
                             <div className="col-span-4 bg-card rounded-[2rem] border shadow-sm overflow-hidden">
                                 <div className="p-6 border-b">
@@ -512,6 +519,6 @@ export default function AdminDashboard() {
                     </TabsContent>
                 </Tabs>
             </div>
-        </div>
+        </div >
     );
 }
