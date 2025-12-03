@@ -141,6 +141,21 @@ export async function POST(request) {
 
     } catch (error) {
         console.error('Registration error:', error);
+
+        // Handle Duplicate Entry (Race Condition)
+        if (error.code === 'ER_DUP_ENTRY') {
+            return NextResponse.json({
+                error: 'คุณได้ลงทะเบียนไปแล้ว (ข้อมูลซ้ำในระบบ)'
+            }, { status: 409 });
+        }
+
+        // Handle Database Connection Issues (Pool Exhaustion / Timeout)
+        if (error.code === 'PROTOCOL_CONNECTION_LOST' || error.code === 'ER_CON_COUNT_ERROR' || error.code === 'ETIMEDOUT') {
+            return NextResponse.json({
+                error: 'ระบบกำลังทำงานหนัก กรุณาลองใหม่อีกครั้งในภายหลัง'
+            }, { status: 503 });
+        }
+
         return NextResponse.json({ error: 'เกิดข้อผิดพลาดในการบันทึกข้อมูล: ' + error.message }, { status: 500 });
     }
 }

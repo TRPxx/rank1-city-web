@@ -95,6 +95,14 @@ export async function POST(request) {
 
     } catch (error) {
         console.error('Lucky Draw Error:', error);
+
+        // Handle Database Connection Issues
+        if (error.code === 'PROTOCOL_CONNECTION_LOST' || error.code === 'ER_CON_COUNT_ERROR' || error.code === 'ETIMEDOUT') {
+            return NextResponse.json({
+                error: 'ระบบกำลังทำงานหนัก กรุณาลองใหม่อีกครั้งในภายหลัง'
+            }, { status: 503 });
+        }
+
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }

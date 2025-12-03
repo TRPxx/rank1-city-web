@@ -214,7 +214,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                         >
                             {isSpinning ? (
                                 <>
-                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> กำลังหมุน...
+                                    <Loader2 className="mr-2 h-4 w-4 animate-spin" /> กำลังประมวลผล...
                                 </>
                             ) : (
                                 <>
@@ -232,7 +232,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                     <History className="h-4 w-4 text-primary" />
                     <h3 className="font-bold">ประวัติการสุ่ม</h3>
                 </div>
-                <ScrollArea className="flex-1 -mr-4 pr-4">
+                <ScrollArea className="flex-1 -mr-4 pr-4 touch-pan-y">
                     <div className="space-y-3">
                         {history.length > 0 ? (
                             history.map((item, index) => (
