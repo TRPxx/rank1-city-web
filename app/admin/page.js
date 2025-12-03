@@ -28,7 +28,8 @@ export default function AdminDashboard() {
     const [recentWins, setRecentWins] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isInitialLoading, setIsInitialLoading] = useState(true);
+    const [isSearching, setIsSearching] = useState(false);
 
     const fetchData = async () => {
         try {
@@ -41,7 +42,7 @@ export default function AdminDashboard() {
         } catch (error) {
             console.error(error);
         } finally {
-            setIsLoading(false);
+            setIsInitialLoading(false);
         }
     };
 
@@ -49,7 +50,7 @@ export default function AdminDashboard() {
         e.preventDefault();
         if (!searchQuery.trim()) return;
 
-        setIsLoading(true);
+        setIsSearching(true);
         try {
             const res = await fetch(`/api/admin?q=${searchQuery}`);
             const data = await res.json();
@@ -57,7 +58,7 @@ export default function AdminDashboard() {
         } catch (error) {
             console.error(error);
         } finally {
-            setIsLoading(false);
+            setIsSearching(false);
         }
     };
 
@@ -73,7 +74,7 @@ export default function AdminDashboard() {
         }
     }, [status, session, router]);
 
-    if (status === 'loading' || isLoading) {
+    if (status === 'loading' || isInitialLoading) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
                 <Loader2 className="h-10 w-10 animate-spin text-primary" />
@@ -225,7 +226,7 @@ export default function AdminDashboard() {
                         <div className="bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden">
                             <div className="p-6 border-b border-border/50 flex flex-col md:flex-row justify-between items-center gap-4">
                                 <h3 className="text-xl font-bold">ค้นหาผู้ใช้งาน</h3>
-                                <div className="flex gap-2 w-full md:w-auto">
+                                <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto">
                                     <div className="relative flex-1 md:w-80">
                                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
@@ -235,10 +236,10 @@ export default function AdminDashboard() {
                                             className="pl-9 rounded-xl bg-muted/30 border-transparent focus:bg-background"
                                         />
                                     </div>
-                                    <Button onClick={handleSearch} className="rounded-xl px-6">
-                                        ค้นหา
+                                    <Button type="submit" disabled={isSearching} className="rounded-xl px-6">
+                                        {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : 'ค้นหา'}
                                     </Button>
-                                </div>
+                                </form>
                             </div>
                             <div className="p-0">
                                 <Table>
@@ -276,7 +277,7 @@ export default function AdminDashboard() {
                                                 <TableCell className="pr-6 text-muted-foreground">{user.invited_by || '-'}</TableCell>
                                             </TableRow>
                                         ))}
-                                        {searchResults.length === 0 && searchQuery && (
+                                        {searchResults.length === 0 && searchQuery && !isSearching && (
                                             <TableRow>
                                                 <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
                                                     <div className="flex flex-col items-center justify-center">
