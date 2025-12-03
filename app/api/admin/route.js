@@ -77,10 +77,32 @@ export async function GET(request) {
                 ORDER BY created_at DESC LIMIT 5
             `);
 
+            // Graph Data: Registrations (Last 7 Days)
+            const [regGraph] = await webDb.query(`
+                SELECT DATE_FORMAT(created_at, '%Y-%m-%d') as date, COUNT(*) as count 
+                FROM preregistrations 
+                WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+                GROUP BY DATE(created_at)
+                ORDER BY date ASC
+            `);
+
+            // Graph Data: Spins (Last 7 Days)
+            const [spinGraph] = await webDb.query(`
+                SELECT DATE_FORMAT(created_at, '%Y-%m-%d') as date, COUNT(*) as count 
+                FROM lucky_draw_history 
+                WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+                GROUP BY DATE(created_at)
+                ORDER BY date ASC
+            `);
+
             return NextResponse.json({
                 stats,
                 recentUsers,
-                recentWins
+                recentWins,
+                graphs: {
+                    registrations: regGraph,
+                    spins: spinGraph
+                }
             });
         }
 

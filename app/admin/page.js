@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function AdminDashboard() {
     const { data: session, status } = useSession();
@@ -26,6 +27,7 @@ export default function AdminDashboard() {
     const [stats, setStats] = useState(null);
     const [recentUsers, setRecentUsers] = useState([]);
     const [recentWins, setRecentWins] = useState([]);
+    const [graphs, setGraphs] = useState({ registrations: [], spins: [] });
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
@@ -39,6 +41,7 @@ export default function AdminDashboard() {
             setStats(data.stats);
             setRecentUsers(data.recentUsers);
             setRecentWins(data.recentWins);
+            setGraphs(data.graphs || { registrations: [], spins: [] });
         } catch (error) {
             console.error(error);
         } finally {
@@ -272,6 +275,58 @@ export default function AdminDashboard() {
                             </div>
                             <p className="text-sm font-medium text-muted-foreground mb-1">สมาชิกครอบครัว</p>
                             <div className="text-3xl font-bold">{stats?.family_members?.toLocaleString() || 0}</div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Section 4: Graphs */}
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Activity className="h-5 w-5 text-primary" /> แนวโน้ม 7 วันล่าสุด</h2>
+                <div className="grid gap-6 md:grid-cols-2 mb-10">
+                    <div className="bg-muted/30 rounded-[2rem] p-6 border border-border/50">
+                        <h3 className="text-sm font-medium text-muted-foreground mb-4">ยอดผู้ลงทะเบียนใหม่</h3>
+                        <div className="h-[200px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={graphs.registrations}>
+                                    <defs>
+                                        <linearGradient id="colorReg" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
+                                    <XAxis dataKey="date" tick={{ fontSize: 12 }} tickFormatter={(val) => val.split('-').slice(1).join('/')} stroke="rgba(255,255,255,0.5)" />
+                                    <YAxis tick={{ fontSize: 12 }} stroke="rgba(255,255,255,0.5)" />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
+                                        itemStyle={{ color: '#fff' }}
+                                    />
+                                    <Area type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorReg)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </div>
+
+                    <div className="bg-muted/30 rounded-[2rem] p-6 border border-border/50">
+                        <h3 className="text-sm font-medium text-muted-foreground mb-4">ยอดการหมุนกาชา</h3>
+                        <div className="h-[200px] w-full">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={graphs.spins}>
+                                    <defs>
+                                        <linearGradient id="colorSpin" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
+                                    <XAxis dataKey="date" tick={{ fontSize: 12 }} tickFormatter={(val) => val.split('-').slice(1).join('/')} stroke="rgba(255,255,255,0.5)" />
+                                    <YAxis tick={{ fontSize: 12 }} stroke="rgba(255,255,255,0.5)" />
+                                    <Tooltip
+                                        contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
+                                        itemStyle={{ color: '#fff' }}
+                                    />
+                                    <Area type="monotone" dataKey="count" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorSpin)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
                         </div>
                     </div>
                 </div>
