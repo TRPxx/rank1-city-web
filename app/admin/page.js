@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Ticket, Trophy, Search, Settings, Loader2, ShieldAlert, UserCheck, Package, Home, Swords, History, Activity, ScrollText, Gift, ChevronLeft, ChevronRight, User, Calendar, CreditCard, Hash, MapPin, Users2 } from 'lucide-react';
+import { Users, Ticket, Trophy, Search, Settings, Loader2, ShieldAlert, UserCheck, Package, Home, Swords, History, Activity, ScrollText, Gift, ChevronLeft, ChevronRight, User, Calendar, CreditCard, Hash, MapPin, Users2, Crown, Medal, Zap } from 'lucide-react';
 import {
     Dialog,
     DialogContent,
@@ -74,6 +74,10 @@ export default function AdminDashboard() {
 
     // Recent Registrations Search
     const [recentRegSearchQuery, setRecentRegSearchQuery] = useState('');
+
+    // Leaderboard State
+    const [leaderboardData, setLeaderboardData] = useState({ topTickets: [], topActive: [] });
+    const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
 
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isSearching, setIsSearching] = useState(false);
@@ -144,6 +148,20 @@ export default function AdminDashboard() {
             console.error(error);
         } finally {
             setIsLoadingGangs(false);
+        }
+    };
+
+    const fetchLeaderboard = async () => {
+        setIsLoadingLeaderboard(true);
+        try {
+            const res = await fetch('/api/admin?type=leaderboard');
+            if (!res.ok) throw new Error('Failed to fetch leaderboard');
+            const data = await res.json();
+            setLeaderboardData(data);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoadingLeaderboard(false);
         }
     };
 
@@ -241,6 +259,7 @@ export default function AdminDashboard() {
                 fetchWinners(1);
                 fetchTransactions(1);
                 fetchGangs(1);
+                fetchLeaderboard();
             }
         }
     }, [status, session, router]);
@@ -293,6 +312,9 @@ export default function AdminDashboard() {
                             </TabsTrigger>
                             <TabsTrigger value="winners" className="rounded-full px-6 py-2.5 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
                                 <Gift className="h-4 w-4" /> ผู้โชคดี
+                            </TabsTrigger>
+                            <TabsTrigger value="leaderboard" className="rounded-full px-6 py-2.5 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                                <Crown className="h-4 w-4" /> อันดับ
                             </TabsTrigger>
                         </TabsList>
                     </div>
@@ -517,6 +539,176 @@ export default function AdminDashboard() {
                                         ))}
                                     </div>
                                 )}
+                            </div>
+                        </div>
+                    </TabsContent>
+
+                    {/* ==================== TAB: LEADERBOARD ==================== */}
+                    <TabsContent value="leaderboard" className="space-y-6 mt-0 animate-in fade-in-50 duration-500">
+                        <div className="grid gap-6 lg:grid-cols-2">
+                            {/* Top Ticket Holders */}
+                            <div className="bg-card rounded-[2rem] border shadow-sm overflow-hidden">
+                                <div className="p-6 border-b bg-gradient-to-r from-amber-500/10 to-yellow-500/10">
+                                    <h3 className="text-lg font-bold flex items-center gap-2">
+                                        <Ticket className="h-5 w-5 text-amber-500" />
+                                        ผู้ครอบครองตั๋วเยอะที่สุด (Top 50)
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground mt-1">ผู้เล่นที่มีตั๋วสุ่มกาชามากที่สุด</p>
+                                </div>
+                                <div className="p-4 max-h-[700px] overflow-y-auto">
+                                    {isLoadingLeaderboard ? (
+                                        <div className="space-y-3">
+                                            {[...Array(10)].map((_, i) => (
+                                                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/30">
+                                                    <Skeleton className="h-10 w-10 rounded-full" />
+                                                    <div className="flex-1 space-y-2">
+                                                        <Skeleton className="h-4 w-3/4" />
+                                                        <Skeleton className="h-3 w-1/2" />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : leaderboardData.topTickets.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {leaderboardData.topTickets.map((user, index) => (
+                                                <div
+                                                    key={index}
+                                                    className={`flex items-center gap-3 p-3 rounded-xl transition-all hover:scale-[1.02] ${index === 0 ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border-2 border-amber-500/30' :
+                                                            index === 1 ? 'bg-gradient-to-r from-gray-400/20 to-gray-500/20 border-2 border-gray-400/30' :
+                                                                index === 2 ? 'bg-gradient-to-r from-orange-600/20 to-amber-700/20 border-2 border-orange-600/30' :
+                                                                    'bg-muted/30 hover:bg-muted/50 border border-border/50'
+                                                        }`}
+                                                >
+                                                    {/* Rank Badge */}
+                                                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border-2 shrink-0">
+                                                        {index === 0 ? (
+                                                            <Crown className="h-5 w-5 text-amber-500" />
+                                                        ) : index === 1 ? (
+                                                            <Medal className="h-5 w-5 text-gray-400" />
+                                                        ) : index === 2 ? (
+                                                            <Medal className="h-5 w-5 text-orange-600" />
+                                                        ) : (
+                                                            <span className="text-sm font-bold text-muted-foreground">#{index + 1}</span>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Avatar */}
+                                                    <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-background shrink-0">
+                                                        {user.avatar_url ? (
+                                                            <img src={user.avatar_url} alt={user.discord_name} className="h-full w-full object-cover" />
+                                                        ) : (
+                                                            <div className="h-full w-full bg-muted flex items-center justify-center">
+                                                                <User className="h-5 w-5 text-muted-foreground" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* User Info */}
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-bold truncate">{user.discord_name || 'Unknown'}</p>
+                                                        <p className="text-xs text-muted-foreground font-mono truncate">
+                                                            {user.discord_id}
+                                                        </p>
+                                                    </div>
+
+                                                    {/* Ticket Count */}
+                                                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500/10 border border-amber-500/20">
+                                                        <Ticket className="h-4 w-4 text-amber-500" />
+                                                        <span className="font-bold text-amber-500">{user.ticket_count.toLocaleString()}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-12 text-muted-foreground">
+                                            <Ticket className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                                            <p>ไม่มีข้อมูล</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Most Active Users */}
+                            <div className="bg-card rounded-[2rem] border shadow-sm overflow-hidden">
+                                <div className="p-6 border-b bg-gradient-to-r from-emerald-500/10 to-green-500/10">
+                                    <h3 className="text-lg font-bold flex items-center gap-2">
+                                        <Zap className="h-5 w-5 text-emerald-500" />
+                                        ผู้ใช้งานเยอะที่สุด (Top 50)
+                                    </h3>
+                                    <p className="text-sm text-muted-foreground mt-1">ผู้เล่นที่สุ่มกาชามากที่สุด</p>
+                                </div>
+                                <div className="p-4 max-h-[700px] overflow-y-auto">
+                                    {isLoadingLeaderboard ? (
+                                        <div className="space-y-3">
+                                            {[...Array(10)].map((_, i) => (
+                                                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-muted/30">
+                                                    <Skeleton className="h-10 w-10 rounded-full" />
+                                                    <div className="flex-1 space-y-2">
+                                                        <Skeleton className="h-4 w-3/4" />
+                                                        <Skeleton className="h-3 w-1/2" />
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : leaderboardData.topActive.length > 0 ? (
+                                        <div className="space-y-2">
+                                            {leaderboardData.topActive.map((user, index) => (
+                                                <div
+                                                    key={index}
+                                                    className={`flex items-center gap-3 p-3 rounded-xl transition-all hover:scale-[1.02] ${index === 0 ? 'bg-gradient-to-r from-emerald-500/20 to-green-500/20 border-2 border-emerald-500/30' :
+                                                            index === 1 ? 'bg-gradient-to-r from-gray-400/20 to-gray-500/20 border-2 border-gray-400/30' :
+                                                                index === 2 ? 'bg-gradient-to-r from-orange-600/20 to-amber-700/20 border-2 border-orange-600/30' :
+                                                                    'bg-muted/30 hover:bg-muted/50 border border-border/50'
+                                                        }`}
+                                                >
+                                                    {/* Rank Badge */}
+                                                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-background/80 backdrop-blur-sm border-2 shrink-0">
+                                                        {index === 0 ? (
+                                                            <Crown className="h-5 w-5 text-emerald-500" />
+                                                        ) : index === 1 ? (
+                                                            <Medal className="h-5 w-5 text-gray-400" />
+                                                        ) : index === 2 ? (
+                                                            <Medal className="h-5 w-5 text-orange-600" />
+                                                        ) : (
+                                                            <span className="text-sm font-bold text-muted-foreground">#{index + 1}</span>
+                                                        )}
+                                                    </div>
+
+                                                    {/* Avatar */}
+                                                    <div className="h-10 w-10 rounded-full overflow-hidden border-2 border-background shrink-0">
+                                                        {user.avatar_url ? (
+                                                            <img src={user.avatar_url} alt={user.discord_name} className="h-full w-full object-cover" />
+                                                        ) : (
+                                                            <div className="h-full w-full bg-muted flex items-center justify-center">
+                                                                <User className="h-5 w-5 text-muted-foreground" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+
+                                                    {/* User Info */}
+                                                    <div className="flex-1 min-w-0">
+                                                        <p className="text-sm font-bold truncate">{user.discord_name || 'Unknown'}</p>
+                                                        <p className="text-xs text-muted-foreground font-mono truncate">
+                                                            {user.discord_id}
+                                                        </p>
+                                                    </div>
+
+                                                    {/* Spin Count */}
+                                                    <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20">
+                                                        <Trophy className="h-4 w-4 text-emerald-500" />
+                                                        <span className="font-bold text-emerald-500">{user.total_spins.toLocaleString()}</span>
+                                                        <span className="text-xs text-muted-foreground">ครั้ง</span>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-12 text-muted-foreground">
+                                            <Zap className="h-12 w-12 mx-auto mb-3 opacity-30" />
+                                            <p>ไม่มีข้อมูล</p>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </TabsContent>

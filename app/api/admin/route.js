@@ -147,6 +147,50 @@ export async function GET(request) {
             });
         }
 
+        if (type === 'leaderboard') {
+            // Leaderboard Mode - Top Ticket Holders & Most Active Users
+
+            // Top 50 Ticket Holders
+            const [topTickets] = await webDb.query(`
+                SELECT 
+                    discord_id, 
+                    discord_name, 
+                    avatar_url, 
+                    ticket_count,
+                    invite_count,
+                    referral_code,
+                    gang_id,
+                    created_at
+                FROM preregistrations
+                WHERE ticket_count > 0
+                ORDER BY ticket_count DESC
+                LIMIT 50
+            `);
+
+            // Top 50 Most Active Users (by Lucky Draw spins count)
+            const [topActive] = await webDb.query(`
+                SELECT 
+                    p.discord_id, 
+                    p.discord_name, 
+                    p.avatar_url,
+                    p.ticket_count,
+                    p.invite_count,
+                    p.referral_code,
+                    COUNT(ldh.id) as total_spins,
+                    p.created_at
+                FROM preregistrations p
+                INNER JOIN lucky_draw_history ldh ON p.discord_id = ldh.discord_id
+                GROUP BY p.discord_id
+                ORDER BY total_spins DESC
+                LIMIT 50
+            `);
+
+            return NextResponse.json({
+                topTickets,
+                topActive
+            });
+        }
+
         if (query) {
             // Search Mode (No Cache)
             const [users] = await webDb.query(`
