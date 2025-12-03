@@ -22,14 +22,23 @@ export async function GET(request) {
 
         if (type === 'winners') {
             // Winners Pagination Mode
-            const [winners] = await webDb.query(`
-                SELECT discord_id, item_name, created_at 
-                FROM lucky_draw_history 
-                ORDER BY created_at DESC 
-                LIMIT ? OFFSET ?
-            `, [limit, offset]);
+            let sql = `SELECT discord_id, item_name, created_at FROM lucky_draw_history`;
+            let countSql = `SELECT COUNT(*) as count FROM lucky_draw_history`;
+            let params = [];
+            let countParams = [];
 
-            const [total] = await webDb.query('SELECT COUNT(*) as count FROM lucky_draw_history');
+            if (query) {
+                sql += ` WHERE discord_id LIKE ? OR item_name LIKE ?`;
+                countSql += ` WHERE discord_id LIKE ? OR item_name LIKE ?`;
+                params.push(`%${query}%`, `%${query}%`);
+                countParams.push(`%${query}%`, `%${query}%`);
+            }
+
+            sql += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+            params.push(limit, offset);
+
+            const [winners] = await webDb.query(sql, params);
+            const [total] = await webDb.query(countSql, countParams);
 
             return NextResponse.json({
                 winners,

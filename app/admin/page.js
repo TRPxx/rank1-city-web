@@ -38,6 +38,8 @@ export default function AdminDashboard() {
     const [winnersList, setWinnersList] = useState([]); // Paginated list
     const [winnersPage, setWinnersPage] = useState(1);
     const [winnersTotalPages, setWinnersTotalPages] = useState(1);
+
+    const [winnersSearchQuery, setWinnersSearchQuery] = useState('');
     const [isLoadingWinners, setIsLoadingWinners] = useState(false);
     const [graphs, setGraphs] = useState({ registrations: [], spins: [] });
     const [searchQuery, setSearchQuery] = useState('');
@@ -82,10 +84,10 @@ export default function AdminDashboard() {
         }
     };
 
-    const fetchWinners = async (page) => {
+    const fetchWinners = async (page, query = '') => {
         setIsLoadingWinners(true);
         try {
-            const res = await fetch(`/api/admin?type=winners&page=${page}&limit=24`);
+            const res = await fetch(`/api/admin?type=winners&page=${page}&limit=24&q=${query}`);
             if (!res.ok) throw new Error('Failed to fetch winners');
             const data = await res.json();
             setWinnersList(data.winners);
@@ -128,7 +130,7 @@ export default function AdminDashboard() {
     };
 
     useEffect(() => {
-        if (winnersPage > 1) fetchWinners(winnersPage);
+        fetchWinners(winnersPage, winnersSearchQuery);
     }, [winnersPage]);
 
     useEffect(() => {
@@ -149,6 +151,12 @@ export default function AdminDashboard() {
         e.preventDefault();
         setGangsPage(1);
         fetchGangs(1, gangSearchQuery);
+    };
+
+    const handleWinnersSearch = (e) => {
+        e.preventDefault();
+        setWinnersPage(1);
+        fetchWinners(1, winnersSearchQuery);
     };
 
     const handleRecentRegSearch = (e) => {
@@ -409,30 +417,41 @@ export default function AdminDashboard() {
                     {/* ==================== TAB: WINNERS ==================== */}
                     <TabsContent value="winners" className="space-y-6 mt-0 animate-in fade-in-50 duration-500">
                         <div className="bg-card rounded-[2rem] border shadow-sm overflow-hidden">
-                            <div className="p-6 border-b flex justify-between items-center">
+                            <div className="p-6 border-b flex flex-col sm:flex-row justify-between items-center gap-4">
                                 <h3 className="text-lg font-bold">ผู้โชคดีล่าสุด</h3>
-                                <div className="flex items-center gap-2">
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        onClick={() => setWinnersPage(p => Math.max(1, p - 1))}
-                                        disabled={winnersPage === 1 || isLoadingWinners}
-                                        className="h-8 w-8 rounded-full"
-                                    >
-                                        <ChevronLeft className="h-4 w-4" />
-                                    </Button>
-                                    <span className="text-sm font-medium min-w-[3rem] text-center">
-                                        {winnersPage} / {winnersTotalPages}
-                                    </span>
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        onClick={() => setWinnersPage(p => Math.min(winnersTotalPages, p + 1))}
-                                        disabled={winnersPage === winnersTotalPages || isLoadingWinners}
-                                        className="h-8 w-8 rounded-full"
-                                    >
-                                        <ChevronRight className="h-4 w-4" />
-                                    </Button>
+                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                    <form onSubmit={handleWinnersSearch} className="relative w-full sm:w-64">
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            placeholder="ค้นหาผู้เล่น หรือ ไอเทม..."
+                                            className="pl-9 h-9 rounded-full bg-muted/50 border-none focus:ring-1 focus:ring-primary"
+                                            value={winnersSearchQuery}
+                                            onChange={(e) => setWinnersSearchQuery(e.target.value)}
+                                        />
+                                    </form>
+                                    <div className="flex items-center gap-1">
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={() => setWinnersPage(p => Math.max(1, p - 1))}
+                                            disabled={winnersPage === 1 || isLoadingWinners}
+                                            className="h-8 w-8 rounded-full"
+                                        >
+                                            <ChevronLeft className="h-4 w-4" />
+                                        </Button>
+                                        <span className="text-sm font-medium min-w-[3rem] text-center">
+                                            {winnersPage} / {winnersTotalPages}
+                                        </span>
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={() => setWinnersPage(p => Math.min(winnersTotalPages, p + 1))}
+                                            disabled={winnersPage === winnersTotalPages || isLoadingWinners}
+                                            className="h-8 w-8 rounded-full"
+                                        >
+                                            <ChevronRight className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                             <div className="p-6">
