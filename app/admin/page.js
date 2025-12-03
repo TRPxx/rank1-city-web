@@ -44,6 +44,19 @@ export default function AdminDashboard() {
     const [searchResults, setSearchResults] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null);
     const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
+
+    // Transactions State
+    const [transactionsList, setTransactionsList] = useState([]);
+    const [transactionsPage, setTransactionsPage] = useState(1);
+    const [transactionsTotalPages, setTransactionsTotalPages] = useState(1);
+    const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
+
+    // Gangs State
+    const [gangsList, setGangsList] = useState([]);
+    const [gangsPage, setGangsPage] = useState(1);
+    const [gangsTotalPages, setGangsTotalPages] = useState(1);
+    const [isLoadingGangs, setIsLoadingGangs] = useState(false);
+
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isSearching, setIsSearching] = useState(false);
 
@@ -78,11 +91,47 @@ export default function AdminDashboard() {
         }
     };
 
-    useEffect(() => {
-        if (winnersPage > 1) {
-            fetchWinners(winnersPage);
+    const fetchTransactions = async (page) => {
+        setIsLoadingTransactions(true);
+        try {
+            const res = await fetch(`/api/admin?type=transactions&page=${page}&limit=20`);
+            if (!res.ok) throw new Error('Failed to fetch transactions');
+            const data = await res.json();
+            setTransactionsList(data.transactions);
+            setTransactionsTotalPages(data.pagination.totalPages);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoadingTransactions(false);
         }
+    };
+
+    const fetchGangs = async (page) => {
+        setIsLoadingGangs(true);
+        try {
+            const res = await fetch(`/api/admin?type=gangs&page=${page}&limit=20`);
+            if (!res.ok) throw new Error('Failed to fetch gangs');
+            const data = await res.json();
+            setGangsList(data.gangs);
+            setGangsTotalPages(data.pagination.totalPages);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoadingGangs(false);
+        }
+    };
+
+    useEffect(() => {
+        if (winnersPage > 1) fetchWinners(winnersPage);
     }, [winnersPage]);
+
+    useEffect(() => {
+        fetchTransactions(transactionsPage);
+    }, [transactionsPage]);
+
+    useEffect(() => {
+        fetchGangs(gangsPage);
+    }, [gangsPage]);
 
     const handleSearch = async (e) => {
         e.preventDefault();
@@ -121,6 +170,8 @@ export default function AdminDashboard() {
             } else {
                 fetchData();
                 fetchWinners(1);
+                fetchTransactions(1);
+                fetchGangs(1);
             }
         }
     }, [status, session, router]);
@@ -597,12 +648,81 @@ export default function AdminDashboard() {
                             </div>
                         </div>
 
-                        {/* Future: Transaction Logs or Item Distribution Charts could go here */}
-                        <div className="bg-muted/20 border-2 border-dashed border-muted rounded-3xl p-12 text-center">
-                            <Trophy className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-                            <h3 className="text-lg font-medium text-muted-foreground">ประวัติธุรกรรม (Coming Soon)</h3>
-                            <p className="text-sm text-muted-foreground/70">ระบบตรวจสอบ Log การเงินและไอเทมอย่างละเอียด</p>
-                        </div>
+                        {/* Transaction Logs Table */}
+                        <Card className="rounded-[2rem] border shadow-sm overflow-hidden">
+                            <div className="p-6 border-b flex justify-between items-center">
+                                <h3 className="text-lg font-bold flex items-center gap-2">
+                                    <ScrollText className="h-5 w-5 text-primary" /> ประวัติธุรกรรม
+                                </h3>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setTransactionsPage(p => Math.max(1, p - 1))}
+                                        disabled={transactionsPage === 1 || isLoadingTransactions}
+                                        className="h-8 w-8 rounded-full"
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <span className="text-sm font-medium min-w-[3rem] text-center">
+                                        {transactionsPage} / {transactionsTotalPages}
+                                    </span>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setTransactionsPage(p => Math.min(transactionsTotalPages, p + 1))}
+                                        disabled={transactionsPage === transactionsTotalPages || isLoadingTransactions}
+                                        className="h-8 w-8 rounded-full"
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                            <div className="p-0">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="hover:bg-transparent border-border/50">
+                                            <TableHead className="pl-6">ID</TableHead>
+                                            <TableHead>ผู้ใช้งาน</TableHead>
+                                            <TableHead>กิจกรรม</TableHead>
+                                            <TableHead>จำนวน</TableHead>
+                                            <TableHead>รายละเอียด</TableHead>
+                                            <TableHead className="text-right pr-6">เวลา</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {isLoadingTransactions ? (
+                                            <TableRow>
+                                                <TableCell colSpan={6} className="h-24 text-center">
+                                                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            transactionsList.map((tx, i) => (
+                                                <TableRow key={i} className="hover:bg-muted/30 border-border/50">
+                                                    <TableCell className="font-mono text-xs pl-6 text-muted-foreground">#{tx.id}</TableCell>
+                                                    <TableCell className="font-mono text-xs">{tx.discord_id}</TableCell>
+                                                    <TableCell>
+                                                        <Badge variant="outline" className="font-normal capitalize">
+                                                            {tx.action.replace('_', ' ')}
+                                                        </Badge>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <span className={tx.amount > 0 ? "text-green-500 font-bold" : "text-red-500 font-bold"}>
+                                                            {tx.amount > 0 ? '+' : ''}{tx.amount}
+                                                        </span>
+                                                    </TableCell>
+                                                    <TableCell className="text-sm text-muted-foreground">{tx.details}</TableCell>
+                                                    <TableCell className="text-right text-muted-foreground pr-6 text-xs">
+                                                        {new Date(tx.created_at).toLocaleString('th-TH')}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </Card>
                     </TabsContent>
 
                     {/* ==================== TAB: SOCIAL ==================== */}
@@ -652,12 +772,83 @@ export default function AdminDashboard() {
                             </div>
                         </div>
 
-                        {/* Future: Gang List */}
-                        <div className="bg-muted/20 border-2 border-dashed border-muted rounded-3xl p-12 text-center">
-                            <ShieldAlert className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
-                            <h3 className="text-lg font-medium text-muted-foreground">จัดการแก๊งและครอบครัว (Coming Soon)</h3>
-                            <p className="text-sm text-muted-foreground/70">ระบบอนุมัติแก๊ง ตรวจสอบสมาชิก และจัดการพื้นที่</p>
-                        </div>
+                        {/* Gang List Table */}
+                        <Card className="rounded-[2rem] border shadow-sm overflow-hidden">
+                            <div className="p-6 border-b flex justify-between items-center">
+                                <h3 className="text-lg font-bold flex items-center gap-2">
+                                    <ShieldAlert className="h-5 w-5 text-primary" /> รายชื่อแก๊ง
+                                </h3>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setGangsPage(p => Math.max(1, p - 1))}
+                                        disabled={gangsPage === 1 || isLoadingGangs}
+                                        className="h-8 w-8 rounded-full"
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <span className="text-sm font-medium min-w-[3rem] text-center">
+                                        {gangsPage} / {gangsTotalPages}
+                                    </span>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setGangsPage(p => Math.min(gangsTotalPages, p + 1))}
+                                        disabled={gangsPage === gangsTotalPages || isLoadingGangs}
+                                        className="h-8 w-8 rounded-full"
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
+                            </div>
+                            <div className="p-0">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="hover:bg-transparent border-border/50">
+                                            <TableHead className="pl-6">ชื่อแก๊ง</TableHead>
+                                            <TableHead>รหัสแก๊ง</TableHead>
+                                            <TableHead>หัวหน้าแก๊ง</TableHead>
+                                            <TableHead>สมาชิก</TableHead>
+                                            <TableHead className="text-right pr-6">วันที่สร้าง</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {isLoadingGangs ? (
+                                            <TableRow>
+                                                <TableCell colSpan={5} className="h-24 text-center">
+                                                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            gangsList.map((gang, i) => (
+                                                <TableRow key={i} className="hover:bg-muted/30 border-border/50">
+                                                    <TableCell className="font-bold pl-6 text-primary">{gang.name}</TableCell>
+                                                    <TableCell>
+                                                        <Badge variant="secondary" className="font-mono">{gang.gang_code}</Badge>
+                                                    </TableCell>
+                                                    <TableCell className="font-mono text-xs text-muted-foreground">{gang.leader_discord_id}</TableCell>
+                                                    <TableCell>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-full bg-muted rounded-full h-2.5 max-w-[100px] overflow-hidden">
+                                                                <div
+                                                                    className="bg-blue-500 h-2.5 rounded-full"
+                                                                    style={{ width: `${(gang.member_count / gang.max_members) * 100}%` }}
+                                                                ></div>
+                                                            </div>
+                                                            <span className="text-xs font-medium">{gang.member_count}/{gang.max_members}</span>
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-right text-muted-foreground pr-6 text-xs">
+                                                        {new Date(gang.created_at).toLocaleDateString('th-TH')}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </Card>
                     </TabsContent>
                 </Tabs>
             </div>

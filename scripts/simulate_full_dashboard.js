@@ -7,6 +7,11 @@ const GANG_NAMES = [
     'Midnight Runners', 'Solar Flares', 'Toxic Avengers', 'Silent Assassins', 'Crimson Tide'
 ];
 
+const FAMILY_NAMES = [
+    'Corleone', 'Soprano', 'Shelby', 'Montana', 'Escobar',
+    'Capone', 'Luciano', 'Gambino', 'Genovese', 'Colombo'
+];
+
 const USER_NAMES = [
     'Alex', 'Jordan', 'Casey', 'Taylor', 'Morgan', 'Jamie', 'Riley', 'Avery',
     'Quinn', 'Skyler', 'Charlie', 'Sam', 'Peyton', 'Reese', 'Dakota', 'Cameron',
@@ -156,6 +161,47 @@ async function simulateDashboard() {
             );
         }
         console.log('✅ Recent spins inserted.');
+
+        // 6. Simulate Transactions
+        console.log('💰 Simulating Transaction Logs...');
+        const actions = ['buy_ticket', 'transfer_ticket', 'admin_grant', 'daily_reward'];
+        const transactions = [];
+        for (let i = 0; i < 1000; i++) {
+            const discordId = `User_${Math.floor(Math.random() * 100000)}`;
+            const action = actions[Math.floor(Math.random() * actions.length)];
+            const amount = Math.floor(Math.random() * 100) + 1;
+            const details = action === 'transfer_ticket' ? `Transfer to User_${Math.floor(Math.random() * 100000)}` : 'System Action';
+            const date = randomDate(7);
+            transactions.push([discordId, action, amount, details, date]);
+        }
+
+        for (let i = 0; i < transactions.length; i += chunkSize) {
+            const chunk = transactions.slice(i, i + chunkSize);
+            await connection.query(
+                'INSERT INTO transaction_logs (discord_id, action, amount, details, created_at) VALUES ?',
+                [chunk]
+            );
+        }
+        console.log('✅ Transactions inserted.');
+
+        // 7. Simulate Families
+        console.log('🏰 Simulating Families...');
+        for (const name of FAMILY_NAMES) {
+            const code = randomString(6);
+            const leaderId = `User_${Math.floor(Math.random() * 1000000)}`;
+            const memberCount = Math.floor(Math.random() * 50);
+
+            // Check if family exists
+            const [existing] = await connection.query('SELECT id FROM families WHERE name = ?', [name]);
+
+            if (existing.length === 0) {
+                await connection.query(
+                    'INSERT INTO families (name, family_code, leader_discord_id, member_count, max_members) VALUES (?, ?, ?, ?, 100)',
+                    [name, code, leaderId, memberCount]
+                );
+            }
+        }
+        console.log('✅ Families ready.');
 
         console.log('🎉 Simulation Complete! Dashboard should now be populated.');
 

@@ -42,6 +42,50 @@ export async function GET(request) {
             });
         }
 
+        if (type === 'transactions') {
+            // Transactions Pagination Mode
+            const [transactions] = await webDb.query(`
+                SELECT * 
+                FROM transaction_logs 
+                ORDER BY created_at DESC 
+                LIMIT ? OFFSET ?
+            `, [limit, offset]);
+
+            const [total] = await webDb.query('SELECT COUNT(*) as count FROM transaction_logs');
+
+            return NextResponse.json({
+                transactions,
+                pagination: {
+                    page,
+                    limit,
+                    total: total[0].count,
+                    totalPages: Math.ceil(total[0].count / limit)
+                }
+            });
+        }
+
+        if (type === 'gangs') {
+            // Gangs Pagination Mode
+            const [gangs] = await webDb.query(`
+                SELECT * 
+                FROM gangs 
+                ORDER BY member_count DESC 
+                LIMIT ? OFFSET ?
+            `, [limit, offset]);
+
+            const [total] = await webDb.query('SELECT COUNT(*) as count FROM gangs');
+
+            return NextResponse.json({
+                gangs,
+                pagination: {
+                    page,
+                    limit,
+                    total: total[0].count,
+                    totalPages: Math.ceil(total[0].count / limit)
+                }
+            });
+        }
+
         if (query) {
             // Search Mode
             const [users] = await webDb.query(`
@@ -86,8 +130,9 @@ export async function GET(request) {
             stats.solo_players = stats.total_users - stats.gang_members;
 
             // Family Stats (Placeholder)
-            stats.total_families = 0;
-            stats.family_members = 0;
+            const [familyStats] = await webDb.query('SELECT COUNT(*) as total, SUM(member_count) as members FROM families');
+            stats.total_families = familyStats[0].total || 0;
+            stats.family_members = familyStats[0].members || 0;
 
             // Recent Registrations
             const [recentUsers] = await webDb.query(`
