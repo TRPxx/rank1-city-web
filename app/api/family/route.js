@@ -4,10 +4,10 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { webDb as pool } from '@/lib/db';
 import { PREREGISTER_CONFIG } from '@/lib/preregister-config';
 
-// Helper to generate gang code
-function generateGangCode() {
+// Helper to generate family code
+function generateFamilyCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = 'GANG-';
+    let code = 'FAM-';
     for (let i = 0; i < 4; i++) {
         code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
@@ -20,12 +20,12 @@ export async function POST(request) {
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         if (!PREREGISTER_CONFIG.features.enableGang) {
-            return NextResponse.json({ error: 'Gang system is disabled' }, { status: 403 });
+            return NextResponse.json({ error: 'Family system is disabled' }, { status: 403 });
         }
 
         const discordId = session.user.id;
         const body = await request.json();
-        const { action, name, gangCode } = body; // action: 'create' | 'join'
+        const { action, name, familyCode } = body; // action: 'create' | 'join'
 
         const connection = await pool.getConnection();
         await connection.beginTransaction();
@@ -42,62 +42,62 @@ export async function POST(request) {
             }
 
             // ⚠️ เงื่อนไข: ห้ามมีทั้งแก๊งและครอบครัว
-            if (userCheck[0].family_id) {
-                throw new Error('คุณอยู่ในครอบครัวแล้ว ไม่สามารถเข้าร่วมแก๊งได้');
+            if (userCheck[0].gang_id) {
+                throw new Error('คุณอยู่ในแก๊งแล้ว ไม่สามารถเข้าร่วมครอบครัวได้');
             }
 
-            if (userCheck[0].gang_id) {
-                throw new Error('You are already in a gang');
+            if (userCheck[0].family_id) {
+                throw new Error('You are already in a family');
             }
 
             if (action === 'create') {
-                if (!name || name.length < 3) throw new Error('Gang name too short');
+                if (!name || name.length < 3) throw new Error('Family name too short');
 
                 // Generate unique code
-                let newGangCode = generateGangCode();
+                let newFamilyCode = generateFamilyCode();
 
-                // Insert Gang
+                // Insert Family
                 const [result] = await connection.query(
-                    'INSERT INTO gangs (name, gang_code, leader_discord_id, member_count) VALUES (?, ?, ?, 1)',
-                    [name, newGangCode, discordId]
+                    'INSERT INTO families (name, family_code, leader_discord_id, member_count) VALUES (?, ?, ?, 1)',
+                    [name, newFamilyCode, discordId]
                 );
-                const gangId = result.insertId;
+                const familyId = result.insertId;
 
                 // Update User
                 await connection.query(
-                    'UPDATE preregistrations SET gang_id = ? WHERE discord_id = ?',
-                    [gangId, discordId]
+                    'UPDATE preregistrations SET family_id = ? WHERE discord_id = ?',
+                    [familyId, discordId]
                 );
 
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Gang created', gangCode: newGangCode });
+                return NextResponse.json({ success: true, message: 'Family created', familyCode: newFamilyCode });
 
             } else if (action === 'join') {
-                if (!gangCode) throw new Error('Gang code required');
+                if (!familyCode) throw new Error('Family code required');
 
-                // Find Gang
-                const [gang] = await connection.query(
-                    'SELECT id, member_count, max_members FROM gangs WHERE gang_code = ?',
-                    [gangCode]
+                // Find Family
+                const [family] = await connection.query(
+                    'SELECT id, member_count, max_members FROM families WHERE family_code = ?',
+                    [familyCode]
                 );
 
-                if (gang.length === 0) throw new Error('Gang not found');
-                if (gang[0].member_count >= gang[0].max_members) throw new Error('Gang is full');
+                if (family.length === 0) throw new Error('Family not found');
+                if (family[0].member_count >= family[0].max_members) throw new Error('Family is full');
 
-                // Update Gang Count
+                // Update Family Count
                 await connection.query(
-                    'UPDATE gangs SET member_count = member_count + 1 WHERE id = ?',
-                    [gang[0].id]
+                    'UPDATE families SET member_count = member_count + 1 WHERE id = ?',
+                    [family[0].id]
                 );
 
                 // Update User
                 await connection.query(
-                    'UPDATE preregistrations SET gang_id = ? WHERE discord_id = ?',
-                    [gang[0].id, discordId]
+                    'UPDATE preregistrations SET family_id = ? WHERE discord_id = ?',
+                    [family[0].id, discordId]
                 );
 
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Joined gang successfully' });
+                return NextResponse.json({ success: true, message: 'Joined family successfully' });
             }
 
             throw new Error('Invalid action');
@@ -110,7 +110,7 @@ export async function POST(request) {
         }
 
     } catch (error) {
-        console.error('Gang API Error:', error);
+        console.error('Family API Error:', error);
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
     }
 }
@@ -122,19 +122,19 @@ export async function GET(request) {
 
         const discordId = session.user.id;
 
-        // Get User's Gang Info
+        // Get User's Family Info
         const [rows] = await pool.query(`
-            SELECT g.name, g.gang_code, g.member_count, g.max_members, g.leader_discord_id
+            SELECT f.name, f.family_code, f.member_count, f.max_members, f.leader_discord_id
             FROM preregistrations p
-            JOIN gangs g ON p.gang_id = g.id
+            JOIN families f ON p.family_id = f.id
             WHERE p.discord_id = ?
         `, [discordId]);
 
         if (rows.length === 0) {
-            return NextResponse.json({ hasGang: false });
+            return NextResponse.json({ hasFamily: false });
         }
 
-        return NextResponse.json({ hasGang: true, gang: rows[0] });
+        return NextResponse.json({ hasFamily: true, family: rows[0] });
 
     } catch (error) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

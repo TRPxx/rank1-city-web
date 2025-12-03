@@ -27,6 +27,32 @@ try {
       commitMessageThai += "\u001b[0;33m• แนะนำการแก้ไขปัญหา performance และ security\u001b[0m\n";
     }
     commitMessageThai += "```";
+  } else if (commitMessage.includes('Gang Members') || commitMessage.includes('gang members')) {
+    commitMessageThai = "```ansi\n";
+    commitMessageThai += "\u001b[1;35m🎉 เพิ่มฟีเจอร์ใหม่: รายชื่อสมาชิกแก๊ง (Gang Members List)\u001b[0m\n\n";
+    commitMessageThai += "\u001b[1;36m1️⃣ API Endpoint ใหม่:\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• Endpoint: GET /api/gang/members?gangCode=GANG-XXXX\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• ดึงรายชื่อสมาชิกทั้งหมดจาก gang_code\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• เรียงลำดับหัวหน้าไว้ข้างบนสุด\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• แสดงข้อมูล: Discord ID, Name, Avatar, วันที่เข้าร่วม, is_leader\u001b[0m\n\n";
+
+    commitMessageThai += "\u001b[1;36m2️⃣ Component Update:\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• เพิ่ม members state และ isMembersLoading\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• เพิ่ม fetchMembers() function\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• Auto-fetch สมาชิกเมื่อมีข้อมูลแก๊ง\u001b[0m\n\n";
+
+    commitMessageThai += "\u001b[1;36m3️⃣ UI Features:\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m✅ แสดงรายชื่อสมาชิกพร้อม:\u001b[0m\n";
+    commitMessageThai += "\u001b[0;33m  • หมายเลขลำดับ (#1, #2, ...)\u001b[0m\n";
+    commitMessageThai += "\u001b[0;33m  • Avatar (หรือ placeholder ถ้าไม่มี)\u001b[0m\n";
+    commitMessageThai += "\u001b[0;33m  • ชื่อ Discord + Discord ID\u001b[0m\n";
+    commitMessageThai += "\u001b[0;33m  • Badge \"หัวหน้า\" 👑 สีทอง สำหรับหัวหน้าแก๊ง\u001b[0m\n";
+    commitMessageThai += "\u001b[0;33m  • วันที่เข้าร่วม (รูปแบบไทย)\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m✅ Loading State - แสดง spinner ขณะโหลดข้อมูล\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m✅ Empty State - แสดงข้อความเมื่อยังไม่มีสมาชิก\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m✅ Scrollable - รายชื่อเลื่อนได้ถ้าสมาชิกเยอะ\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m✅ Hover Effect - รายการสมาชิกเปลี่ยนสีเมื่อเอาเมาส์ชี้\u001b[0m\n";
+    commitMessageThai += "```";
   } else {
     commitMessageThai = commitMessage;
   }
