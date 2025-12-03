@@ -107,6 +107,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                                                         src={winItem.image}
                                                         alt={winItem.name}
                                                         fill
+                                                        sizes="96px"
                                                         className="object-contain"
                                                     />
                                                 </div>
@@ -181,6 +182,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                                                     src={item.image}
                                                     alt={item.name}
                                                     fill
+                                                    sizes="(max-width: 640px) 48px, 64px"
                                                     className="object-contain drop-shadow-sm"
                                                 />
                                             </div>

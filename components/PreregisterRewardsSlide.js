@@ -137,6 +137,7 @@ export default function PreregisterRewardsSlide({ totalRegistrations, isRegister
                                                             src={reward.image}
                                                             alt={reward.name}
                                                             fill
+                                                            sizes="96px"
                                                             className="object-contain drop-shadow-md"
                                                         />
                                                     ) : (

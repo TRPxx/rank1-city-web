@@ -47,11 +47,12 @@
 ## 🟢 Priority 3: Performance Tuning (ความเร็ว)
 > *ปรับปรุงเพื่อให้เว็บโหลดเร็วขึ้นและได้คะแนน Lighthouse สูงขึ้น*
 
-- [ ] **Optimize LCP (Largest Contentful Paint)**
-    - [ ] **Page:** Home (Hero Section)
-    - [ ] **Action:** เพิ่ม property `priority` ให้กับรูปภาพ Banner (`<Image priority ... />`)
-- [ ] **Optimize Images**
-    - [ ] **Action:** ตรวจสอบรูปภาพขนาดใหญ่ ให้ใช้ Format WebP และขนาดที่เหมาะสม
+- [x] **Optimize LCP (Largest Contentful Paint)**
+    - [x] **Page:** Home (Hero Section)
+    - [x] **Action:** เพิ่ม property `priority` ให้กับรูปภาพ Banner (`<Image priority ... />`)
+- [x] **Optimize Images**
+    - [x] **Action:** ตรวจสอบรูปภาพขนาดใหญ่ ให้ใช้ Format WebP และขนาดที่เหมาะสม
+    - [x] **Action:** เพิ่ม `sizes` prop ให้กับรูปภาพใน Lucky Draw และ Rewards Slide
 
 ## � Priority 4: Security & Maintenance (ความปลอดภัยเพิ่มเติม)
 - [ ] **Security Audit Review**
