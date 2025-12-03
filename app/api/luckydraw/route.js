@@ -8,19 +8,21 @@ import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(request) {
     try {
-        const ip = request.headers.get("x-forwarded-for") || "unknown";
-        if (!rateLimit(ip, 10, 60000)) { // 10 spins per minute (fast but limited)
-            return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
-        }
-
         const session = await getServerSession(authOptions);
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+        const discordId = session.user.id;
+
+        // Rate Limit by User ID (not IP) to support Internet Cafes
+        if (!rateLimit(discordId, 10, 60000)) { // 10 spins per minute per user
+            return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+        }
 
         if (!PREREGISTER_CONFIG.features.enableLuckyDraw) {
             return NextResponse.json({ error: 'Lucky draw is disabled' }, { status: 403 });
         }
 
-        const discordId = session.user.id;
+
 
         const connection = await pool.getConnection();
         await connection.beginTransaction();

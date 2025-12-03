@@ -5,14 +5,14 @@
 ## 🔴 Priority 0: Critical (ต้องทำทันที - ระบบมีความเสี่ยงสูง)
 > *หากไม่แก้ไข ห้ามนำขึ้น Production เด็ดขาด*
 
-- [ ] **Fix Lucky Draw Race Condition (BUG-001)**
-    - [ ] **File:** `app/api/luckydraw/route.js`
-    - [ ] **Action:** ลบคำสั่ง `CREATE TABLE IF NOT EXISTS` ออกจาก Transaction
-    - [ ] **Action:** ย้าย Logic การสร้างตารางไปไว้ใน Migration Script
-    - [ ] **Action:** ตรวจสอบ Transaction Isolation Level และการใช้ `FOR UPDATE` ให้ถูกต้อง
-- [ ] **Database Schema Migration**
-    - [ ] **Action:** รัน SQL สร้างตาราง `claim_queue` ใน Database จริง
-    - [ ] **Action:** สร้างไฟล์ `scripts/migrate_claim_queue.js` สำหรับ Deploy
+- [x] **Fix Lucky Draw Race Condition (BUG-001)**
+    - [x] **File:** `app/api/luckydraw/route.js`
+    - [x] **Action:** ลบคำสั่ง `CREATE TABLE IF NOT EXISTS` ออกจาก Transaction
+    - [x] **Action:** ย้าย Logic การสร้างตารางไปไว้ใน Migration Script
+    - [x] **Action:** ตรวจสอบ Transaction Isolation Level และการใช้ `FOR UPDATE` ให้ถูกต้อง
+- [x] **Database Schema Migration**
+    - [x] **Action:** รัน SQL สร้างตาราง `claim_queue` ใน Database จริง
+    - [x] **Action:** สร้างไฟล์ `scripts/migrate_claim_queue.js` สำหรับ Deploy
 
 ## 🟠 Priority 1: High (ความปลอดภัยและประสิทธิภาพ)
 > *ควรแก้ไขก่อนเปิดใช้งานจริง เพื่อป้องกันปัญหาผู้ใช้และ Server Load*

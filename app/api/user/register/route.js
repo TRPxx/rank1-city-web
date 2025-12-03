@@ -7,15 +7,17 @@ import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(request) {
     try {
-        const ip = request.headers.get("x-forwarded-for") || "unknown";
-        if (!rateLimit(ip, 5, 60000)) { // 5 requests per minute for registration
-            return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
-        }
-
         const session = await getServerSession(authOptions);
 
         if (!session) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+        }
+
+        const discordId = session.user.id;
+
+        // Rate Limit by User ID (not IP)
+        if (!rateLimit(discordId, 5, 60000)) { // 5 requests per minute per user
+            return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
         }
 
         const data = await request.json();
