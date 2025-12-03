@@ -53,12 +53,12 @@ export default function PreRegisterPage() {
     if (!session || !userData) return null;
 
     return (
-        <main className="min-h-screen w-full flex flex-col bg-background pt-16">
+        <main className="h-screen w-full flex flex-col overflow-hidden bg-background pt-16">
             {/* Global Navbar */}
             <Navbar />
 
-            {/* Dashboard Container - Fills remaining space, natural scroll */}
-            <div className="flex-1 w-full max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
+            {/* Dashboard Container - Fixed height, no body scroll */}
+            <div className="flex-1 overflow-hidden relative w-full max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
                 <PreRegisterDashboard userData={userData} />
             </div>
         </main>
