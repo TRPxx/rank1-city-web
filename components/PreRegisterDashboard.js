@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import InviteEarn from './InviteEarn';
 import LuckyDraw from './LuckyDraw';
 import GangManager from './GangManager';
+import FamilyManager from './FamilyManager';
 
 import { PREREGISTER_CONFIG } from '@/lib/preregister-config';
 
@@ -78,15 +79,26 @@ export default function PreRegisterDashboard({ userData }) {
                         )}
 
                         {PREREGISTER_CONFIG.features.enableGang && (
-                            <Button
-                                variant={activeTab === 'gang' ? 'secondary' : 'ghost'}
-                                size="sm"
-                                onClick={() => setActiveTab('gang')}
-                                className={`gap-2 rounded-xl transition-all ${activeTab === 'gang' ? 'bg-background shadow-sm' : 'hover:bg-background/50'}`}
-                            >
-                                <Shield className="w-4 h-4" />
-                                ระบบแก๊ง
-                            </Button>
+                            <>
+                                <Button
+                                    variant={activeTab === 'gang' ? 'secondary' : 'ghost'}
+                                    size="sm"
+                                    onClick={() => setActiveTab('gang')}
+                                    className={`gap-2 rounded-xl transition-all ${activeTab === 'gang' ? 'bg-background shadow-sm' : 'hover:bg-background/50'}`}
+                                >
+                                    <Shield className="w-4 h-4" />
+                                    ระบบแก๊ง
+                                </Button>
+                                <Button
+                                    variant={activeTab === 'family' ? 'secondary' : 'ghost'}
+                                    size="sm"
+                                    onClick={() => setActiveTab('family')}
+                                    className={`gap-2 rounded-xl transition-all ${activeTab === 'family' ? 'bg-background shadow-sm' : 'hover:bg-background/50'}`}
+                                >
+                                    <Users className="w-4 h-4" />
+                                    ครอบครัว
+                                </Button>
+                            </>
                         )}
 
 
@@ -119,6 +131,9 @@ export default function PreRegisterDashboard({ userData }) {
                         )}
                         {activeTab === 'gang' && (
                             <GangManager />
+                        )}
+                        {activeTab === 'family' && (
+                            <FamilyManager />
                         )}
 
                     </motion.div>
