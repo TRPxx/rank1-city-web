@@ -419,7 +419,7 @@ export default function AdminDashboard() {
                         <div className="bg-card rounded-[2rem] border shadow-sm overflow-hidden">
                             <div className="p-6 border-b flex flex-col sm:flex-row justify-between items-center gap-4">
                                 <h3 className="text-lg font-bold">ผู้โชคดีล่าสุด</h3>
-                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
                                     <form onSubmit={handleWinnersSearch} className="relative w-full sm:w-64">
                                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
@@ -488,7 +488,7 @@ export default function AdminDashboard() {
                         <div className="grid gap-6">
                             {/* Search Section */}
                             <Card className="rounded-[2rem] border-none shadow-lg bg-gradient-to-br from-background to-muted/20 overflow-hidden">
-                                <div className="p-12 flex flex-col items-center justify-center text-center space-y-6">
+                                <div className="p-6 md:p-12 flex flex-col items-center justify-center text-center space-y-6">
                                     <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center mb-2">
                                         <Search className="h-10 w-10 text-primary" />
                                     </div>
@@ -774,7 +774,7 @@ export default function AdminDashboard() {
                                 <h3 className="text-lg font-bold flex items-center gap-2">
                                     <ScrollText className="h-5 w-5 text-primary" /> ประวัติธุรกรรม
                                 </h3>
-                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
                                     <form onSubmit={handleTransactionSearch} className="relative w-full sm:w-64">
                                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
@@ -909,7 +909,7 @@ export default function AdminDashboard() {
                                 <h3 className="text-lg font-bold flex items-center gap-2">
                                     <ShieldAlert className="h-5 w-5 text-primary" /> รายชื่อแก๊ง
                                 </h3>
-                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
                                     <form onSubmit={handleGangSearch} className="relative w-full sm:w-64">
                                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
