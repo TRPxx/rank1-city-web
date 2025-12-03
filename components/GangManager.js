@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/table";
 import { Users, Shield, Copy, LogOut, Crown, Plus, ArrowRight, Loader2, CheckCircle2, AlertCircle, Search } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import GangDesignShowcase from './GangDesignShowcase';
 
 export default function GangManager() {
     const [gangData, setGangData] = useState(null);
@@ -263,16 +262,113 @@ export default function GangManager() {
     }
 
     // View: Create or Join
-    // Using Design Showcase to let user choose
     return (
-        <GangDesignShowcase
-            joinCode={joinCode}
-            setJoinCode={setJoinCode}
-            createName={createName}
-            setCreateName={setCreateName}
-            handleAction={handleAction}
-            isActionLoading={isActionLoading}
-            error={error}
-        />
+        <div className="h-full w-full p-4 lg:p-8 flex items-center justify-center">
+            <div className="w-full h-full max-h-[800px] overflow-hidden rounded-[2rem] border border-border/50 bg-background shadow-2xl grid lg:grid-cols-2">
+
+                {/* Left Side: Hero Section (Shadcn Style) */}
+                <div className="relative hidden lg:flex flex-col justify-between bg-zinc-900 p-10 text-white dark:border-r">
+                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1605218427306-635ba2439af2?q=80&w=2574&auto=format&fit=crop')] bg-cover bg-center opacity-20" />
+                    <div className="relative z-20 flex items-center text-lg font-medium">
+                        <Shield className="mr-2 h-6 w-6 text-amber-500" />
+                        Rank1 City Gangs
+                    </div>
+                    <div className="relative z-20 mt-auto">
+                        <blockquote className="space-y-2">
+                            <p className="text-lg">
+                                &ldquo;Power is not given to you. You have to take it. Build your legacy, gather your crew, and rule the streets of Rank1 City.&rdquo;
+                            </p>
+                            <footer className="text-sm text-zinc-400">The Godfather</footer>
+                        </blockquote>
+                    </div>
+                </div>
+
+                {/* Right Side: Form Section */}
+                <div className="flex flex-col justify-center p-8 lg:p-12 bg-background/50 backdrop-blur-sm">
+                    <div className="mx-auto w-full max-w-[400px] flex flex-col justify-center space-y-6">
+                        <div className="flex flex-col space-y-2 text-center">
+                            <h1 className="text-3xl font-bold tracking-tight">Gang System</h1>
+                            <p className="text-sm text-muted-foreground">
+                                Enter your invite code or establish a new organization.
+                            </p>
+                        </div>
+
+                        <Tabs defaultValue="join" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 mb-6">
+                                <TabsTrigger value="join">Join Gang</TabsTrigger>
+                                <TabsTrigger value="create">Create Gang</TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="join" className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Invite Code
+                                    </label>
+                                    <Input
+                                        placeholder="G-XXXXXX"
+                                        value={joinCode}
+                                        onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                                        className="font-mono uppercase text-center tracking-widest h-11"
+                                    />
+                                </div>
+                                <Button
+                                    className="w-full h-11 bg-amber-600 hover:bg-amber-700 text-white"
+                                    onClick={() => handleAction('join')}
+                                    disabled={!joinCode || isActionLoading}
+                                >
+                                    {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Users className="mr-2 h-4 w-4" />}
+                                    Join Gang
+                                </Button>
+                            </TabsContent>
+
+                            <TabsContent value="create" className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Gang Name
+                                    </label>
+                                    <Input
+                                        placeholder="Enter gang name"
+                                        value={createName}
+                                        onChange={(e) => setCreateName(e.target.value)}
+                                        maxLength={20}
+                                        className="h-11"
+                                    />
+                                    <p className="text-[10px] text-muted-foreground text-right">
+                                        {createName.length}/20
+                                    </p>
+                                </div>
+                                <Button
+                                    className="w-full h-11 bg-amber-600 hover:bg-amber-700 text-white"
+                                    onClick={() => handleAction('create')}
+                                    disabled={!createName || isActionLoading}
+                                >
+                                    {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+                                    Create Gang
+                                </Button>
+                            </TabsContent>
+                        </Tabs>
+
+                        {error && (
+                            <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-center gap-2 justify-center">
+                                <AlertCircle className="w-4 h-4" />
+                                {error}
+                            </div>
+                        )}
+
+                        <p className="px-8 text-center text-sm text-muted-foreground">
+                            By creating a gang, you agree to our{" "}
+                            <span className="underline underline-offset-4 hover:text-primary cursor-pointer">
+                                Server Rules
+                            </span>{" "}
+                            and{" "}
+                            <span className="underline underline-offset-4 hover:text-primary cursor-pointer">
+                                Gang Policy
+                            </span>
+                            .
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
     );
 }

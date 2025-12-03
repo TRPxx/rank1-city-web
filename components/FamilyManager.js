@@ -263,80 +263,108 @@ export default function FamilyManager() {
 
     // View: Create or Join
     return (
-        <div className="h-full flex items-center justify-center p-4">
-            <Card className="w-full max-w-md border-border/50 shadow-lg">
-                <CardHeader className="text-center pb-2">
-                    <div className="mx-auto w-12 h-12 bg-rose-500/10 rounded-full flex items-center justify-center mb-4">
-                        <Users className="w-6 h-6 text-rose-600" />
+        <div className="h-full w-full p-4 lg:p-8 flex items-center justify-center">
+            <div className="w-full h-full max-h-[800px] overflow-hidden rounded-[2rem] border border-border/50 bg-background shadow-2xl grid lg:grid-cols-2">
+
+                {/* Left Side: Hero Section (Shadcn Style) */}
+                <div className="relative hidden lg:flex flex-col justify-between bg-zinc-900 p-10 text-white dark:border-r">
+                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center opacity-20" />
+                    <div className="relative z-20 flex items-center text-lg font-medium">
+                        <Users className="mr-2 h-6 w-6 text-rose-500" />
+                        Rank1 City Families
                     </div>
-                    <CardTitle className="text-2xl font-bold">ระบบครอบครัว</CardTitle>
-                    <CardDescription>
-                        เข้าร่วมหรือสร้างครอบครัวเพื่อเริ่มต้นการผจญภัย
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6">
-                    <Tabs defaultValue="join" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-6">
-                            <TabsTrigger value="join">เข้าร่วม</TabsTrigger>
-                            <TabsTrigger value="create">สร้างใหม่</TabsTrigger>
-                        </TabsList>
+                    <div className="relative z-20 mt-auto">
+                        <blockquote className="space-y-2">
+                            <p className="text-lg">
+                                &ldquo;Family isn't just about blood. It's about who is willing to hold your hand when you need it the most. Build your home in this city.&rdquo;
+                            </p>
+                            <footer className="text-sm text-zinc-400">The Matriarch</footer>
+                        </blockquote>
+                    </div>
+                </div>
 
-                        <TabsContent value="join" className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    รหัสครอบครัว
-                                </label>
-                                <Input
-                                    placeholder="FAM-XXXXXX"
-                                    value={joinCode}
-                                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                                    className="font-mono uppercase text-center tracking-widest"
-                                />
-                            </div>
-                            <Button
-                                className="w-full bg-rose-600 hover:bg-rose-700 text-white"
-                                onClick={() => handleAction('join')}
-                                disabled={!joinCode || isActionLoading}
-                            >
-                                {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
-                                เข้าร่วมครอบครัว
-                            </Button>
-                        </TabsContent>
-
-                        <TabsContent value="create" className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    ชื่อครอบครัว
-                                </label>
-                                <Input
-                                    placeholder="ตั้งชื่อครอบครัวของคุณ"
-                                    value={createName}
-                                    onChange={(e) => setCreateName(e.target.value)}
-                                    maxLength={20}
-                                />
-                                <p className="text-[10px] text-muted-foreground text-right">
-                                    {createName.length}/20
-                                </p>
-                            </div>
-                            <Button
-                                className="w-full bg-rose-600 hover:bg-rose-700 text-white"
-                                onClick={() => handleAction('create')}
-                                disabled={!createName || isActionLoading}
-                            >
-                                {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-                                สร้างครอบครัว
-                            </Button>
-                        </TabsContent>
-                    </Tabs>
-
-                    {error && (
-                        <div className="mt-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4" />
-                            {error}
+                {/* Right Side: Form Section */}
+                <div className="flex flex-col justify-center p-8 lg:p-12 bg-background/50 backdrop-blur-sm">
+                    <div className="mx-auto w-full max-w-[400px] flex flex-col justify-center space-y-6">
+                        <div className="flex flex-col space-y-2 text-center">
+                            <h1 className="text-3xl font-bold tracking-tight">Family System</h1>
+                            <p className="text-sm text-muted-foreground">
+                                Join a loving home or start your own lineage.
+                            </p>
                         </div>
-                    )}
-                </CardContent>
-            </Card>
+
+                        <Tabs defaultValue="join" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 mb-6">
+                                <TabsTrigger value="join">Join Family</TabsTrigger>
+                                <TabsTrigger value="create">Create Family</TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="join" className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Invite Code
+                                    </label>
+                                    <Input
+                                        placeholder="FAM-XXXXXX"
+                                        value={joinCode}
+                                        onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                                        className="font-mono uppercase text-center tracking-widest h-11"
+                                    />
+                                </div>
+                                <Button
+                                    className="w-full h-11 bg-rose-600 hover:bg-rose-700 text-white"
+                                    onClick={() => handleAction('join')}
+                                    disabled={!joinCode || isActionLoading}
+                                >
+                                    {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
+                                    Join Family
+                                </Button>
+                            </TabsContent>
+
+                            <TabsContent value="create" className="space-y-4">
+                                <div className="space-y-2">
+                                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                        Family Name
+                                    </label>
+                                    <Input
+                                        placeholder="Enter family name"
+                                        value={createName}
+                                        onChange={(e) => setCreateName(e.target.value)}
+                                        maxLength={20}
+                                        className="h-11"
+                                    />
+                                    <p className="text-[10px] text-muted-foreground text-right">
+                                        {createName.length}/20
+                                    </p>
+                                </div>
+                                <Button
+                                    className="w-full h-11 bg-rose-600 hover:bg-rose-700 text-white"
+                                    onClick={() => handleAction('create')}
+                                    disabled={!createName || isActionLoading}
+                                >
+                                    {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+                                    Create Family
+                                </Button>
+                            </TabsContent>
+                        </Tabs>
+
+                        {error && (
+                            <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-center gap-2 justify-center">
+                                <AlertCircle className="w-4 h-4" />
+                                {error}
+                            </div>
+                        )}
+
+                        <p className="px-8 text-center text-sm text-muted-foreground">
+                            By creating a family, you agree to our{" "}
+                            <span className="underline underline-offset-4 hover:text-primary cursor-pointer">
+                                Community Guidelines
+                            </span>
+                            .
+                        </p>
+                    </div>
+                </div>
+            </div>
         </div>
     );
 }
