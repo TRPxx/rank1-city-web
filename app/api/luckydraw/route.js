@@ -66,22 +66,7 @@ export async function POST(request) {
             );
 
             // PHASE 5: Add to Claim Queue
-            // Ensure table exists first (in case setup-db wasn't run)
-            await connection.query(`
-                CREATE TABLE IF NOT EXISTS claim_queue (
-                  id int(11) NOT NULL AUTO_INCREMENT,
-                  discord_id varchar(50) NOT NULL,
-                  item_id varchar(50) NOT NULL,
-                  item_name varchar(255) NOT NULL,
-                  amount int(11) DEFAULT 1,
-                  status enum('pending','claimed') DEFAULT 'pending',
-                  created_at timestamp NULL DEFAULT current_timestamp(),
-                  claimed_at datetime DEFAULT NULL,
-                  PRIMARY KEY (id),
-                  KEY discord_id (discord_id),
-                  KEY status (status)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-            `);
+            // Note: Table 'claim_queue' must be created via migration script (scripts/migrate_claim_queue.js)
 
             console.log(`Inserting into claim_queue: DiscordID=${discordId}, ItemID=${selectedItem.id}, Name=${selectedItem.name}`);
 
@@ -94,14 +79,6 @@ export async function POST(request) {
 
             await connection.commit();
             console.log('Transaction committed');
-
-            return NextResponse.json({
-                success: true,
-                reward: selectedItem,
-                remainingTickets: currentTickets - 1
-            });
-
-            await connection.commit();
 
             return NextResponse.json({
                 success: true,
