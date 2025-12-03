@@ -6,7 +6,15 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Ticket, Trophy, Search, Settings, Loader2, ShieldAlert, UserCheck, Package, Home, Swords, History, Activity, ScrollText, Gift, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Users, Ticket, Trophy, Search, Settings, Loader2, ShieldAlert, UserCheck, Package, Home, Swords, History, Activity, ScrollText, Gift, ChevronLeft, ChevronRight, User, Calendar, CreditCard, Hash, MapPin, Users2 } from 'lucide-react';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from "@/components/ui/dialog";
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -34,6 +42,8 @@ export default function AdminDashboard() {
     const [graphs, setGraphs] = useState({ registrations: [], spins: [] });
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const [selectedUser, setSelectedUser] = useState(null);
+    const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isSearching, setIsSearching] = useState(false);
 
@@ -82,12 +92,24 @@ export default function AdminDashboard() {
         try {
             const res = await fetch(`/api/admin?q=${searchQuery}`);
             const data = await res.json();
-            setSearchResults(data.users || []);
+            const results = data.users || [];
+            setSearchResults(results);
+
+            // If exactly one result is found, open the dialog immediately
+            if (results.length === 1) {
+                setSelectedUser(results[0]);
+                setIsUserDialogOpen(true);
+            }
         } catch (error) {
             console.error(error);
         } finally {
             setIsSearching(false);
         }
+    };
+
+    const openUserDialog = (user) => {
+        setSelectedUser(user);
+        setIsUserDialogOpen(true);
     };
 
     useEffect(() => {
@@ -351,129 +373,190 @@ export default function AdminDashboard() {
                     </TabsContent>
 
                     {/* ==================== TAB: USERS ==================== */}
-                    <TabsContent value="users" className="space-y-6 mt-0 animate-in fade-in-50 duration-500">
-                        {/* User Stats Grid */}
-                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
-                                <div className="p-3 bg-blue-500/10 rounded-xl">
-                                    <Users className="h-6 w-6 text-blue-500" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-muted-foreground">ผู้ใช้ทั้งหมด</p>
-                                    <h3 className="text-2xl font-bold">{stats?.total_users?.toLocaleString() || 0}</h3>
-                                </div>
-                            </div>
-                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
-                                <div className="p-3 bg-purple-500/10 rounded-xl">
-                                    <UserCheck className="h-6 w-6 text-purple-500" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-muted-foreground">ตัวละครในเกม</p>
-                                    <h3 className="text-2xl font-bold">{stats?.total_characters?.toLocaleString() || 0}</h3>
-                                </div>
-                            </div>
-                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
-                                <div className="p-3 bg-orange-500/10 rounded-xl">
-                                    <History className="h-6 w-6 text-orange-500" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-muted-foreground">ผู้เล่น Solo</p>
-                                    <h3 className="text-2xl font-bold">{stats?.solo_players?.toLocaleString() || 0}</h3>
-                                </div>
-                            </div>
-                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
-                                <div className="p-3 bg-rose-500/10 rounded-xl">
-                                    <Swords className="h-6 w-6 text-rose-500" />
-                                </div>
-                                <div>
-                                    <p className="text-sm font-medium text-muted-foreground">มีสังกัดแก๊ง</p>
-                                    <h3 className="text-2xl font-bold">{stats?.gang_members?.toLocaleString() || 0}</h3>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Search & Table */}
-                        <div className="bg-card rounded-[2.5rem] border shadow-sm overflow-hidden">
-                            <div className="p-6 border-b flex flex-col md:flex-row justify-between items-center gap-4">
-                                <h3 className="text-xl font-bold">ค้นหาผู้ใช้งาน</h3>
-                                <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto">
-                                    <div className="relative flex-1 md:w-80">
-                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <TabsContent value="users" className="mt-0 animate-in fade-in-50 duration-500">
+                        <div className="grid gap-6">
+                            {/* Search Section */}
+                            <Card className="rounded-[2rem] border-none shadow-lg bg-gradient-to-br from-background to-muted/20 overflow-hidden">
+                                <div className="p-12 flex flex-col items-center justify-center text-center space-y-6">
+                                    <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center mb-2">
+                                        <Search className="h-10 w-10 text-primary" />
+                                    </div>
+                                    <div className="space-y-2 max-w-lg">
+                                        <h2 className="text-3xl font-bold tracking-tight">ค้นหาผู้ใช้งาน</h2>
+                                        <p className="text-muted-foreground">
+                                            กรอก Discord ID หรือ รหัสแนะนำ เพื่อดูข้อมูลรายละเอียดของผู้ใช้งาน
+                                        </p>
+                                    </div>
+                                    <form onSubmit={handleSearch} className="w-full max-w-xl relative">
+                                        <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                                         <Input
-                                            placeholder="ค้นหาด้วย Discord ID หรือ รหัสแนะนำ..."
+                                            placeholder="ค้นหาด้วย Discord ID หรือ Referral Code..."
+                                            className="pl-12 h-14 text-lg rounded-full border-2 border-muted bg-background/50 hover:bg-background focus:border-primary transition-all shadow-sm"
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
-                                            className="pl-9 rounded-xl bg-muted/30 border-transparent focus:bg-background"
                                         />
-                                    </div>
-                                    <Button type="submit" disabled={isSearching} className="rounded-xl px-6">
-                                        {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : 'ค้นหา'}
-                                    </Button>
-                                </form>
-                            </div>
-                            <div className="p-0">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow className="hover:bg-transparent border-border/50">
-                                            <TableHead className="pl-6">Discord ID</TableHead>
-                                            <TableHead>แก๊ง</TableHead>
-                                            <TableHead>ตั๋ว</TableHead>
-                                            <TableHead>แต้ม</TableHead>
-                                            <TableHead>รหัสแนะนำ</TableHead>
-                                            <TableHead className="pr-6">ผู้แนะนำ</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {searchResults.map((user) => (
-                                            <TableRow key={user.id} className="hover:bg-muted/30 border-border/50">
-                                                <TableCell className="font-mono pl-6">{user.discord_id}</TableCell>
-                                                <TableCell>
-                                                    {user.gang_name ? (
-                                                        <Badge variant="outline" className="rounded-lg">{user.gang_name}</Badge>
-                                                    ) : '-'}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="flex items-center gap-1">
-                                                        <Ticket className="w-3 h-3 text-amber-500" />
-                                                        {user.ticket_count}
-                                                    </div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <div className="font-bold text-primary">{user.points}</div>
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge variant="secondary" className="rounded-lg font-mono">{user.referral_code}</Badge>
-                                                </TableCell>
-                                                <TableCell className="pr-6 text-muted-foreground">{user.invited_by || '-'}</TableCell>
-                                            </TableRow>
-                                        ))}
-                                        {searchResults.length === 0 && searchQuery && !isSearching && (
-                                            <TableRow>
-                                                <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
-                                                    <div className="flex flex-col items-center justify-center">
-                                                        <Search className="h-10 w-10 mb-4 opacity-20" />
-                                                        <p>ไม่พบข้อมูลผู้ใช้งาน</p>
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                        {searchResults.length === 0 && !searchQuery && (
-                                            <TableRow>
-                                                <TableCell colSpan={6} className="text-center py-12 text-muted-foreground">
-                                                    <div className="flex flex-col items-center justify-center">
-                                                        <Search className="h-10 w-10 mb-4 opacity-20" />
-                                                        <p>พิมพ์คำค้นหาเพื่อเริ่มค้นหาข้อมูล</p>
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </div>
-                    </TabsContent>
+                                        <Button
+                                            type="submit"
+                                            className="absolute right-2 top-2 bottom-2 rounded-full px-6"
+                                            disabled={isSearching}
+                                        >
+                                            {isSearching ? <Loader2 className="h-4 w-4 animate-spin" /> : 'ค้นหา'}
+                                        </Button>
+                                    </form>
+                                </div>
+                            </Card>
 
-                    {/* ==================== TAB: ECONOMY ==================== */}
+                            {/* Search Results */}
+                            {searchResults.length > 0 && (
+                                <Card className="rounded-[2rem] border shadow-sm overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
+                                    <div className="p-6 border-b">
+                                        <h3 className="text-lg font-bold">ผลการค้นหา ({searchResults.length})</h3>
+                                    </div>
+                                    <div className="p-0">
+                                        <Table>
+                                            <TableHeader>
+                                                <TableRow className="hover:bg-transparent border-border/50">
+                                                    <TableHead className="pl-6">Discord ID</TableHead>
+                                                    <TableHead>ชื่อ</TableHead>
+                                                    <TableHead>แก๊ง</TableHead>
+                                                    <TableHead>ตั๋ว</TableHead>
+                                                    <TableHead className="text-right pr-6">จัดการ</TableHead>
+                                                </TableRow>
+                                            </TableHeader>
+                                            <TableBody>
+                                                {searchResults.map((user, i) => (
+                                                    <TableRow key={i} className="hover:bg-muted/30 border-border/50 cursor-pointer" onClick={() => openUserDialog(user)}>
+                                                        <TableCell className="font-mono pl-6">{user.discord_id}</TableCell>
+                                                        <TableCell>
+                                                            <div className="flex items-center gap-2">
+                                                                {user.avatar_url && <img src={user.avatar_url} alt="" className="h-6 w-6 rounded-full" />}
+                                                                <span className="font-medium">{user.discord_name || 'Unknown'}</span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {user.gang_name ? (
+                                                                <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">
+                                                                    {user.gang_name}
+                                                                </Badge>
+                                                            ) : (
+                                                                <span className="text-muted-foreground text-sm">-</span>
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <div className="flex items-center gap-1">
+                                                                <Ticket className="h-3 w-3 text-yellow-500" />
+                                                                <span>{user.ticket_count}</span>
+                                                            </div>
+                                                        </TableCell>
+                                                        <TableCell className="text-right pr-6">
+                                                            <Button variant="ghost" size="sm" onClick={(e) => { e.stopPropagation(); openUserDialog(user); }}>
+                                                                ดูข้อมูล
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))}
+                                            </TableBody>
+                                        </Table>
+                                    </div>
+                                </Card>
+                            )}
+                        </div>
+
+                        {/* User Details Dialog */}
+                        <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
+                            <DialogContent className="sm:max-w-[600px] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl">
+                                {selectedUser && (
+                                    <>
+                                        <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white relative">
+                                            <div className="absolute top-4 right-4 opacity-20">
+                                                <Users2 className="h-32 w-32" />
+                                            </div>
+                                            <div className="relative z-10 flex items-center gap-6">
+                                                <div className="h-24 w-24 rounded-full bg-white/20 backdrop-blur-sm border-4 border-white/30 overflow-hidden shadow-xl">
+                                                    {selectedUser.avatar_url ? (
+                                                        <img src={selectedUser.avatar_url} alt={selectedUser.discord_name} className="h-full w-full object-cover" />
+                                                    ) : (
+                                                        <div className="h-full w-full flex items-center justify-center bg-muted text-muted-foreground">
+                                                            <User className="h-10 w-10" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <h2 className="text-3xl font-bold">{selectedUser.discord_name || 'Unknown User'}</h2>
+                                                    <div className="flex items-center gap-2 mt-2 text-white/80 font-mono bg-black/20 px-3 py-1 rounded-full w-fit">
+                                                        <Hash className="h-4 w-4" />
+                                                        {selectedUser.discord_id}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="p-8 bg-background">
+                                            <div className="grid grid-cols-2 gap-8">
+                                                <div className="space-y-6">
+                                                    <div>
+                                                        <h4 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                                                            <CreditCard className="h-4 w-4" /> ข้อมูลการแนะนำ
+                                                        </h4>
+                                                        <div className="bg-muted/30 p-4 rounded-xl space-y-3">
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="text-sm">รหัสแนะนำ</span>
+                                                                <Badge variant="secondary" className="font-mono text-base">{selectedUser.referral_code}</Badge>
+                                                            </div>
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="text-sm">ผู้แนะนำ</span>
+                                                                <span className="font-medium">{selectedUser.referred_by || '-'}</span>
+                                                            </div>
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="text-sm">เชิญเพื่อน</span>
+                                                                <span className="font-bold text-green-500">{selectedUser.invite_count} คน</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-6">
+                                                    <div>
+                                                        <h4 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
+                                                            <Activity className="h-4 w-4" /> สถานะเกม
+                                                        </h4>
+                                                        <div className="bg-muted/30 p-4 rounded-xl space-y-3">
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="text-sm">แก๊ง</span>
+                                                                {selectedUser.gang_name ? (
+                                                                    <Badge className="bg-red-500 hover:bg-red-600">{selectedUser.gang_name}</Badge>
+                                                                ) : (
+                                                                    <span className="text-muted-foreground">-</span>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="text-sm">ตั๋วคงเหลือ</span>
+                                                                <div className="flex items-center gap-1 font-bold text-yellow-500">
+                                                                    <Ticket className="h-4 w-4" />
+                                                                    {selectedUser.ticket_count}
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div className="mt-8 pt-6 border-t grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                                                <div className="flex items-center gap-2">
+                                                    <Calendar className="h-4 w-4" />
+                                                    ลงทะเบียน: {new Date(selectedUser.created_at).toLocaleDateString('th-TH')}
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <MapPin className="h-4 w-4" />
+                                                    IP: {selectedUser.ip_address || 'Unknown'}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </>
+                                )}
+                            </DialogContent>
+                        </Dialog>
+                    </TabsContent>
                     <TabsContent value="economy" className="space-y-6 mt-0 animate-in fade-in-50 duration-500">
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                             <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
