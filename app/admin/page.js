@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Ticket, Trophy, Search, Settings, Loader2, ShieldAlert, UserCheck, Package, Home, Swords, History, Activity, ScrollText } from 'lucide-react';
+import { Users, Ticket, Trophy, Search, Settings, Loader2, ShieldAlert, UserCheck, Package, Home, Swords, History, Activity, ScrollText, Gift } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -123,6 +123,9 @@ export default function AdminDashboard() {
                             <TabsTrigger value="activity" className="rounded-full px-6 py-2.5 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
                                 <ScrollText className="h-4 w-4" /> กิจกรรม
                             </TabsTrigger>
+                            <TabsTrigger value="winners" className="rounded-full px-6 py-2.5 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                                <Gift className="h-4 w-4" /> ผู้โชคดี
+                            </TabsTrigger>
                         </TabsList>
                     </div>
 
@@ -232,60 +235,61 @@ export default function AdminDashboard() {
 
                     {/* ==================== TAB: ACTIVITY ==================== */}
                     <TabsContent value="activity" className="space-y-6 mt-0 animate-in fade-in-50 duration-500">
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-                            <div className="col-span-4 bg-card rounded-[2rem] border shadow-sm overflow-hidden">
-                                <div className="p-6 border-b">
-                                    <h3 className="text-lg font-bold">การลงทะเบียนล่าสุด</h3>
-                                </div>
-                                <div className="p-0">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow className="hover:bg-transparent border-border/50">
-                                                <TableHead className="pl-6">Discord ID</TableHead>
-                                                <TableHead>รหัสแนะนำ</TableHead>
-                                                <TableHead className="text-right pr-6">วันที่</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {recentUsers.map((user, i) => (
-                                                <TableRow key={i} className="hover:bg-muted/30 border-border/50">
-                                                    <TableCell className="font-mono text-xs pl-6">{user.discord_id}</TableCell>
-                                                    <TableCell>
-                                                        <Badge variant="secondary" className="rounded-lg font-mono">{user.referral_code}</Badge>
-                                                    </TableCell>
-                                                    <TableCell className="text-right text-muted-foreground pr-6">
-                                                        {new Date(user.created_at).toLocaleDateString('th-TH')}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
-                                        </TableBody>
-                                    </Table>
-                                </div>
+                        <div className="bg-card rounded-[2rem] border shadow-sm overflow-hidden">
+                            <div className="p-6 border-b">
+                                <h3 className="text-lg font-bold">การลงทะเบียนล่าสุด</h3>
                             </div>
-
-                            <div className="col-span-3 bg-card rounded-[2rem] border shadow-sm overflow-hidden">
-                                <div className="p-6 border-b">
-                                    <h3 className="text-lg font-bold">ผู้โชคดีล่าสุด</h3>
-                                </div>
-                                <div className="p-6">
-                                    <div className="space-y-4">
-                                        {recentWins.map((win, i) => (
-                                            <div key={i} className="flex items-center p-3 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-colors">
-                                                <div className="h-10 w-10 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500 shrink-0">
-                                                    <Trophy className="h-5 w-5" />
-                                                </div>
-                                                <div className="ml-4 space-y-1 overflow-hidden min-w-0">
-                                                    <p className="text-sm font-bold leading-none truncate">{win.item_name}</p>
-                                                    <p className="text-xs text-muted-foreground truncate">
-                                                        {win.discord_id}
-                                                    </p>
-                                                </div>
-                                                <div className="ml-auto font-medium text-xs text-muted-foreground whitespace-nowrap pl-2">
-                                                    {new Date(win.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
-                                                </div>
-                                            </div>
+                            <div className="p-0">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow className="hover:bg-transparent border-border/50">
+                                            <TableHead className="pl-6">Discord ID</TableHead>
+                                            <TableHead>รหัสแนะนำ</TableHead>
+                                            <TableHead className="text-right pr-6">วันที่</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {recentUsers.map((user, i) => (
+                                            <TableRow key={i} className="hover:bg-muted/30 border-border/50">
+                                                <TableCell className="font-mono text-xs pl-6">{user.discord_id}</TableCell>
+                                                <TableCell>
+                                                    <Badge variant="secondary" className="rounded-lg font-mono">{user.referral_code}</Badge>
+                                                </TableCell>
+                                                <TableCell className="text-right text-muted-foreground pr-6">
+                                                    {new Date(user.created_at).toLocaleDateString('th-TH')}
+                                                </TableCell>
+                                            </TableRow>
                                         ))}
-                                    </div>
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </div>
+                    </TabsContent>
+
+                    {/* ==================== TAB: WINNERS ==================== */}
+                    <TabsContent value="winners" className="space-y-6 mt-0 animate-in fade-in-50 duration-500">
+                        <div className="bg-card rounded-[2rem] border shadow-sm overflow-hidden">
+                            <div className="p-6 border-b">
+                                <h3 className="text-lg font-bold">ผู้โชคดีล่าสุด</h3>
+                            </div>
+                            <div className="p-6">
+                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+                                    {recentWins.map((win, i) => (
+                                        <div key={i} className="flex items-center p-4 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-colors border border-border/50">
+                                            <div className="h-12 w-12 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500 shrink-0">
+                                                <Trophy className="h-6 w-6" />
+                                            </div>
+                                            <div className="ml-4 space-y-1 overflow-hidden min-w-0">
+                                                <p className="text-sm font-bold leading-none truncate">{win.item_name}</p>
+                                                <p className="text-xs text-muted-foreground truncate">
+                                                    {win.discord_id}
+                                                </p>
+                                            </div>
+                                            <div className="ml-auto font-medium text-xs text-muted-foreground whitespace-nowrap pl-2">
+                                                {new Date(win.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         </div>
