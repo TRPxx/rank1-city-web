@@ -22,7 +22,7 @@ export default function FamilyManager() {
 
     const fetchFamily = async () => {
         try {
-            const res = await fetch('/api/Family');
+            const res = await fetch('/api/family');
             const data = await res.json();
             if (data.hasFamily) {
                 setFamilyData(data.Family);
@@ -39,7 +39,7 @@ export default function FamilyManager() {
     const fetchMembers = async (FamilyCode) => {
         setIsMembersLoading(true);
         try {
-            const res = await fetch(`/api/Family/members?FamilyCode=${FamilyCode}`);
+            const res = await fetch(`/api/family/members?familyCode=${FamilyCode}`);
             const data = await res.json();
             if (data.members) {
                 setMembers(data.members);
