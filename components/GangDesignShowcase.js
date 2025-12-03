@@ -181,6 +181,216 @@ const DesignNeon = () => (
     </div>
 );
 
+// --- Design 6: Minimalist Typography ---
+const DesignMinimal = () => (
+    <div className="h-full flex items-center justify-center bg-white text-black p-8 overflow-hidden relative">
+        <div className="absolute top-0 left-0 w-full h-2 bg-black"></div>
+        <div className="absolute bottom-0 right-0 w-full h-2 bg-black"></div>
+        <div className="grid grid-cols-1 md:grid-cols-2 w-full max-w-6xl h-[80%] gap-12">
+            <div className="group relative flex items-center justify-center border-r-2 border-transparent hover:border-black transition-all duration-500 cursor-pointer">
+                <h1 className="text-8xl md:text-9xl font-black tracking-tighter group-hover:scale-110 transition-transform duration-500">JOIN</h1>
+                <div className="absolute inset-0 bg-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <Input placeholder="CODE" className="text-4xl font-black text-center border-b-4 border-black border-t-0 border-x-0 rounded-none focus:ring-0 placeholder:text-gray-300 w-64" />
+                    <Button variant="link" className="text-xl font-bold mt-4 underline decoration-4 underline-offset-4">ENTER &rarr;</Button>
+                </div>
+            </div>
+            <div className="group relative flex items-center justify-center cursor-pointer">
+                <h1 className="text-8xl md:text-9xl font-black tracking-tighter group-hover:scale-110 transition-transform duration-500 text-gray-300 group-hover:text-black">CREATE</h1>
+                <div className="absolute inset-0 bg-white flex flex-col items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <Input placeholder="NAME" className="text-4xl font-black text-center border-b-4 border-black border-t-0 border-x-0 rounded-none focus:ring-0 placeholder:text-gray-300 w-64" />
+                    <Button variant="link" className="text-xl font-bold mt-4 underline decoration-4 underline-offset-4">ESTABLISH &rarr;</Button>
+                </div>
+            </div>
+        </div>
+    </div>
+);
+
+// --- Design 7: Interactive 3D Cards ---
+const Design3D = () => (
+    <div className="h-full flex items-center justify-center p-8 bg-slate-900 perspective-1000">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 w-full max-w-5xl">
+            <motion.div
+                whileHover={{ rotateY: 10, rotateX: -5, scale: 1.05 }}
+                className="h-96 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl p-8 text-white shadow-2xl flex flex-col justify-between cursor-pointer border-4 border-white/10"
+            >
+                <div>
+                    <Users className="w-16 h-16 mb-4 opacity-80" />
+                    <h2 className="text-4xl font-bold mb-2">JOIN SQUAD</h2>
+                    <p className="text-indigo-200">Enter the fray with your allies.</p>
+                </div>
+                <div className="bg-white/20 backdrop-blur-md rounded-xl p-4">
+                    <Input placeholder="G-CODE" className="bg-transparent border-none text-white placeholder:text-indigo-300 text-2xl font-bold text-center focus:ring-0" />
+                </div>
+            </motion.div>
+
+            <motion.div
+                whileHover={{ rotateY: -10, rotateX: -5, scale: 1.05 }}
+                className="h-96 bg-gradient-to-br from-pink-600 to-rose-700 rounded-3xl p-8 text-white shadow-2xl flex flex-col justify-between cursor-pointer border-4 border-white/10"
+            >
+                <div>
+                    <Crown className="w-16 h-16 mb-4 opacity-80" />
+                    <h2 className="text-4xl font-bold mb-2">START EMPIRE</h2>
+                    <p className="text-pink-200">Begin your reign today.</p>
+                </div>
+                <div className="bg-white/20 backdrop-blur-md rounded-xl p-4">
+                    <Input placeholder="NAME" className="bg-transparent border-none text-white placeholder:text-pink-300 text-2xl font-bold text-center focus:ring-0" />
+                </div>
+            </motion.div>
+        </div>
+    </div>
+);
+
+// --- Design 8: Sidebar Navigation ---
+const DesignSidebar = () => {
+    const [activeTab, setActiveTab] = useState('join');
+    return (
+        <div className="h-full flex bg-slate-950 border border-slate-800 rounded-xl overflow-hidden">
+            <div className="w-64 bg-slate-900 border-r border-slate-800 p-4 flex flex-col gap-2">
+                <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 px-2">Gang Menu</div>
+                <Button
+                    variant={activeTab === 'join' ? 'secondary' : 'ghost'}
+                    className="justify-start"
+                    onClick={() => setActiveTab('join')}
+                >
+                    <Users className="w-4 h-4 mr-2" /> Join Gang
+                </Button>
+                <Button
+                    variant={activeTab === 'create' ? 'secondary' : 'ghost'}
+                    className="justify-start"
+                    onClick={() => setActiveTab('create')}
+                >
+                    <Plus className="w-4 h-4 mr-2" /> Create Gang
+                </Button>
+                <div className="mt-auto p-4 bg-slate-950 rounded-lg border border-slate-800">
+                    <p className="text-xs text-slate-400">Need help? Contact support via Discord.</p>
+                </div>
+            </div>
+            <div className="flex-1 p-12 flex items-center justify-center bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-slate-950 to-slate-950">
+                <div className="w-full max-w-md">
+                    <h2 className="text-3xl font-bold text-white mb-2">
+                        {activeTab === 'join' ? 'Join an Existing Gang' : 'Create a New Gang'}
+                    </h2>
+                    <p className="text-slate-400 mb-8">
+                        {activeTab === 'join' ? 'Enter the unique code provided by a gang leader.' : 'Set up your organization profile and invite members.'}
+                    </p>
+
+                    {activeTab === 'join' ? (
+                        <div className="space-y-4">
+                            <Input placeholder="G-XXXXXX" className="bg-slate-900 border-slate-800 h-12" />
+                            <Button className="w-full h-12">Join Gang</Button>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <Input placeholder="Gang Name" className="bg-slate-900 border-slate-800 h-12" />
+                            <Button className="w-full h-12">Create Gang</Button>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// --- Design 9: Step-by-Step Wizard ---
+const DesignWizard = () => {
+    const [step, setStep] = useState(0); // 0: Choice, 1: Join, 2: Create
+
+    return (
+        <div className="h-full flex items-center justify-center p-4 bg-slate-100 text-slate-900">
+            <Card className="w-full max-w-2xl shadow-2xl border-0 overflow-hidden">
+                <div className="h-2 bg-blue-600 w-full"></div>
+                <CardContent className="p-12 text-center">
+                    {step === 0 && (
+                        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+                            <h2 className="text-3xl font-bold mb-8">What would you like to do?</h2>
+                            <div className="grid grid-cols-2 gap-6">
+                                <button onClick={() => setStep(1)} className="p-8 rounded-2xl border-2 border-slate-200 hover:border-blue-600 hover:bg-blue-50 transition-all group text-left">
+                                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                        <Users className="w-6 h-6" />
+                                    </div>
+                                    <h3 className="text-xl font-bold mb-2">Join a Gang</h3>
+                                    <p className="text-slate-500 text-sm">I have an invite code.</p>
+                                </button>
+                                <button onClick={() => setStep(2)} className="p-8 rounded-2xl border-2 border-slate-200 hover:border-blue-600 hover:bg-blue-50 transition-all group text-left">
+                                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mb-4 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                                        <Plus className="w-6 h-6" />
+                                    </div>
+                                    <h3 className="text-xl font-bold mb-2">Create a Gang</h3>
+                                    <p className="text-slate-500 text-sm">I want to lead my own.</p>
+                                </button>
+                            </div>
+                        </motion.div>
+                    )}
+
+                    {step === 1 && (
+                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                            <button onClick={() => setStep(0)} className="text-sm text-slate-400 hover:text-slate-600 mb-8 flex items-center justify-center gap-1">
+                                &larr; Back
+                            </button>
+                            <h2 className="text-2xl font-bold mb-2">Enter Invite Code</h2>
+                            <p className="text-slate-500 mb-8">Ask your gang leader for the code.</p>
+                            <Input placeholder="G-XXXXXX" className="text-center text-2xl tracking-widest h-16 mb-6 max-w-xs mx-auto" />
+                            <Button size="lg" className="w-full max-w-xs bg-blue-600 hover:bg-blue-700">Join Now</Button>
+                        </motion.div>
+                    )}
+
+                    {step === 2 && (
+                        <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                            <button onClick={() => setStep(0)} className="text-sm text-slate-400 hover:text-slate-600 mb-8 flex items-center justify-center gap-1">
+                                &larr; Back
+                            </button>
+                            <h2 className="text-2xl font-bold mb-2">Name Your Gang</h2>
+                            <p className="text-slate-500 mb-8">Choose a unique name for your organization.</p>
+                            <Input placeholder="Gang Name" className="text-center text-2xl h-16 mb-6 max-w-xs mx-auto" />
+                            <Button size="lg" className="w-full max-w-xs bg-blue-600 hover:bg-blue-700">Create Now</Button>
+                        </motion.div>
+                    )}
+                </CardContent>
+            </Card>
+        </div>
+    );
+};
+
+// --- Design 10: Floating Islands ---
+const DesignFloating = () => (
+    <div className="h-full flex items-center justify-center p-4 bg-sky-900 overflow-hidden relative">
+        <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
+
+        {/* Join Island */}
+        <motion.div
+            animate={{ y: [0, -15, 0] }}
+            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute left-[15%] top-[20%] w-80 bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-[2rem] text-center shadow-[0_0_50px_rgba(0,0,0,0.3)]"
+        >
+            <div className="w-16 h-16 mx-auto bg-gradient-to-tr from-cyan-400 to-blue-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                <Users className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-4">Join Us</h3>
+            <Input placeholder="Code" className="bg-white/20 border-none text-white placeholder:text-white/50 text-center mb-2" />
+            <Button className="w-full bg-cyan-500 hover:bg-cyan-400 rounded-xl">Fly In</Button>
+        </motion.div>
+
+        {/* Create Island */}
+        <motion.div
+            animate={{ y: [0, -20, 0] }}
+            transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+            className="absolute right-[15%] bottom-[20%] w-80 bg-white/10 backdrop-blur-md border border-white/20 p-6 rounded-[2rem] text-center shadow-[0_0_50px_rgba(0,0,0,0.3)]"
+        >
+            <div className="w-16 h-16 mx-auto bg-gradient-to-tr from-purple-400 to-pink-500 rounded-full flex items-center justify-center mb-4 shadow-lg">
+                <Plus className="w-8 h-8 text-white" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-4">Create New</h3>
+            <Input placeholder="Name" className="bg-white/20 border-none text-white placeholder:text-white/50 text-center mb-2" />
+            <Button className="w-full bg-purple-500 hover:bg-purple-400 rounded-xl">Launch</Button>
+        </motion.div>
+
+        {/* Center Decoration */}
+        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <h1 className="text-[10rem] font-black text-white/5 select-none">SKY</h1>
+        </div>
+    </div>
+);
+
 export default function GangDesignShowcase(props) {
     const [currentDesign, setCurrentDesign] = useState(1);
 
@@ -190,6 +400,11 @@ export default function GangDesignShowcase(props) {
         { id: 3, name: 'Hero Split', component: DesignHero, icon: Smartphone },
         { id: 4, name: 'Glassmorphism', component: DesignGlass, icon: Palette },
         { id: 5, name: 'Cyberpunk', component: DesignNeon, icon: Monitor },
+        { id: 6, name: 'Minimalist', component: DesignMinimal, icon: Layout },
+        { id: 7, name: '3D Cards', component: Design3D, icon: Monitor },
+        { id: 8, name: 'Sidebar', component: DesignSidebar, icon: Layout },
+        { id: 9, name: 'Wizard', component: DesignWizard, icon: Smartphone },
+        { id: 10, name: 'Floating', component: DesignFloating, icon: Palette },
     ];
 
     const ActiveComponent = designs.find(d => d.id === currentDesign)?.component || DesignClassic;
