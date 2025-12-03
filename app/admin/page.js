@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Users, Ticket, Trophy, Search, Settings, Loader2, ShieldAlert, UserCheck, Package, Home, Swords, History, Activity, ScrollText, Gift } from 'lucide-react';
+import { Users, Ticket, Trophy, Search, Settings, Loader2, ShieldAlert, UserCheck, Package, Home, Swords, History, Activity, ScrollText, Gift, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -26,7 +26,11 @@ export default function AdminDashboard() {
     const router = useRouter();
     const [stats, setStats] = useState(null);
     const [recentUsers, setRecentUsers] = useState([]);
-    const [recentWins, setRecentWins] = useState([]);
+    const [recentWins, setRecentWins] = useState([]); // Initial top 5
+    const [winnersList, setWinnersList] = useState([]); // Paginated list
+    const [winnersPage, setWinnersPage] = useState(1);
+    const [winnersTotalPages, setWinnersTotalPages] = useState(1);
+    const [isLoadingWinners, setIsLoadingWinners] = useState(false);
     const [graphs, setGraphs] = useState({ registrations: [], spins: [] });
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -48,6 +52,27 @@ export default function AdminDashboard() {
             setIsInitialLoading(false);
         }
     };
+
+    const fetchWinners = async (page) => {
+        setIsLoadingWinners(true);
+        try {
+            const res = await fetch(`/api/admin?type=winners&page=${page}&limit=24`);
+            if (!res.ok) throw new Error('Failed to fetch winners');
+            const data = await res.json();
+            setWinnersList(data.winners);
+            setWinnersTotalPages(data.pagination.totalPages);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoadingWinners(false);
+        }
+    };
+
+    useEffect(() => {
+        if (winnersPage > 1) {
+            fetchWinners(winnersPage);
+        }
+    }, [winnersPage]);
 
     const handleSearch = async (e) => {
         e.preventDefault();
@@ -73,6 +98,7 @@ export default function AdminDashboard() {
                 router.push('/');
             } else {
                 fetchData();
+                fetchWinners(1);
             }
         }
     }, [status, session, router]);
@@ -269,28 +295,57 @@ export default function AdminDashboard() {
                     {/* ==================== TAB: WINNERS ==================== */}
                     <TabsContent value="winners" className="space-y-6 mt-0 animate-in fade-in-50 duration-500">
                         <div className="bg-card rounded-[2rem] border shadow-sm overflow-hidden">
-                            <div className="p-6 border-b">
+                            <div className="p-6 border-b flex justify-between items-center">
                                 <h3 className="text-lg font-bold">ผู้โชคดีล่าสุด</h3>
+                                <div className="flex items-center gap-2">
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setWinnersPage(p => Math.max(1, p - 1))}
+                                        disabled={winnersPage === 1 || isLoadingWinners}
+                                        className="h-8 w-8 rounded-full"
+                                    >
+                                        <ChevronLeft className="h-4 w-4" />
+                                    </Button>
+                                    <span className="text-sm font-medium min-w-[3rem] text-center">
+                                        {winnersPage} / {winnersTotalPages}
+                                    </span>
+                                    <Button
+                                        variant="outline"
+                                        size="icon"
+                                        onClick={() => setWinnersPage(p => Math.min(winnersTotalPages, p + 1))}
+                                        disabled={winnersPage === winnersTotalPages || isLoadingWinners}
+                                        className="h-8 w-8 rounded-full"
+                                    >
+                                        <ChevronRight className="h-4 w-4" />
+                                    </Button>
+                                </div>
                             </div>
                             <div className="p-6">
-                                <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-                                    {recentWins.map((win, i) => (
-                                        <div key={i} className="flex items-center p-4 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-colors border border-border/50">
-                                            <div className="h-12 w-12 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500 shrink-0">
-                                                <Trophy className="h-6 w-6" />
+                                {isLoadingWinners ? (
+                                    <div className="flex justify-center py-12">
+                                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                    </div>
+                                ) : (
+                                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                        {winnersList.map((win, i) => (
+                                            <div key={i} className="flex items-center p-4 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-colors border border-border/50">
+                                                <div className="h-12 w-12 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500 shrink-0">
+                                                    <Trophy className="h-6 w-6" />
+                                                </div>
+                                                <div className="ml-4 space-y-1 overflow-hidden min-w-0">
+                                                    <p className="text-sm font-bold leading-none truncate">{win.item_name}</p>
+                                                    <p className="text-xs text-muted-foreground truncate">
+                                                        {win.discord_id}
+                                                    </p>
+                                                </div>
+                                                <div className="ml-auto font-medium text-xs text-muted-foreground whitespace-nowrap pl-2">
+                                                    {new Date(win.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
+                                                </div>
                                             </div>
-                                            <div className="ml-4 space-y-1 overflow-hidden min-w-0">
-                                                <p className="text-sm font-bold leading-none truncate">{win.item_name}</p>
-                                                <p className="text-xs text-muted-foreground truncate">
-                                                    {win.discord_id}
-                                                </p>
-                                            </div>
-                                            <div className="ml-auto font-medium text-xs text-muted-foreground whitespace-nowrap pl-2">
-                                                {new Date(win.created_at).toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </TabsContent>

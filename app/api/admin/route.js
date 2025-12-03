@@ -15,6 +15,32 @@ export async function GET(request) {
 
         const { searchParams } = new URL(request.url);
         const query = searchParams.get('q');
+        const type = searchParams.get('type');
+        const page = parseInt(searchParams.get('page') || '1');
+        const limit = parseInt(searchParams.get('limit') || '20');
+        const offset = (page - 1) * limit;
+
+        if (type === 'winners') {
+            // Winners Pagination Mode
+            const [winners] = await webDb.query(`
+                SELECT discord_id, item_name, created_at 
+                FROM lucky_draw_history 
+                ORDER BY created_at DESC 
+                LIMIT ? OFFSET ?
+            `, [limit, offset]);
+
+            const [total] = await webDb.query('SELECT COUNT(*) as count FROM lucky_draw_history');
+
+            return NextResponse.json({
+                winners,
+                pagination: {
+                    page,
+                    limit,
+                    total: total[0].count,
+                    totalPages: Math.ceil(total[0].count / limit)
+                }
+            });
+        }
 
         if (query) {
             // Search Mode
