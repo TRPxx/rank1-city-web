@@ -38,18 +38,6 @@ export default function AdminDashboard() {
     const [winnersList, setWinnersList] = useState([]); // Paginated list
     const [winnersPage, setWinnersPage] = useState(1);
     const [winnersTotalPages, setWinnersTotalPages] = useState(1);
-    const [isLoadingWinners, setIsLoadingWinners] = useState(false);
-    const [graphs, setGraphs] = useState({ registrations: [], spins: [] });
-    const [searchQuery, setSearchQuery] = useState('');
-    const [searchResults, setSearchResults] = useState([]);
-    const [selectedUser, setSelectedUser] = useState(null);
-    const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
-
-    // Transactions State
-    const [transactionsList, setTransactionsList] = useState([]);
-    const [transactionsPage, setTransactionsPage] = useState(1);
-    const [transactionsTotalPages, setTransactionsTotalPages] = useState(1);
-    const [transactionSearchQuery, setTransactionSearchQuery] = useState('');
     const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
 
     // Gangs State
@@ -632,35 +620,14 @@ export default function AdminDashboard() {
                                                 </div>
                                             </div>
                                             <div className="mt-8 pt-6 border-t">
-                                                <h4 className="text-sm font-medium text-muted-foreground mb-4 flex items-center gap-2">
-                                                    <History className="h-4 w-4" /> ประวัติการสุ่มกาชา (10 รายการล่าสุด)
-                                                </h4>
-                                                {selectedUser.lucky_draw_history && selectedUser.lucky_draw_history.length > 0 ? (
-                                                    <div className="bg-muted/30 rounded-xl overflow-hidden">
-                                                        <Table>
-                                                            <TableHeader>
-                                                                <TableRow className="hover:bg-transparent border-border/50">
-                                                                    <TableHead className="h-10">ไอเทม</TableHead>
-                                                                    <TableHead className="h-10 text-right">เวลา</TableHead>
-                                                                </TableRow>
-                                                            </TableHeader>
-                                                            <TableBody>
-                                                                {selectedUser.lucky_draw_history.map((item, i) => (
-                                                                    <TableRow key={i} className="hover:bg-muted/50 border-border/50">
-                                                                        <TableCell className="font-medium">{item.item_name}</TableCell>
-                                                                        <TableCell className="text-right text-muted-foreground text-xs">
-                                                                            {new Date(item.created_at).toLocaleString('th-TH')}
-                                                                        </TableCell>
-                                                                    </TableRow>
-                                                                ))}
-                                                            </TableBody>
-                                                        </Table>
-                                                    </div>
-                                                ) : (
-                                                    <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-xl">
-                                                        ไม่พบประวัติการสุ่ม
-                                                    </div>
-                                                )}
+                                                <Button
+                                                    variant="outline"
+                                                    className="w-full h-12 rounded-xl border-dashed border-2 hover:border-primary hover:bg-primary/5 hover:text-primary transition-all group"
+                                                    onClick={() => setIsHistoryDialogOpen(true)}
+                                                >
+                                                    <History className="h-4 w-4 mr-2 group-hover:animate-spin" />
+                                                    ดูประวัติการสุ่มกาชา ({selectedUser.lucky_draw_history?.length || 0} รายการล่าสุด)
+                                                </Button>
                                             </div>
 
                                             <div className="mt-8 pt-6 border-t grid grid-cols-2 gap-4 text-sm text-muted-foreground">
@@ -673,6 +640,56 @@ export default function AdminDashboard() {
                                                     IP: {selectedUser.ip_address || 'Unknown'}
                                                 </div>
                                             </div>
+                                        </div>
+                                    </>
+                                )}
+                            </DialogContent>
+                        </Dialog>
+
+                        {/* History Dialog */}
+                        <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
+                            <DialogContent className="sm:max-w-[500px] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl">
+                                {selectedUser && (
+                                    <>
+                                        <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 text-white flex items-center gap-4">
+                                            <div className="h-12 w-12 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                                                <History className="h-6 w-6" />
+                                            </div>
+                                            <div>
+                                                <DialogTitle className="text-xl font-bold">ประวัติการสุ่มกาชา</DialogTitle>
+                                                <p className="text-white/80 text-sm">ของ {selectedUser.discord_name}</p>
+                                            </div>
+                                        </div>
+                                        <div className="p-6 bg-background max-h-[60vh] overflow-y-auto">
+                                            {selectedUser.lucky_draw_history && selectedUser.lucky_draw_history.length > 0 ? (
+                                                <div className="rounded-xl border overflow-hidden">
+                                                    <Table>
+                                                        <TableHeader>
+                                                            <TableRow className="bg-muted/50">
+                                                                <TableHead>ไอเทม</TableHead>
+                                                                <TableHead className="text-right">เวลา</TableHead>
+                                                            </TableRow>
+                                                        </TableHeader>
+                                                        <TableBody>
+                                                            {selectedUser.lucky_draw_history.map((item, i) => (
+                                                                <TableRow key={i}>
+                                                                    <TableCell className="font-medium">{item.item_name}</TableCell>
+                                                                    <TableCell className="text-right text-muted-foreground text-xs">
+                                                                        {new Date(item.created_at).toLocaleString('th-TH')}
+                                                                    </TableCell>
+                                                                </TableRow>
+                                                            ))}
+                                                        </TableBody>
+                                                    </Table>
+                                                </div>
+                                            ) : (
+                                                <div className="text-center py-12 text-muted-foreground border-2 border-dashed rounded-xl">
+                                                    ไม่พบประวัติการสุ่ม
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="p-4 bg-muted/20 border-t flex justify-end">
+                                            <Button onClick={() => setIsHistoryDialogOpen(false)}>ปิดหน้าต่าง</Button>
                                         </div>
                                     </>
                                 )}
