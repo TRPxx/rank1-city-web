@@ -387,13 +387,13 @@ export default function AdminDashboard() {
                                     />
                                 </form>
                             </div>
-                            <div className="p-0">
+                            <div className="p-0 overflow-x-auto">
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="hover:bg-transparent border-border/50">
-                                            <TableHead className="pl-6">Discord ID</TableHead>
-                                            <TableHead>รหัสแนะนำ</TableHead>
-                                            <TableHead className="text-right pr-6">วันที่</TableHead>
+                                            <TableHead className="pl-6 whitespace-nowrap">Discord ID</TableHead>
+                                            <TableHead className="whitespace-nowrap">รหัสแนะนำ</TableHead>
+                                            <TableHead className="text-right pr-6 whitespace-nowrap">วันที่</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -403,7 +403,7 @@ export default function AdminDashboard() {
                                                 <TableCell>
                                                     <Badge variant="secondary" className="rounded-lg font-mono">{user.referral_code}</Badge>
                                                 </TableCell>
-                                                <TableCell className="text-right text-muted-foreground pr-6">
+                                                <TableCell className="text-right text-muted-foreground pr-6 whitespace-nowrap">
                                                     {new Date(user.created_at).toLocaleDateString('th-TH')}
                                                 </TableCell>
                                             </TableRow>
@@ -523,15 +523,15 @@ export default function AdminDashboard() {
                                     <div className="p-6 border-b">
                                         <h3 className="text-lg font-bold">ผลการค้นหา ({searchResults.length})</h3>
                                     </div>
-                                    <div className="p-0">
+                                    <div className="p-0 overflow-x-auto">
                                         <Table>
                                             <TableHeader>
                                                 <TableRow className="hover:bg-transparent border-border/50">
-                                                    <TableHead className="pl-6">Discord ID</TableHead>
-                                                    <TableHead>ชื่อ</TableHead>
-                                                    <TableHead>แก๊ง</TableHead>
-                                                    <TableHead>ตั๋ว</TableHead>
-                                                    <TableHead className="text-right pr-6">จัดการ</TableHead>
+                                                    <TableHead className="pl-6 whitespace-nowrap">Discord ID</TableHead>
+                                                    <TableHead className="whitespace-nowrap">ชื่อ</TableHead>
+                                                    <TableHead className="whitespace-nowrap">แก๊ง</TableHead>
+                                                    <TableHead className="whitespace-nowrap">ตั๋ว</TableHead>
+                                                    <TableHead className="text-right pr-6 whitespace-nowrap">จัดการ</TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
@@ -539,14 +539,14 @@ export default function AdminDashboard() {
                                                     <TableRow key={i} className="hover:bg-muted/30 border-border/50 cursor-pointer" onClick={() => openUserDialog(user)}>
                                                         <TableCell className="font-mono pl-6">{user.discord_id}</TableCell>
                                                         <TableCell>
-                                                            <div className="flex items-center gap-2">
+                                                            <div className="flex items-center gap-2 min-w-[150px]">
                                                                 {user.avatar_url && <img src={user.avatar_url} alt="" className="h-6 w-6 rounded-full" />}
                                                                 <span className="font-medium">{user.discord_name || 'Unknown'}</span>
                                                             </div>
                                                         </TableCell>
                                                         <TableCell>
                                                             {user.gang_name ? (
-                                                                <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20">
+                                                                <Badge variant="outline" className="bg-red-500/10 text-red-500 border-red-500/20 whitespace-nowrap">
                                                                     {user.gang_name}
                                                                 </Badge>
                                                             ) : (
@@ -575,7 +575,7 @@ export default function AdminDashboard() {
 
                         {/* User Details Dialog */}
                         <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
-                            <DialogContent className="sm:max-w-[600px] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl">
+                            <DialogContent className="w-[95vw] max-w-[600px] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl">
                                 {selectedUser && (
                                     <>
                                         <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-white relative">
@@ -602,8 +602,8 @@ export default function AdminDashboard() {
                                             </div>
                                         </div>
 
-                                        <div className="p-8 bg-background">
-                                            <div className="grid grid-cols-2 gap-8">
+                                        <div className="p-6 md:p-8 bg-background">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                                                 <div className="space-y-6">
                                                     <div>
                                                         <h4 className="text-sm font-medium text-muted-foreground mb-2 flex items-center gap-2">
@@ -680,7 +680,7 @@ export default function AdminDashboard() {
 
                         {/* History Dialog */}
                         <Dialog open={isHistoryDialogOpen} onOpenChange={setIsHistoryDialogOpen}>
-                            <DialogContent className="sm:max-w-[500px] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl">
+                            <DialogContent className="w-[95vw] max-w-[500px] rounded-[2rem] p-0 overflow-hidden border-none shadow-2xl">
                                 {selectedUser && (
                                     <>
                                         <div className="bg-gradient-to-r from-emerald-500 to-teal-600 p-6 text-white flex items-center gap-4">
@@ -809,16 +809,16 @@ export default function AdminDashboard() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="p-0">
+                            <div className="p-0 overflow-x-auto">
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="hover:bg-transparent border-border/50">
-                                            <TableHead className="pl-6">ID</TableHead>
-                                            <TableHead>ผู้ใช้งาน</TableHead>
-                                            <TableHead>กิจกรรม</TableHead>
-                                            <TableHead>จำนวน</TableHead>
-                                            <TableHead>รายละเอียด</TableHead>
-                                            <TableHead className="text-right pr-6">เวลา</TableHead>
+                                            <TableHead className="pl-6 whitespace-nowrap">ID</TableHead>
+                                            <TableHead className="whitespace-nowrap">ผู้ใช้งาน</TableHead>
+                                            <TableHead className="whitespace-nowrap">กิจกรรม</TableHead>
+                                            <TableHead className="whitespace-nowrap">จำนวน</TableHead>
+                                            <TableHead className="whitespace-nowrap">รายละเอียด</TableHead>
+                                            <TableHead className="text-right pr-6 whitespace-nowrap">เวลา</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -831,10 +831,10 @@ export default function AdminDashboard() {
                                         ) : (
                                             transactionsList.map((tx, i) => (
                                                 <TableRow key={i} className="hover:bg-muted/30 border-border/50">
-                                                    <TableCell className="font-mono text-xs pl-6 text-muted-foreground">#{tx.id}</TableCell>
+                                                    <TableCell className="font-mono text-xs pl-6 text-muted-foreground">{tx.id}</TableCell>
                                                     <TableCell className="font-mono text-xs">{tx.discord_id}</TableCell>
                                                     <TableCell>
-                                                        <Badge variant="outline" className="font-normal capitalize">
+                                                        <Badge variant="outline" className="font-normal capitalize whitespace-nowrap">
                                                             {tx.action.replace('_', ' ')}
                                                         </Badge>
                                                     </TableCell>
@@ -843,8 +843,8 @@ export default function AdminDashboard() {
                                                             {tx.amount > 0 ? '+' : ''}{tx.amount}
                                                         </span>
                                                     </TableCell>
-                                                    <TableCell className="text-sm text-muted-foreground">{tx.details}</TableCell>
-                                                    <TableCell className="text-right text-muted-foreground pr-6 text-xs">
+                                                    <TableCell className="text-sm text-muted-foreground min-w-[200px]">{tx.details}</TableCell>
+                                                    <TableCell className="text-right text-muted-foreground pr-6 text-xs whitespace-nowrap">
                                                         {new Date(tx.created_at).toLocaleString('th-TH')}
                                                     </TableCell>
                                                 </TableRow>
@@ -944,15 +944,15 @@ export default function AdminDashboard() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="p-0">
+                            <div className="p-0 overflow-x-auto">
                                 <Table>
                                     <TableHeader>
                                         <TableRow className="hover:bg-transparent border-border/50">
-                                            <TableHead className="pl-6">ชื่อแก๊ง</TableHead>
-                                            <TableHead>รหัสแก๊ง</TableHead>
-                                            <TableHead>หัวหน้าแก๊ง</TableHead>
-                                            <TableHead>สมาชิก</TableHead>
-                                            <TableHead className="text-right pr-6">วันที่สร้าง</TableHead>
+                                            <TableHead className="pl-6 whitespace-nowrap">ชื่อแก๊ง</TableHead>
+                                            <TableHead className="whitespace-nowrap">รหัสแก๊ง</TableHead>
+                                            <TableHead className="whitespace-nowrap">หัวหน้าแก๊ง</TableHead>
+                                            <TableHead className="whitespace-nowrap">สมาชิก</TableHead>
+                                            <TableHead className="text-right pr-6 whitespace-nowrap">วันที่สร้าง</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
@@ -965,13 +965,13 @@ export default function AdminDashboard() {
                                         ) : (
                                             gangsList.map((gang, i) => (
                                                 <TableRow key={i} className="hover:bg-muted/30 border-border/50">
-                                                    <TableCell className="font-bold pl-6 text-primary">{gang.name}</TableCell>
+                                                    <TableCell className="font-bold pl-6 text-primary whitespace-nowrap">{gang.name}</TableCell>
                                                     <TableCell>
                                                         <Badge variant="secondary" className="font-mono">{gang.gang_code}</Badge>
                                                     </TableCell>
                                                     <TableCell className="font-mono text-xs text-muted-foreground">{gang.leader_discord_id}</TableCell>
                                                     <TableCell>
-                                                        <div className="flex items-center gap-2">
+                                                        <div className="flex items-center gap-2 min-w-[120px]">
                                                             <div className="w-full bg-muted rounded-full h-2.5 max-w-[100px] overflow-hidden">
                                                                 <div
                                                                     className="bg-blue-500 h-2.5 rounded-full"
@@ -981,7 +981,7 @@ export default function AdminDashboard() {
                                                             <span className="text-xs font-medium">{gang.member_count}/{gang.max_members}</span>
                                                         </div>
                                                     </TableCell>
-                                                    <TableCell className="text-right text-muted-foreground pr-6 text-xs">
+                                                    <TableCell className="text-right text-muted-foreground pr-6 text-xs whitespace-nowrap">
                                                         {new Date(gang.created_at).toLocaleDateString('th-TH')}
                                                     </TableCell>
                                                 </TableRow>
