@@ -44,14 +44,23 @@ export async function GET(request) {
 
         if (type === 'transactions') {
             // Transactions Pagination Mode
-            const [transactions] = await webDb.query(`
-                SELECT * 
-                FROM transaction_logs 
-                ORDER BY created_at DESC 
-                LIMIT ? OFFSET ?
-            `, [limit, offset]);
+            let sql = `SELECT * FROM transaction_logs`;
+            let countSql = `SELECT COUNT(*) as count FROM transaction_logs`;
+            let params = [];
+            let countParams = [];
 
-            const [total] = await webDb.query('SELECT COUNT(*) as count FROM transaction_logs');
+            if (query) {
+                sql += ` WHERE discord_id LIKE ? OR action LIKE ?`;
+                countSql += ` WHERE discord_id LIKE ? OR action LIKE ?`;
+                params.push(`%${query}%`, `%${query}%`);
+                countParams.push(`%${query}%`, `%${query}%`);
+            }
+
+            sql += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+            params.push(limit, offset);
+
+            const [transactions] = await webDb.query(sql, params);
+            const [total] = await webDb.query(countSql, countParams);
 
             return NextResponse.json({
                 transactions,
@@ -66,14 +75,23 @@ export async function GET(request) {
 
         if (type === 'gangs') {
             // Gangs Pagination Mode
-            const [gangs] = await webDb.query(`
-                SELECT * 
-                FROM gangs 
-                ORDER BY member_count DESC 
-                LIMIT ? OFFSET ?
-            `, [limit, offset]);
+            let sql = `SELECT * FROM gangs`;
+            let countSql = `SELECT COUNT(*) as count FROM gangs`;
+            let params = [];
+            let countParams = [];
 
-            const [total] = await webDb.query('SELECT COUNT(*) as count FROM gangs');
+            if (query) {
+                sql += ` WHERE name LIKE ? OR gang_code LIKE ?`;
+                countSql += ` WHERE name LIKE ? OR gang_code LIKE ?`;
+                params.push(`%${query}%`, `%${query}%`);
+                countParams.push(`%${query}%`, `%${query}%`);
+            }
+
+            sql += ` ORDER BY member_count DESC LIMIT ? OFFSET ?`;
+            params.push(limit, offset);
+
+            const [gangs] = await webDb.query(sql, params);
+            const [total] = await webDb.query(countSql, countParams);
 
             return NextResponse.json({
                 gangs,

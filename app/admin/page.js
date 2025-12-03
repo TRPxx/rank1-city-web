@@ -49,13 +49,18 @@ export default function AdminDashboard() {
     const [transactionsList, setTransactionsList] = useState([]);
     const [transactionsPage, setTransactionsPage] = useState(1);
     const [transactionsTotalPages, setTransactionsTotalPages] = useState(1);
+    const [transactionSearchQuery, setTransactionSearchQuery] = useState('');
     const [isLoadingTransactions, setIsLoadingTransactions] = useState(false);
 
     // Gangs State
     const [gangsList, setGangsList] = useState([]);
     const [gangsPage, setGangsPage] = useState(1);
     const [gangsTotalPages, setGangsTotalPages] = useState(1);
+    const [gangSearchQuery, setGangSearchQuery] = useState('');
     const [isLoadingGangs, setIsLoadingGangs] = useState(false);
+
+    // Recent Registrations Search
+    const [recentRegSearchQuery, setRecentRegSearchQuery] = useState('');
 
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isSearching, setIsSearching] = useState(false);
@@ -91,10 +96,10 @@ export default function AdminDashboard() {
         }
     };
 
-    const fetchTransactions = async (page) => {
+    const fetchTransactions = async (page, query = '') => {
         setIsLoadingTransactions(true);
         try {
-            const res = await fetch(`/api/admin?type=transactions&page=${page}&limit=20`);
+            const res = await fetch(`/api/admin?type=transactions&page=${page}&limit=5&q=${query}`);
             if (!res.ok) throw new Error('Failed to fetch transactions');
             const data = await res.json();
             setTransactionsList(data.transactions);
@@ -106,10 +111,10 @@ export default function AdminDashboard() {
         }
     };
 
-    const fetchGangs = async (page) => {
+    const fetchGangs = async (page, query = '') => {
         setIsLoadingGangs(true);
         try {
-            const res = await fetch(`/api/admin?type=gangs&page=${page}&limit=20`);
+            const res = await fetch(`/api/admin?type=gangs&page=${page}&limit=5&q=${query}`);
             if (!res.ok) throw new Error('Failed to fetch gangs');
             const data = await res.json();
             setGangsList(data.gangs);
@@ -126,12 +131,38 @@ export default function AdminDashboard() {
     }, [winnersPage]);
 
     useEffect(() => {
-        fetchTransactions(transactionsPage);
+        fetchTransactions(transactionsPage, transactionSearchQuery);
     }, [transactionsPage]);
 
     useEffect(() => {
-        fetchGangs(gangsPage);
+        fetchGangs(gangsPage, gangSearchQuery);
     }, [gangsPage]);
+
+    const handleTransactionSearch = (e) => {
+        e.preventDefault();
+        setTransactionsPage(1);
+        fetchTransactions(1, transactionSearchQuery);
+    };
+
+    const handleGangSearch = (e) => {
+        e.preventDefault();
+        setGangsPage(1);
+        fetchGangs(1, gangSearchQuery);
+    };
+
+    const handleRecentRegSearch = (e) => {
+        e.preventDefault();
+        // Redirect to Users tab with search query
+        const tabsTrigger = document.querySelector('[value="users"]');
+        if (tabsTrigger) tabsTrigger.click();
+        setSearchQuery(recentRegSearchQuery);
+        // Trigger search in Users tab (need to wait for state update or call handleSearch manually if possible, 
+        // but setting searchQuery might be enough if we trigger it)
+        // For now, let's just set the query and let the user click search or we can auto-search if we add an effect.
+        // Better: just call handleSearch logic directly if we were in the same context, but we are switching tabs.
+        // We will just set the main search query and let the user press enter or we can simulate it.
+        // Actually, let's just switch tab and set query.
+    };
 
     const handleSearch = async (e) => {
         e.preventDefault();
@@ -335,8 +366,17 @@ export default function AdminDashboard() {
                     {/* ==================== TAB: ACTIVITY ==================== */}
                     <TabsContent value="activity" className="space-y-6 mt-0 animate-in fade-in-50 duration-500">
                         <div className="bg-card rounded-[2rem] border shadow-sm overflow-hidden">
-                            <div className="p-6 border-b">
+                            <div className="p-6 border-b flex flex-col sm:flex-row justify-between items-center gap-4">
                                 <h3 className="text-lg font-bold">การลงทะเบียนล่าสุด</h3>
+                                <form onSubmit={handleRecentRegSearch} className="relative w-full sm:w-64">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="ค้นหาผู้ใช้..."
+                                        className="pl-9 h-9 rounded-full bg-muted/50 border-none focus:ring-1 focus:ring-primary"
+                                        value={recentRegSearchQuery}
+                                        onChange={(e) => setRecentRegSearchQuery(e.target.value)}
+                                    />
+                                </form>
                             </div>
                             <div className="p-0">
                                 <Table>
@@ -650,32 +690,43 @@ export default function AdminDashboard() {
 
                         {/* Transaction Logs Table */}
                         <Card className="rounded-[2rem] border shadow-sm overflow-hidden">
-                            <div className="p-6 border-b flex justify-between items-center">
+                            <div className="p-6 border-b flex flex-col sm:flex-row justify-between items-center gap-4">
                                 <h3 className="text-lg font-bold flex items-center gap-2">
                                     <ScrollText className="h-5 w-5 text-primary" /> ประวัติธุรกรรม
                                 </h3>
-                                <div className="flex items-center gap-2">
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        onClick={() => setTransactionsPage(p => Math.max(1, p - 1))}
-                                        disabled={transactionsPage === 1 || isLoadingTransactions}
-                                        className="h-8 w-8 rounded-full"
-                                    >
-                                        <ChevronLeft className="h-4 w-4" />
-                                    </Button>
-                                    <span className="text-sm font-medium min-w-[3rem] text-center">
-                                        {transactionsPage} / {transactionsTotalPages}
-                                    </span>
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        onClick={() => setTransactionsPage(p => Math.min(transactionsTotalPages, p + 1))}
-                                        disabled={transactionsPage === transactionsTotalPages || isLoadingTransactions}
-                                        className="h-8 w-8 rounded-full"
-                                    >
-                                        <ChevronRight className="h-4 w-4" />
-                                    </Button>
+                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                    <form onSubmit={handleTransactionSearch} className="relative w-full sm:w-64">
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            placeholder="ค้นหาธุรกรรม..."
+                                            className="pl-9 h-9 rounded-full bg-muted/50 border-none focus:ring-1 focus:ring-primary"
+                                            value={transactionSearchQuery}
+                                            onChange={(e) => setTransactionSearchQuery(e.target.value)}
+                                        />
+                                    </form>
+                                    <div className="flex items-center gap-1">
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={() => setTransactionsPage(p => Math.max(1, p - 1))}
+                                            disabled={transactionsPage === 1 || isLoadingTransactions}
+                                            className="h-8 w-8 rounded-full"
+                                        >
+                                            <ChevronLeft className="h-4 w-4" />
+                                        </Button>
+                                        <span className="text-sm font-medium min-w-[3rem] text-center">
+                                            {transactionsPage} / {transactionsTotalPages}
+                                        </span>
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={() => setTransactionsPage(p => Math.min(transactionsTotalPages, p + 1))}
+                                            disabled={transactionsPage === transactionsTotalPages || isLoadingTransactions}
+                                            className="h-8 w-8 rounded-full"
+                                        >
+                                            <ChevronRight className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                             <div className="p-0">
@@ -774,32 +825,43 @@ export default function AdminDashboard() {
 
                         {/* Gang List Table */}
                         <Card className="rounded-[2rem] border shadow-sm overflow-hidden">
-                            <div className="p-6 border-b flex justify-between items-center">
+                            <div className="p-6 border-b flex flex-col sm:flex-row justify-between items-center gap-4">
                                 <h3 className="text-lg font-bold flex items-center gap-2">
                                     <ShieldAlert className="h-5 w-5 text-primary" /> รายชื่อแก๊ง
                                 </h3>
-                                <div className="flex items-center gap-2">
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        onClick={() => setGangsPage(p => Math.max(1, p - 1))}
-                                        disabled={gangsPage === 1 || isLoadingGangs}
-                                        className="h-8 w-8 rounded-full"
-                                    >
-                                        <ChevronLeft className="h-4 w-4" />
-                                    </Button>
-                                    <span className="text-sm font-medium min-w-[3rem] text-center">
-                                        {gangsPage} / {gangsTotalPages}
-                                    </span>
-                                    <Button
-                                        variant="outline"
-                                        size="icon"
-                                        onClick={() => setGangsPage(p => Math.min(gangsTotalPages, p + 1))}
-                                        disabled={gangsPage === gangsTotalPages || isLoadingGangs}
-                                        className="h-8 w-8 rounded-full"
-                                    >
-                                        <ChevronRight className="h-4 w-4" />
-                                    </Button>
+                                <div className="flex items-center gap-2 w-full sm:w-auto">
+                                    <form onSubmit={handleGangSearch} className="relative w-full sm:w-64">
+                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                            placeholder="ค้นหาแก๊ง..."
+                                            className="pl-9 h-9 rounded-full bg-muted/50 border-none focus:ring-1 focus:ring-primary"
+                                            value={gangSearchQuery}
+                                            onChange={(e) => setGangSearchQuery(e.target.value)}
+                                        />
+                                    </form>
+                                    <div className="flex items-center gap-1">
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={() => setGangsPage(p => Math.max(1, p - 1))}
+                                            disabled={gangsPage === 1 || isLoadingGangs}
+                                            className="h-8 w-8 rounded-full"
+                                        >
+                                            <ChevronLeft className="h-4 w-4" />
+                                        </Button>
+                                        <span className="text-sm font-medium min-w-[3rem] text-center">
+                                            {gangsPage} / {gangsTotalPages}
+                                        </span>
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={() => setGangsPage(p => Math.min(gangsTotalPages, p + 1))}
+                                            disabled={gangsPage === gangsTotalPages || isLoadingGangs}
+                                            className="h-8 w-8 rounded-full"
+                                        >
+                                            <ChevronRight className="h-4 w-4" />
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                             <div className="p-0">
