@@ -11,7 +11,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function GangManager() {
     const [gangData, setGangData] = useState(null);
+    const [members, setMembers] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [isMembersLoading, setIsMembersLoading] = useState(false);
     const [isActionLoading, setIsActionLoading] = useState(false);
     const [joinCode, setJoinCode] = useState('');
     const [createName, setCreateName] = useState('');
@@ -34,9 +36,30 @@ export default function GangManager() {
         }
     };
 
+    const fetchMembers = async (gangCode) => {
+        setIsMembersLoading(true);
+        try {
+            const res = await fetch(`/api/gang/members?gangCode=${gangCode}`);
+            const data = await res.json();
+            if (data.members) {
+                setMembers(data.members);
+            }
+        } catch (err) {
+            console.error(err);
+        } finally {
+            setIsMembersLoading(false);
+        }
+    };
+
     useEffect(() => {
         fetchGang();
     }, []);
+
+    useEffect(() => {
+        if (gangData?.gang_code) {
+            fetchMembers(gangData.gang_code);
+        }
+    }, [gangData]);
 
     const handleAction = async (action) => {
         setError('');
@@ -139,16 +162,82 @@ export default function GangManager() {
                                 </div>
                             </div>
                         </div>
-                        <div className="flex-1 p-0">
-                            <div className="flex flex-col items-center justify-center h-[300px] text-center">
-                                <div className="w-12 h-12 rounded-2xl bg-muted/30 flex items-center justify-center mb-4">
-                                    <Users className="w-6 h-6 text-muted-foreground" />
+                        <div className="flex-1 p-0 overflow-y-auto">
+                            {isMembersLoading ? (
+                                <div className="flex flex-col items-center justify-center h-[300px] text-center">
+                                    <Loader2 className="w-8 h-8 animate-spin text-muted-foreground mb-2" />
+                                    <p className="text-sm text-muted-foreground">กำลังโหลดสมาชิก...</p>
                                 </div>
-                                <h3 className="text-sm font-medium">รายชื่อสมาชิกเร็วๆ นี้</h3>
-                                <p className="text-xs text-muted-foreground max-w-xs mt-1 px-4">
-                                    เรากำลังพัฒนาระบบแสดงรายชื่อสมาชิก โปรดติดตามตอนต่อไป!
-                                </p>
-                            </div>
+                            ) : members.length > 0 ? (
+                                <div className="divide-y divide-border/10">
+                                    {members.map((member, idx) => (
+                                        <div key={member.discord_id} className="p-4 hover:bg-muted/5 transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                {/* Rank Number */}
+                                                <div className="w-8 h-8 rounded-lg bg-muted/30 flex items-center justify-center shrink-0">
+                                                    <span className="text-xs font-bold text-muted-foreground">#{idx + 1}</span>
+                                                </div>
+
+                                                {/* Avatar */}
+                                                <div className="w-10 h-10 rounded-full overflow-hidden bg-muted shrink-0">
+                                                    {member.avatar_url ? (
+                                                        <img
+                                                            src={member.avatar_url}
+                                                            alt={member.discord_name}
+                                                            className="w-full h-full object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
+                                                            <Users className="w-5 h-5 text-primary" />
+                                                        </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Info */}
+                                                <div className="flex-1 min-w-0">
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="font-medium text-sm truncate">
+                                                            {member.discord_name || 'Unknown'}
+                                                        </p>
+                                                        {member.is_leader && (
+                                                            <Badge variant="default" className="h-5 px-1.5 text-[10px] bg-amber-500/10 text-amber-500 border-amber-500/20">
+                                                                <Crown className="w-3 h-3 mr-0.5" />
+                                                                หัวหน้า
+                                                            </Badge>
+                                                        )}
+                                                    </div>
+                                                    <p className="text-xs text-muted-foreground font-mono truncate">
+                                                        {member.discord_id}
+                                                    </p>
+                                                </div>
+
+                                                {/* Join Date */}
+                                                <div className="text-right shrink-0">
+                                                    <p className="text-[10px] text-muted-foreground">
+                                                        เข้าร่วม
+                                                    </p>
+                                                    <p className="text-xs font-medium">
+                                                        {new Date(member.joined_at).toLocaleDateString('th-TH', {
+                                                            day: 'numeric',
+                                                            month: 'short'
+                                                        })}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="flex flex-col items-center justify-center h-[300px] text-center">
+                                    <div className="w-12 h-12 rounded-2xl bg-muted/30 flex items-center justify-center mb-4">
+                                        <Users className="w-6 h-6 text-muted-foreground" />
+                                    </div>
+                                    <h3 className="text-sm font-medium">ยังไม่มีสมาชิก</h3>
+                                    <p className="text-xs text-muted-foreground max-w-xs mt-1 px-4">
+                                        แชร์รหัสแก๊งเพื่อเชิญเพื่อนของคุณ!
+                                    </p>
+                                </div>
+                            )}
                         </div>
                     </div>
 
