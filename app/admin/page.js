@@ -93,10 +93,10 @@ export default function AdminDashboard() {
         <div className="min-h-screen bg-background font-sans">
             <Navbar />
             <div className="container max-w-7xl pt-24 pb-12 px-4">
-                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-10">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
                     <div>
-                        <h1 className="text-4xl font-bold tracking-tight mb-2">แดชบอร์ดผู้ดูแลระบบ</h1>
-                        <p className="text-lg text-muted-foreground">จัดการกิจกรรมเซิร์ฟเวอร์และผู้ใช้งาน</p>
+                        <h1 className="text-3xl font-bold tracking-tight mb-2">แดชบอร์ดผู้ดูแลระบบ</h1>
+                        <p className="text-muted-foreground">ภาพรวมและจัดการระบบ Rank1 City</p>
                     </div>
                     <Link href="/admin/settings">
                         <Button variant="outline" className="rounded-full px-6 border-muted-foreground/20 hover:bg-muted">
@@ -105,243 +105,130 @@ export default function AdminDashboard() {
                     </Link>
                 </div>
 
-                {/* Section 1: User Activity */}
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Users className="h-5 w-5 text-primary" /> ข้อมูลผู้ใช้งาน</h2>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
-                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Users className="h-24 w-24" />
-                        </div>
-                        <div className="relative">
-                            <div className="p-3 bg-blue-500/10 w-fit rounded-2xl mb-4">
-                                <Users className="h-6 w-6 text-blue-500" />
-                            </div>
-                            <p className="text-sm font-medium text-muted-foreground mb-1">ผู้ใช้งานทั้งหมด</p>
-                            <div className="text-3xl font-bold">{stats?.total_users?.toLocaleString() || 0}</div>
-                        </div>
-                    </div>
-
-                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
-                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Activity className="h-24 w-24" />
-                        </div>
-                        <div className="relative">
-                            <div className="p-3 bg-green-500/10 w-fit rounded-2xl mb-4">
-                                <Activity className="h-6 w-6 text-green-500" />
-                            </div>
-                            <p className="text-sm font-medium text-muted-foreground mb-1">สมัครใหม่วันนี้</p>
-                            <div className="text-3xl font-bold">{stats?.users_today?.toLocaleString() || 0}</div>
-                        </div>
-                    </div>
-
-                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
-                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <UserCheck className="h-24 w-24" />
-                        </div>
-                        <div className="relative">
-                            <div className="p-3 bg-purple-500/10 w-fit rounded-2xl mb-4">
-                                <UserCheck className="h-6 w-6 text-purple-500" />
-                            </div>
-                            <p className="text-sm font-medium text-muted-foreground mb-1">ตัวละครในเกม</p>
-                            <div className="text-3xl font-bold">{stats?.total_characters?.toLocaleString() || 0}</div>
-                        </div>
-                    </div>
-
-                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
-                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <History className="h-24 w-24" />
-                        </div>
-                        <div className="relative">
-                            <div className="p-3 bg-orange-500/10 w-fit rounded-2xl mb-4">
-                                <History className="h-6 w-6 text-orange-500" />
-                            </div>
-                            <p className="text-sm font-medium text-muted-foreground mb-1">ผู้เล่น Solo</p>
-                            <div className="text-3xl font-bold">{stats?.solo_players?.toLocaleString() || 0}</div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Section 2: Economy & Claims */}
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Trophy className="h-5 w-5 text-primary" /> ระบบเศรษฐกิจ & รางวัล</h2>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
-                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
-                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Trophy className="h-24 w-24" />
-                        </div>
-                        <div className="relative">
-                            <div className="p-3 bg-emerald-500/10 w-fit rounded-2xl mb-4">
-                                <Trophy className="h-6 w-6 text-emerald-500" />
-                            </div>
-                            <p className="text-sm font-medium text-muted-foreground mb-1">ยอดการหมุนวงล้อ</p>
-                            <div className="text-3xl font-bold">{stats?.total_spins?.toLocaleString() || 0}</div>
-                        </div>
-                    </div>
-
-                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
-                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Ticket className="h-24 w-24" />
-                        </div>
-                        <div className="relative">
-                            <div className="p-3 bg-amber-500/10 w-fit rounded-2xl mb-4">
-                                <Ticket className="h-6 w-6 text-amber-500" />
-                            </div>
-                            <p className="text-sm font-medium text-muted-foreground mb-1">ตั๋วคงเหลือในระบบ</p>
-                            <div className="text-3xl font-bold">{stats?.tickets_holding?.toLocaleString() || 0}</div>
-                        </div>
-                    </div>
-
-                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
-                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Package className="h-24 w-24" />
-                        </div>
-                        <div className="relative">
-                            <div className="p-3 bg-cyan-500/10 w-fit rounded-2xl mb-4">
-                                <Package className="h-6 w-6 text-cyan-500" />
-                            </div>
-                            <p className="text-sm font-medium text-muted-foreground mb-1">รอรับรางวัล (Pending)</p>
-                            <div className="text-3xl font-bold">{stats?.pending_claims?.toLocaleString() || 0}</div>
-                        </div>
-                    </div>
-
-                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
-                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Package className="h-24 w-24" />
-                        </div>
-                        <div className="relative">
-                            <div className="p-3 bg-teal-500/10 w-fit rounded-2xl mb-4">
-                                <Package className="h-6 w-6 text-teal-500" />
-                            </div>
-                            <p className="text-sm font-medium text-muted-foreground mb-1">รับรางวัลแล้ว (Claimed)</p>
-                            <div className="text-3xl font-bold">{stats?.claimed_items?.toLocaleString() || 0}</div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Section 3: Gangs & Families */}
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><ShieldAlert className="h-5 w-5 text-primary" /> แก๊ง & ครอบครัว</h2>
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-10">
-                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
-                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <ShieldAlert className="h-24 w-24" />
-                        </div>
-                        <div className="relative">
-                            <div className="p-3 bg-red-500/10 w-fit rounded-2xl mb-4">
-                                <ShieldAlert className="h-6 w-6 text-red-500" />
-                            </div>
-                            <p className="text-sm font-medium text-muted-foreground mb-1">แก๊งทั้งหมด</p>
-                            <div className="text-3xl font-bold">{stats?.total_gangs?.toLocaleString() || 0}</div>
-                        </div>
-                    </div>
-
-                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors">
-                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Swords className="h-24 w-24" />
-                        </div>
-                        <div className="relative">
-                            <div className="p-3 bg-rose-500/10 w-fit rounded-2xl mb-4">
-                                <Swords className="h-6 w-6 text-rose-500" />
-                            </div>
-                            <p className="text-sm font-medium text-muted-foreground mb-1">สมาชิกแก๊ง</p>
-                            <div className="text-3xl font-bold">{stats?.gang_members?.toLocaleString() || 0}</div>
-                        </div>
-                    </div>
-
-                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors opacity-60">
-                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Home className="h-24 w-24" />
-                        </div>
-                        <div className="relative">
-                            <div className="flex justify-between items-start">
-                                <div className="p-3 bg-indigo-500/10 w-fit rounded-2xl mb-4">
-                                    <Home className="h-6 w-6 text-indigo-500" />
-                                </div>
-                                <Badge variant="outline" className="text-[10px]">Coming Soon</Badge>
-                            </div>
-                            <p className="text-sm font-medium text-muted-foreground mb-1">ครอบครัวทั้งหมด</p>
-                            <div className="text-3xl font-bold">{stats?.total_families?.toLocaleString() || 0}</div>
-                        </div>
-                    </div>
-
-                    <div className="bg-muted/30 rounded-[2rem] p-6 relative overflow-hidden group hover:bg-muted/40 transition-colors opacity-60">
-                        <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                            <Users className="h-24 w-24" />
-                        </div>
-                        <div className="relative">
-                            <div className="flex justify-between items-start">
-                                <div className="p-3 bg-pink-500/10 w-fit rounded-2xl mb-4">
-                                    <Users className="h-6 w-6 text-pink-500" />
-                                </div>
-                                <Badge variant="outline" className="text-[10px]">Coming Soon</Badge>
-                            </div>
-                            <p className="text-sm font-medium text-muted-foreground mb-1">สมาชิกครอบครัว</p>
-                            <div className="text-3xl font-bold">{stats?.family_members?.toLocaleString() || 0}</div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Section 4: Graphs */}
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2"><Activity className="h-5 w-5 text-primary" /> แนวโน้ม 7 วันล่าสุด</h2>
-                <div className="grid gap-6 md:grid-cols-2 mb-10">
-                    <div className="bg-muted/30 rounded-[2rem] p-6 border border-border/50">
-                        <h3 className="text-sm font-medium text-muted-foreground mb-4">ยอดผู้ลงทะเบียนใหม่</h3>
-                        <div className="h-[200px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={graphs.registrations}>
-                                    <defs>
-                                        <linearGradient id="colorReg" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                                    <XAxis dataKey="date" tick={{ fontSize: 12 }} tickFormatter={(val) => val.split('-').slice(1).join('/')} stroke="rgba(255,255,255,0.5)" />
-                                    <YAxis tick={{ fontSize: 12 }} stroke="rgba(255,255,255,0.5)" />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
-                                        itemStyle={{ color: '#fff' }}
-                                    />
-                                    <Area type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={2} fillOpacity={1} fill="url(#colorReg)" />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-
-                    <div className="bg-muted/30 rounded-[2rem] p-6 border border-border/50">
-                        <h3 className="text-sm font-medium text-muted-foreground mb-4">ยอดการหมุนกาชา</h3>
-                        <div className="h-[200px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={graphs.spins}>
-                                    <defs>
-                                        <linearGradient id="colorSpin" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
-                                            <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
-                                        </linearGradient>
-                                    </defs>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
-                                    <XAxis dataKey="date" tick={{ fontSize: 12 }} tickFormatter={(val) => val.split('-').slice(1).join('/')} stroke="rgba(255,255,255,0.5)" />
-                                    <YAxis tick={{ fontSize: 12 }} stroke="rgba(255,255,255,0.5)" />
-                                    <Tooltip
-                                        contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
-                                        itemStyle={{ color: '#fff' }}
-                                    />
-                                    <Area type="monotone" dataKey="count" stroke="#10b981" strokeWidth={2} fillOpacity={1} fill="url(#colorSpin)" />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </div>
-                </div>
-
                 <Tabs defaultValue="overview" className="space-y-8">
-                    <TabsList className="bg-muted/50 p-1 rounded-full h-auto inline-flex">
-                        <TabsTrigger value="overview" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">ภาพรวม</TabsTrigger>
-                        <TabsTrigger value="users" className="rounded-full px-6 py-2.5 data-[state=active]:bg-background data-[state=active]:shadow-sm">จัดการผู้ใช้</TabsTrigger>
-                    </TabsList>
+                    <div className="flex overflow-x-auto pb-2 scrollbar-hide">
+                        <TabsList className="bg-muted/50 p-1 rounded-full h-auto inline-flex w-full md:w-auto justify-start">
+                            <TabsTrigger value="overview" className="rounded-full px-6 py-2.5 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                                <Activity className="h-4 w-4" /> ภาพรวม
+                            </TabsTrigger>
+                            <TabsTrigger value="users" className="rounded-full px-6 py-2.5 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                                <Users className="h-4 w-4" /> ผู้ใช้งาน
+                            </TabsTrigger>
+                            <TabsTrigger value="economy" className="rounded-full px-6 py-2.5 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                                <Trophy className="h-4 w-4" /> เศรษฐกิจ
+                            </TabsTrigger>
+                            <TabsTrigger value="social" className="rounded-full px-6 py-2.5 gap-2 data-[state=active]:bg-background data-[state=active]:shadow-sm">
+                                <ShieldAlert className="h-4 w-4" /> สังคม
+                            </TabsTrigger>
+                        </TabsList>
+                    </div>
 
-                    <TabsContent value="overview" className="space-y-6 mt-0">
+                    {/* ==================== TAB: OVERVIEW ==================== */}
+                    <TabsContent value="overview" className="space-y-6 mt-0 animate-in fade-in-50 duration-500">
+                        {/* Key Metrics */}
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
+                                <div className="p-3 bg-blue-500/10 rounded-xl">
+                                    <Users className="h-6 w-6 text-blue-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">ผู้ใช้ทั้งหมด</p>
+                                    <h3 className="text-2xl font-bold">{stats?.total_users?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
+                                <div className="p-3 bg-green-500/10 rounded-xl">
+                                    <Activity className="h-6 w-6 text-green-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">ใหม่วันนี้</p>
+                                    <h3 className="text-2xl font-bold">{stats?.users_today?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
+                                <div className="p-3 bg-emerald-500/10 rounded-xl">
+                                    <Trophy className="h-6 w-6 text-emerald-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">ยอดหมุนกาชา</p>
+                                    <h3 className="text-2xl font-bold">{stats?.total_spins?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
+                                <div className="p-3 bg-cyan-500/10 rounded-xl">
+                                    <Package className="h-6 w-6 text-cyan-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">รอรับรางวัล</p>
+                                    <h3 className="text-2xl font-bold">{stats?.pending_claims?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Graphs */}
+                        <div className="grid gap-6 md:grid-cols-2">
+                            <div className="bg-card rounded-[2rem] p-6 border shadow-sm">
+                                <div className="mb-6">
+                                    <h3 className="text-lg font-bold flex items-center gap-2">
+                                        <Users className="h-4 w-4 text-primary" /> ผู้ลงทะเบียนใหม่ (7 วัน)
+                                    </h3>
+                                </div>
+                                <div className="h-[250px] w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={graphs.registrations}>
+                                            <defs>
+                                                <linearGradient id="colorReg" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#3b82f6" stopOpacity={0.3} />
+                                                    <stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
+                                            <XAxis dataKey="date" tick={{ fontSize: 12 }} tickFormatter={(val) => val.split('-').slice(1).join('/')} stroke="rgba(255,255,255,0.5)" />
+                                            <YAxis tick={{ fontSize: 12 }} stroke="rgba(255,255,255,0.5)" />
+                                            <Tooltip
+                                                contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
+                                                itemStyle={{ color: '#fff' }}
+                                            />
+                                            <Area type="monotone" dataKey="count" stroke="#3b82f6" strokeWidth={3} fillOpacity={1} fill="url(#colorReg)" />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+
+                            <div className="bg-card rounded-[2rem] p-6 border shadow-sm">
+                                <div className="mb-6">
+                                    <h3 className="text-lg font-bold flex items-center gap-2">
+                                        <Trophy className="h-4 w-4 text-primary" /> ยอดสุ่มกาชา (7 วัน)
+                                    </h3>
+                                </div>
+                                <div className="h-[250px] w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <AreaChart data={graphs.spins}>
+                                            <defs>
+                                                <linearGradient id="colorSpin" x1="0" y1="0" x2="0" y2="1">
+                                                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3} />
+                                                    <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
+                                                </linearGradient>
+                                            </defs>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.1)" />
+                                            <XAxis dataKey="date" tick={{ fontSize: 12 }} tickFormatter={(val) => val.split('-').slice(1).join('/')} stroke="rgba(255,255,255,0.5)" />
+                                            <YAxis tick={{ fontSize: 12 }} stroke="rgba(255,255,255,0.5)" />
+                                            <Tooltip
+                                                contentStyle={{ backgroundColor: '#1e293b', border: 'none', borderRadius: '8px' }}
+                                                itemStyle={{ color: '#fff' }}
+                                            />
+                                            <Area type="monotone" dataKey="count" stroke="#10b981" strokeWidth={3} fillOpacity={1} fill="url(#colorSpin)" />
+                                        </AreaChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Recent Activity */}
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-7">
-                            <div className="col-span-4 bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden">
-                                <div className="p-6 border-b border-border/50">
-                                    <h3 className="text-xl font-bold">การลงทะเบียนล่าสุด</h3>
+                            <div className="col-span-4 bg-card rounded-[2rem] border shadow-sm overflow-hidden">
+                                <div className="p-6 border-b">
+                                    <h3 className="text-lg font-bold">การลงทะเบียนล่าสุด</h3>
                                 </div>
                                 <div className="p-0">
                                     <Table>
@@ -369,21 +256,21 @@ export default function AdminDashboard() {
                                 </div>
                             </div>
 
-                            <div className="col-span-3 bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden">
-                                <div className="p-6 border-b border-border/50">
-                                    <h3 className="text-xl font-bold">ผู้โชคดีล่าสุด</h3>
+                            <div className="col-span-3 bg-card rounded-[2rem] border shadow-sm overflow-hidden">
+                                <div className="p-6 border-b">
+                                    <h3 className="text-lg font-bold">ผู้โชคดีล่าสุด</h3>
                                 </div>
                                 <div className="p-6">
-                                    <div className="space-y-6">
+                                    <div className="space-y-4">
                                         {recentWins.map((win, i) => (
-                                            <div key={i} className="flex items-center p-3 rounded-2xl hover:bg-muted/30 transition-colors">
-                                                <div className="h-10 w-10 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500">
+                                            <div key={i} className="flex items-center p-3 rounded-2xl bg-muted/30 hover:bg-muted/50 transition-colors">
+                                                <div className="h-10 w-10 rounded-full bg-yellow-500/10 flex items-center justify-center text-yellow-500 shrink-0">
                                                     <Trophy className="h-5 w-5" />
                                                 </div>
-                                                <div className="ml-4 space-y-1 overflow-hidden">
+                                                <div className="ml-4 space-y-1 overflow-hidden min-w-0">
                                                     <p className="text-sm font-bold leading-none truncate">{win.item_name}</p>
                                                     <p className="text-xs text-muted-foreground truncate">
-                                                        ผู้ชนะ: {win.discord_id}
+                                                        {win.discord_id}
                                                     </p>
                                                 </div>
                                                 <div className="ml-auto font-medium text-xs text-muted-foreground whitespace-nowrap pl-2">
@@ -397,9 +284,51 @@ export default function AdminDashboard() {
                         </div>
                     </TabsContent>
 
-                    <TabsContent value="users" className="mt-0">
-                        <div className="bg-card rounded-[2.5rem] border border-border/50 shadow-sm overflow-hidden">
-                            <div className="p-6 border-b border-border/50 flex flex-col md:flex-row justify-between items-center gap-4">
+                    {/* ==================== TAB: USERS ==================== */}
+                    <TabsContent value="users" className="space-y-6 mt-0 animate-in fade-in-50 duration-500">
+                        {/* User Stats Grid */}
+                        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
+                                <div className="p-3 bg-blue-500/10 rounded-xl">
+                                    <Users className="h-6 w-6 text-blue-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">ผู้ใช้ทั้งหมด</p>
+                                    <h3 className="text-2xl font-bold">{stats?.total_users?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
+                                <div className="p-3 bg-purple-500/10 rounded-xl">
+                                    <UserCheck className="h-6 w-6 text-purple-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">ตัวละครในเกม</p>
+                                    <h3 className="text-2xl font-bold">{stats?.total_characters?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
+                                <div className="p-3 bg-orange-500/10 rounded-xl">
+                                    <History className="h-6 w-6 text-orange-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">ผู้เล่น Solo</p>
+                                    <h3 className="text-2xl font-bold">{stats?.solo_players?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
+                                <div className="p-3 bg-rose-500/10 rounded-xl">
+                                    <Swords className="h-6 w-6 text-rose-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">มีสังกัดแก๊ง</p>
+                                    <h3 className="text-2xl font-bold">{stats?.gang_members?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Search & Table */}
+                        <div className="bg-card rounded-[2.5rem] border shadow-sm overflow-hidden">
+                            <div className="p-6 border-b flex flex-col md:flex-row justify-between items-center gap-4">
                                 <h3 className="text-xl font-bold">ค้นหาผู้ใช้งาน</h3>
                                 <form onSubmit={handleSearch} className="flex gap-2 w-full md:w-auto">
                                     <div className="relative flex-1 md:w-80">
@@ -475,6 +404,110 @@ export default function AdminDashboard() {
                                     </TableBody>
                                 </Table>
                             </div>
+                        </div>
+                    </TabsContent>
+
+                    {/* ==================== TAB: ECONOMY ==================== */}
+                    <TabsContent value="economy" className="space-y-6 mt-0 animate-in fade-in-50 duration-500">
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
+                                <div className="p-3 bg-emerald-500/10 rounded-xl">
+                                    <Trophy className="h-6 w-6 text-emerald-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">ยอดหมุนกาชา</p>
+                                    <h3 className="text-2xl font-bold">{stats?.total_spins?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
+                                <div className="p-3 bg-amber-500/10 rounded-xl">
+                                    <Ticket className="h-6 w-6 text-amber-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">ตั๋วคงเหลือ</p>
+                                    <h3 className="text-2xl font-bold">{stats?.tickets_holding?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
+                                <div className="p-3 bg-cyan-500/10 rounded-xl">
+                                    <Package className="h-6 w-6 text-cyan-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">รอรับรางวัล</p>
+                                    <h3 className="text-2xl font-bold">{stats?.pending_claims?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
+                                <div className="p-3 bg-teal-500/10 rounded-xl">
+                                    <Package className="h-6 w-6 text-teal-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">รับรางวัลแล้ว</p>
+                                    <h3 className="text-2xl font-bold">{stats?.claimed_items?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Future: Transaction Logs or Item Distribution Charts could go here */}
+                        <div className="bg-muted/20 border-2 border-dashed border-muted rounded-3xl p-12 text-center">
+                            <Trophy className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+                            <h3 className="text-lg font-medium text-muted-foreground">ประวัติธุรกรรม (Coming Soon)</h3>
+                            <p className="text-sm text-muted-foreground/70">ระบบตรวจสอบ Log การเงินและไอเทมอย่างละเอียด</p>
+                        </div>
+                    </TabsContent>
+
+                    {/* ==================== TAB: SOCIAL ==================== */}
+                    <TabsContent value="social" className="space-y-6 mt-0 animate-in fade-in-50 duration-500">
+                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
+                                <div className="p-3 bg-red-500/10 rounded-xl">
+                                    <ShieldAlert className="h-6 w-6 text-red-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">แก๊งทั้งหมด</p>
+                                    <h3 className="text-2xl font-bold">{stats?.total_gangs?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
+                                <div className="p-3 bg-rose-500/10 rounded-xl">
+                                    <Swords className="h-6 w-6 text-rose-500" />
+                                </div>
+                                <div>
+                                    <p className="text-sm font-medium text-muted-foreground">สมาชิกแก๊ง</p>
+                                    <h3 className="text-2xl font-bold">{stats?.gang_members?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4 opacity-60">
+                                <div className="p-3 bg-indigo-500/10 rounded-xl">
+                                    <Home className="h-6 w-6 text-indigo-500" />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-sm font-medium text-muted-foreground">ครอบครัว</p>
+                                        <Badge variant="outline" className="text-[10px] h-4 px-1">Soon</Badge>
+                                    </div>
+                                    <h3 className="text-2xl font-bold">{stats?.total_families?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4 opacity-60">
+                                <div className="p-3 bg-pink-500/10 rounded-xl">
+                                    <Users className="h-6 w-6 text-pink-500" />
+                                </div>
+                                <div>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-sm font-medium text-muted-foreground">สมาชิกครอบครัว</p>
+                                        <Badge variant="outline" className="text-[10px] h-4 px-1">Soon</Badge>
+                                    </div>
+                                    <h3 className="text-2xl font-bold">{stats?.family_members?.toLocaleString() || 0}</h3>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Future: Gang List */}
+                        <div className="bg-muted/20 border-2 border-dashed border-muted rounded-3xl p-12 text-center">
+                            <ShieldAlert className="h-12 w-12 mx-auto text-muted-foreground/30 mb-4" />
+                            <h3 className="text-lg font-medium text-muted-foreground">จัดการแก๊งและครอบครัว (Coming Soon)</h3>
+                            <p className="text-sm text-muted-foreground/70">ระบบอนุมัติแก๊ง ตรวจสอบสมาชิก และจัดการพื้นที่</p>
                         </div>
                     </TabsContent>
                 </Tabs>
