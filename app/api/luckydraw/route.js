@@ -65,6 +65,12 @@ export async function POST(request) {
                 [discordId, selectedItem.id, selectedItem.name]
             );
 
+            // 4. Log Transaction
+            await connection.query(
+                'INSERT INTO transaction_logs (discord_id, action, amount, details) VALUES (?, ?, ?, ?)',
+                [discordId, 'lucky_draw_spin', -1, `Won ${selectedItem.name}`]
+            );
+
             // PHASE 5: Add to Claim Queue
             // Note: Table 'claim_queue' must be created via migration script (scripts/migrate_claim_queue.js)
 

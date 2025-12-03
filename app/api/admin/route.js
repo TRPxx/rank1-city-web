@@ -3,6 +3,13 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { webDb, gameDb } from '@/lib/db';
 
+// Simple In-Memory Cache for Stats
+let statsCache = {
+    data: null,
+    lastUpdated: 0
+};
+const CACHE_DURATION = 60 * 1000; // 60 seconds
+
 export async function GET(request) {
     try {
         const session = await getServerSession(authOptions);
@@ -20,18 +27,33 @@ export async function GET(request) {
         const limit = parseInt(searchParams.get('limit') || '20');
         const offset = (page - 1) * limit;
 
+        const startDate = searchParams.get('startDate');
+        const endDate = searchParams.get('endDate');
+
         if (type === 'winners') {
             // Winners Pagination Mode
             let sql = `SELECT discord_id, item_name, created_at FROM lucky_draw_history`;
             let countSql = `SELECT COUNT(*) as count FROM lucky_draw_history`;
             let params = [];
             let countParams = [];
+            let whereClauses = [];
 
             if (query) {
-                sql += ` WHERE discord_id LIKE ? OR item_name LIKE ?`;
-                countSql += ` WHERE discord_id LIKE ? OR item_name LIKE ?`;
+                whereClauses.push(`(discord_id LIKE ? OR item_name LIKE ?)`);
                 params.push(`%${query}%`, `%${query}%`);
                 countParams.push(`%${query}%`, `%${query}%`);
+            }
+
+            if (startDate && endDate) {
+                whereClauses.push(`created_at BETWEEN ? AND ?`);
+                params.push(new Date(startDate), new Date(endDate));
+                countParams.push(new Date(startDate), new Date(endDate));
+            }
+
+            if (whereClauses.length > 0) {
+                const whereSql = ' WHERE ' + whereClauses.join(' AND ');
+                sql += whereSql;
+                countSql += whereSql;
             }
 
             sql += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
@@ -57,12 +79,24 @@ export async function GET(request) {
             let countSql = `SELECT COUNT(*) as count FROM transaction_logs`;
             let params = [];
             let countParams = [];
+            let whereClauses = [];
 
             if (query) {
-                sql += ` WHERE discord_id LIKE ? OR action LIKE ?`;
-                countSql += ` WHERE discord_id LIKE ? OR action LIKE ?`;
+                whereClauses.push(`(discord_id LIKE ? OR action LIKE ?)`);
                 params.push(`%${query}%`, `%${query}%`);
                 countParams.push(`%${query}%`, `%${query}%`);
+            }
+
+            if (startDate && endDate) {
+                whereClauses.push(`created_at BETWEEN ? AND ?`);
+                params.push(new Date(startDate), new Date(endDate));
+                countParams.push(new Date(startDate), new Date(endDate));
+            }
+
+            if (whereClauses.length > 0) {
+                const whereSql = ' WHERE ' + whereClauses.join(' AND ');
+                sql += whereSql;
+                countSql += whereSql;
             }
 
             sql += ` ORDER BY created_at DESC LIMIT ? OFFSET ?`;
@@ -114,7 +148,7 @@ export async function GET(request) {
         }
 
         if (query) {
-            // Search Mode
+            // Search Mode (No Cache)
             const [users] = await webDb.query(`
                 SELECT p.*, g.name as gang_name 
                 FROM preregistrations p 
@@ -137,7 +171,12 @@ export async function GET(request) {
 
             return NextResponse.json({ users });
         } else {
-            // Dashboard Stats Mode
+            // Dashboard Stats Mode (With Cache)
+            const now = Date.now();
+            if (statsCache.data && (now - statsCache.lastUpdated < CACHE_DURATION)) {
+                return NextResponse.json(statsCache.data);
+            }
+
             // 1. Web DB Stats
             const [webStats] = await webDb.query(`
                 SELECT 
@@ -205,7 +244,7 @@ export async function GET(request) {
                 ORDER BY date ASC
             `);
 
-            return NextResponse.json({
+            const responseData = {
                 stats,
                 recentUsers,
                 recentWins,
@@ -213,7 +252,15 @@ export async function GET(request) {
                     registrations: regGraph,
                     spins: spinGraph
                 }
-            });
+            };
+
+            // Update Cache
+            statsCache = {
+                data: responseData,
+                lastUpdated: now
+            };
+
+            return NextResponse.json(responseData);
         }
 
     } catch (error) {

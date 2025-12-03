@@ -26,8 +26,12 @@ import {
     TableRow,
 } from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+
+import { DatePickerWithRange } from '@/components/ui/date-range-picker';
+import { addDays } from 'date-fns';
 
 export default function AdminDashboard() {
     const { data: session, status } = useSession();
@@ -47,6 +51,12 @@ export default function AdminDashboard() {
     const [selectedUser, setSelectedUser] = useState(null);
     const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
     const [isHistoryDialogOpen, setIsHistoryDialogOpen] = useState(false);
+
+    // Date Filter State
+    const [dateRange, setDateRange] = useState({
+        from: addDays(new Date(), -7),
+        to: new Date(),
+    });
 
     // Transactions State
     const [transactionsList, setTransactionsList] = useState([]);
@@ -87,7 +97,11 @@ export default function AdminDashboard() {
     const fetchWinners = async (page, query = '') => {
         setIsLoadingWinners(true);
         try {
-            const res = await fetch(`/api/admin?type=winners&page=${page}&limit=24&q=${query}`);
+            let url = `/api/admin?type=winners&page=${page}&limit=24&q=${query}`;
+            if (dateRange?.from) url += `&startDate=${dateRange.from.toISOString()}`;
+            if (dateRange?.to) url += `&endDate=${dateRange.to.toISOString()}`;
+
+            const res = await fetch(url);
             if (!res.ok) throw new Error('Failed to fetch winners');
             const data = await res.json();
             setWinnersList(data.winners);
@@ -102,7 +116,11 @@ export default function AdminDashboard() {
     const fetchTransactions = async (page, query = '') => {
         setIsLoadingTransactions(true);
         try {
-            const res = await fetch(`/api/admin?type=transactions&page=${page}&limit=5&q=${query}`);
+            let url = `/api/admin?type=transactions&page=${page}&limit=5&q=${query}`;
+            if (dateRange?.from) url += `&startDate=${dateRange.from.toISOString()}`;
+            if (dateRange?.to) url += `&endDate=${dateRange.to.toISOString()}`;
+
+            const res = await fetch(url);
             if (!res.ok) throw new Error('Failed to fetch transactions');
             const data = await res.json();
             setTransactionsList(data.transactions);
@@ -141,20 +159,31 @@ export default function AdminDashboard() {
         fetchGangs(gangsPage, gangSearchQuery);
     }, [gangsPage]);
 
+    // Refetch when date range changes
+    useEffect(() => {
+        if (dateRange?.from) {
+            fetchWinners(1, winnersSearchQuery);
+            fetchTransactions(1, transactionSearchQuery);
+        }
+    }, [dateRange]);
+
     const handleTransactionSearch = (e) => {
         e.preventDefault();
+        if (transactionSearchQuery.length > 0 && transactionSearchQuery.length < 3) return;
         setTransactionsPage(1);
         fetchTransactions(1, transactionSearchQuery);
     };
 
     const handleGangSearch = (e) => {
         e.preventDefault();
+        if (gangSearchQuery.length > 0 && gangSearchQuery.length < 3) return;
         setGangsPage(1);
         fetchGangs(1, gangSearchQuery);
     };
 
     const handleWinnersSearch = (e) => {
         e.preventDefault();
+        if (winnersSearchQuery.length > 0 && winnersSearchQuery.length < 3) return;
         setWinnersPage(1);
         fetchWinners(1, winnersSearchQuery);
     };
@@ -175,7 +204,7 @@ export default function AdminDashboard() {
 
     const handleSearch = async (e) => {
         e.preventDefault();
-        if (!searchQuery.trim()) return;
+        if (!searchQuery.trim() || searchQuery.length < 3) return;
 
         setIsSearching(true);
         try {
@@ -420,6 +449,7 @@ export default function AdminDashboard() {
                             <div className="p-6 border-b flex flex-col sm:flex-row justify-between items-center gap-4">
                                 <h3 className="text-lg font-bold">ผู้โชคดีล่าสุด</h3>
                                 <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                                    <DatePickerWithRange date={dateRange} setDate={setDateRange} className="w-full sm:w-auto" />
                                     <form onSubmit={handleWinnersSearch} className="relative w-full sm:w-64">
                                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
@@ -456,8 +486,16 @@ export default function AdminDashboard() {
                             </div>
                             <div className="p-6">
                                 {isLoadingWinners ? (
-                                    <div className="flex justify-center py-12">
-                                        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                        {[...Array(8)].map((_, i) => (
+                                            <div key={i} className="flex items-center p-4 rounded-2xl bg-muted/30 border border-border/50">
+                                                <Skeleton className="h-12 w-12 rounded-full" />
+                                                <div className="ml-4 space-y-2 flex-1">
+                                                    <Skeleton className="h-4 w-3/4" />
+                                                    <Skeleton className="h-3 w-1/2" />
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
                                 ) : (
                                     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -775,6 +813,7 @@ export default function AdminDashboard() {
                                     <ScrollText className="h-5 w-5 text-primary" /> ประวัติธุรกรรม
                                 </h3>
                                 <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                                    <DatePickerWithRange date={dateRange} setDate={setDateRange} className="w-full sm:w-auto" />
                                     <form onSubmit={handleTransactionSearch} className="relative w-full sm:w-64">
                                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
