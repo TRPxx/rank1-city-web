@@ -71,8 +71,8 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                             className="relative w-full max-w-sm sm:max-w-md rounded-lg border bg-background p-6 shadow-lg"
                         >
                             {/* Close Button */}
-                            <div className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-                                <X className="h-4 w-4 cursor-pointer" onClick={() => setShowWinnerModal(false)} />
+                            <div className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground p-2 -m-2 cursor-pointer">
+                                <X className="h-6 w-6" onClick={() => setShowWinnerModal(false)} />
                                 <span className="sr-only">ปิด</span>
                             </div>
 
@@ -208,7 +208,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
                             size="lg"
                             onClick={() => spin(ticketCount)}
                             disabled={isSpinning || ticketCount <= 0}
-                            className="w-full sm:w-auto min-w-[160px] shadow-lg shadow-primary/20"
+                            className="w-full sm:w-auto min-w-[160px] h-14 text-lg shadow-lg shadow-primary/20"
                         >
                             {isSpinning ? (
                                 <>

@@ -1,8 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { CalendarCheck, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
 
 export default function DailyCheckIn({ onCheckInSuccess }) {
     const [canCheckIn, setCanCheckIn] = useState(false);
@@ -36,10 +35,10 @@ export default function DailyCheckIn({ onCheckInSuccess }) {
             // Success
             setCanCheckIn(false);
             if (onCheckInSuccess) onCheckInSuccess();
-            alert('Check-in successful! You got 1 Ticket.'); // Simple alert for now
+            toast.success('เช็คชื่อสำเร็จ! คุณได้รับตั๋วสุ่มรางวัล 1 ใบ');
 
         } catch (error) {
-            alert(error.message);
+            toast.error(error.message || 'เกิดข้อผิดพลาดในการเช็คชื่อ');
         } finally {
             setIsCheckingIn(false);
         }
