@@ -268,7 +268,7 @@ export default function GangManager() {
 
                 {/* Left Side: Hero Section (Shadcn Style) */}
                 <div className="relative hidden lg:flex flex-col justify-between bg-zinc-900 p-10 text-white dark:border-r">
-                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1605218427306-635ba2439af2?q=80&w=2574&auto=format&fit=crop')] bg-cover bg-center opacity-20" />
+                    <div className="absolute inset-0 bg-[url('/images/gang-hero.png')] bg-cover bg-center opacity-40" />
                     <div className="relative z-20 flex items-center text-lg font-medium">
                         <Shield className="mr-2 h-6 w-6 text-amber-500" />
                         Rank1 City Gangs

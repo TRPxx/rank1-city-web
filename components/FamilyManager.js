@@ -268,7 +268,7 @@ export default function FamilyManager() {
 
                 {/* Left Side: Hero Section (Shadcn Style) */}
                 <div className="relative hidden lg:flex flex-col justify-between bg-zinc-900 p-10 text-white dark:border-r">
-                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=2670&auto=format&fit=crop')] bg-cover bg-center opacity-20" />
+                    <div className="absolute inset-0 bg-[url('/images/family-hero.png')] bg-cover bg-center opacity-40" />
                     <div className="relative z-20 flex items-center text-lg font-medium">
                         <Users className="mr-2 h-6 w-6 text-rose-500" />
                         Rank1 City Families
