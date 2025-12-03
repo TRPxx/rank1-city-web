@@ -630,22 +630,52 @@ export default function AdminDashboard() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                            </div>
+                                                <div className="mt-8 pt-6 border-t">
+                                                    <h4 className="text-sm font-medium text-muted-foreground mb-4 flex items-center gap-2">
+                                                        <History className="h-4 w-4" /> ประวัติการสุ่มกาชา (10 รายการล่าสุด)
+                                                    </h4>
+                                                    {selectedUser.lucky_draw_history && selectedUser.lucky_draw_history.length > 0 ? (
+                                                        <div className="bg-muted/30 rounded-xl overflow-hidden">
+                                                            <Table>
+                                                                <TableHeader>
+                                                                    <TableRow className="hover:bg-transparent border-border/50">
+                                                                        <TableHead className="h-10">ไอเทม</TableHead>
+                                                                        <TableHead className="h-10 text-right">เวลา</TableHead>
+                                                                    </TableRow>
+                                                                </TableHeader>
+                                                                <TableBody>
+                                                                    {selectedUser.lucky_draw_history.map((item, i) => (
+                                                                        <TableRow key={i} className="hover:bg-muted/50 border-border/50">
+                                                                            <TableCell className="font-medium">{item.item_name}</TableCell>
+                                                                            <TableCell className="text-right text-muted-foreground text-xs">
+                                                                                {new Date(item.created_at).toLocaleString('th-TH')}
+                                                                            </TableCell>
+                                                                        </TableRow>
+                                                                    ))}
+                                                                </TableBody>
+                                                            </Table>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-center py-8 text-muted-foreground bg-muted/30 rounded-xl">
+                                                            ไม่พบประวัติการสุ่ม
+                                                        </div>
+                                                    )}
+                                                </div>
 
-                                            <div className="mt-8 pt-6 border-t grid grid-cols-2 gap-4 text-sm text-muted-foreground">
-                                                <div className="flex items-center gap-2">
-                                                    <Calendar className="h-4 w-4" />
-                                                    ลงทะเบียน: {new Date(selectedUser.created_at).toLocaleDateString('th-TH')}
-                                                </div>
-                                                <div className="flex items-center gap-2">
-                                                    <MapPin className="h-4 w-4" />
-                                                    IP: {selectedUser.ip_address || 'Unknown'}
+                                                <div className="mt-8 pt-6 border-t grid grid-cols-2 gap-4 text-sm text-muted-foreground">
+                                                    <div className="flex items-center gap-2">
+                                                        <Calendar className="h-4 w-4" />
+                                                        ลงทะเบียน: {new Date(selectedUser.created_at).toLocaleDateString('th-TH')}
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <MapPin className="h-4 w-4" />
+                                                        IP: {selectedUser.ip_address || 'Unknown'}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </>
+                                        </>
                                 )}
-                            </DialogContent>
+                                    </DialogContent>
                         </Dialog>
                     </TabsContent>
                     <TabsContent value="economy" className="space-y-6 mt-0 animate-in fade-in-50 duration-500">

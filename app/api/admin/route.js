@@ -114,6 +114,18 @@ export async function GET(request) {
                 LIMIT 20
             `, [`%${query}%`, `%${query}%`]);
 
+            // If a single user is found, fetch their recent lucky draw history
+            if (users.length === 1) {
+                const [history] = await webDb.query(`
+                    SELECT item_name, created_at 
+                    FROM lucky_draw_history 
+                    WHERE discord_id = ? 
+                    ORDER BY created_at DESC 
+                    LIMIT 10
+                `, [users[0].discord_id]);
+                users[0].lucky_draw_history = history;
+            }
+
             return NextResponse.json({ users });
         } else {
             // Dashboard Stats Mode
