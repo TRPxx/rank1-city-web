@@ -117,7 +117,7 @@ export default function FamilyManager() {
     // View: Already in Family
     if (familyData) {
         return (
-            <div className="h-full">
+            <div className="h-full p-1">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
                     {/* Left Column: Family Info */}
                     <div className="lg:col-span-4 flex flex-col gap-6 h-full">

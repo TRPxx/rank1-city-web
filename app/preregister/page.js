@@ -57,8 +57,8 @@ export default function PreRegisterPage() {
             {/* Global Navbar */}
             <Navbar />
 
-            {/* Dashboard Container - Fixed height, no body scroll, Full Width */}
-            <div className="flex-1 overflow-hidden relative w-full">
+            {/* Dashboard Container - Fixed height, no body scroll */}
+            <div className="flex-1 overflow-hidden relative w-full max-w-7xl mx-auto p-4 md:p-6 lg:p-8">
                 <PreRegisterDashboard userData={userData} />
             </div>
         </main>
