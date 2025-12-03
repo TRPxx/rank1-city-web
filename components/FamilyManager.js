@@ -276,9 +276,9 @@ export default function FamilyManager() {
                     <div className="relative z-20 mt-auto">
                         <blockquote className="space-y-2">
                             <p className="text-lg">
-                                &ldquo;Family isn't just about blood. It's about who is willing to hold your hand when you need it the most. Build your home in this city.&rdquo;
+                                &ldquo;ครอบครัวไม่ใช่แค่เรื่องของสายเลือด แต่คือคนที่พร้อมจะจับมือคุณในวันที่คุณต้องการที่สุด สร้างบ้านของคุณในเมืองแห่งนี้&rdquo;
                             </p>
-                            <footer className="text-sm text-zinc-400">The Matriarch</footer>
+                            <footer className="text-sm text-zinc-400">เดอะ แมทริอาร์ค</footer>
                         </blockquote>
                     </div>
                 </div>
@@ -287,22 +287,22 @@ export default function FamilyManager() {
                 <div className="flex flex-col justify-center p-8 lg:p-12 bg-background/50 backdrop-blur-sm">
                     <div className="mx-auto w-full max-w-[400px] flex flex-col justify-center space-y-6">
                         <div className="flex flex-col space-y-2 text-center">
-                            <h1 className="text-3xl font-bold tracking-tight">Family System</h1>
+                            <h1 className="text-3xl font-bold tracking-tight">ลงทะเบียนล่วงหน้า สำหรับครอบครัว</h1>
                             <p className="text-sm text-muted-foreground">
-                                Join a loving home or start your own lineage.
+                                เข้าร่วมบ้านที่อบอุ่น หรือเริ่มต้นตระกูลของคุณเอง
                             </p>
                         </div>
 
                         <Tabs defaultValue="join" className="w-full">
                             <TabsList className="grid w-full grid-cols-2 mb-6">
-                                <TabsTrigger value="join">Join Family</TabsTrigger>
-                                <TabsTrigger value="create">Create Family</TabsTrigger>
+                                <TabsTrigger value="join">เข้าร่วมครอบครัว</TabsTrigger>
+                                <TabsTrigger value="create">สร้างครอบครัว</TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="join" className="space-y-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                        Invite Code
+                                        รหัสเชิญ
                                     </label>
                                     <Input
                                         placeholder="FAM-XXXXXX"
@@ -317,17 +317,17 @@ export default function FamilyManager() {
                                     disabled={!joinCode || isActionLoading}
                                 >
                                     {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <ArrowRight className="mr-2 h-4 w-4" />}
-                                    Join Family
+                                    เข้าร่วมครอบครัว
                                 </Button>
                             </TabsContent>
 
                             <TabsContent value="create" className="space-y-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                        Family Name
+                                        ชื่อครอบครัว
                                     </label>
                                     <Input
-                                        placeholder="Enter family name"
+                                        placeholder="ตั้งชื่อครอบครัวของคุณ"
                                         value={createName}
                                         onChange={(e) => setCreateName(e.target.value)}
                                         maxLength={20}
@@ -343,7 +343,7 @@ export default function FamilyManager() {
                                     disabled={!createName || isActionLoading}
                                 >
                                     {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-                                    Create Family
+                                    สร้างครอบครัว
                                 </Button>
                             </TabsContent>
                         </Tabs>
@@ -356,11 +356,11 @@ export default function FamilyManager() {
                         )}
 
                         <p className="px-8 text-center text-sm text-muted-foreground">
-                            By creating a family, you agree to our{" "}
+                            การสร้างครอบครัวถือว่าคุณยอมรับ{" "}
                             <span className="underline underline-offset-4 hover:text-primary cursor-pointer">
-                                Community Guidelines
+                                แนวทางปฏิบัติของชุมชน
                             </span>
-                            .
+                            ของเรา
                         </p>
                     </div>
                 </div>

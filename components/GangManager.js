@@ -276,9 +276,9 @@ export default function GangManager() {
                     <div className="relative z-20 mt-auto">
                         <blockquote className="space-y-2">
                             <p className="text-lg">
-                                &ldquo;Power is not given to you. You have to take it. Build your legacy, gather your crew, and rule the streets of Rank1 City.&rdquo;
+                                &ldquo;อำนาจไม่ใช่สิ่งที่ใครจะมอบให้ คุณต้องคว้ามันมาเอง สร้างตำนาน รวบรวมพรรคพวก และปกครองถนนแห่ง Rank1 City&rdquo;
                             </p>
-                            <footer className="text-sm text-zinc-400">The Godfather</footer>
+                            <footer className="text-sm text-zinc-400">เดอะ ก็อดฟาเธอร์</footer>
                         </blockquote>
                     </div>
                 </div>
@@ -287,22 +287,22 @@ export default function GangManager() {
                 <div className="flex flex-col justify-center p-8 lg:p-12 bg-background/50 backdrop-blur-sm">
                     <div className="mx-auto w-full max-w-[400px] flex flex-col justify-center space-y-6">
                         <div className="flex flex-col space-y-2 text-center">
-                            <h1 className="text-3xl font-bold tracking-tight">Gang System</h1>
+                            <h1 className="text-3xl font-bold tracking-tight">ลงทะเบียนล่วงหน้า สำหรับแก๊ง</h1>
                             <p className="text-sm text-muted-foreground">
-                                Enter your invite code or establish a new organization.
+                                กรอกรหัสเชิญเพื่อเข้าร่วม หรือก่อตั้งองค์กรใหม่
                             </p>
                         </div>
 
                         <Tabs defaultValue="join" className="w-full">
                             <TabsList className="grid w-full grid-cols-2 mb-6">
-                                <TabsTrigger value="join">Join Gang</TabsTrigger>
-                                <TabsTrigger value="create">Create Gang</TabsTrigger>
+                                <TabsTrigger value="join">เข้าร่วมแก๊ง</TabsTrigger>
+                                <TabsTrigger value="create">สร้างแก๊ง</TabsTrigger>
                             </TabsList>
 
                             <TabsContent value="join" className="space-y-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                        Invite Code
+                                        รหัสเชิญ
                                     </label>
                                     <Input
                                         placeholder="G-XXXXXX"
@@ -317,17 +317,17 @@ export default function GangManager() {
                                     disabled={!joinCode || isActionLoading}
                                 >
                                     {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Users className="mr-2 h-4 w-4" />}
-                                    Join Gang
+                                    เข้าร่วมแก๊ง
                                 </Button>
                             </TabsContent>
 
                             <TabsContent value="create" className="space-y-4">
                                 <div className="space-y-2">
                                     <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                        Gang Name
+                                        ชื่อแก๊ง
                                     </label>
                                     <Input
-                                        placeholder="Enter gang name"
+                                        placeholder="ตั้งชื่อแก๊งของคุณ"
                                         value={createName}
                                         onChange={(e) => setCreateName(e.target.value)}
                                         maxLength={20}
@@ -343,7 +343,7 @@ export default function GangManager() {
                                     disabled={!createName || isActionLoading}
                                 >
                                     {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-                                    Create Gang
+                                    สร้างแก๊ง
                                 </Button>
                             </TabsContent>
                         </Tabs>
@@ -356,15 +356,15 @@ export default function GangManager() {
                         )}
 
                         <p className="px-8 text-center text-sm text-muted-foreground">
-                            By creating a gang, you agree to our{" "}
+                            การสร้างแก๊งถือว่าคุณยอมรับ{" "}
                             <span className="underline underline-offset-4 hover:text-primary cursor-pointer">
-                                Server Rules
+                                กฎของเซิร์ฟเวอร์
                             </span>{" "}
-                            and{" "}
+                            และ{" "}
                             <span className="underline underline-offset-4 hover:text-primary cursor-pointer">
-                                Gang Policy
+                                นโยบายแก๊ง
                             </span>
-                            .
+                            ของเรา
                         </p>
                     </div>
                 </div>
