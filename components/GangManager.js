@@ -188,7 +188,7 @@ export default function GangManager() {
                     </div>
 
                     {/* Right Column: Member List */}
-                    <div className="lg:col-span-8 flex flex-col rounded-[2.5rem] bg-slate-900/30 border border-slate-800/50 backdrop-blur-md overflow-hidden h-[600px]">
+                    <div className="lg:col-span-8 flex flex-col rounded-[2.5rem] bg-slate-900/30 border border-slate-800/50 backdrop-blur-md overflow-hidden min-h-[600px]">
                         <div className="p-6 border-b border-slate-800/50 bg-slate-900/20 flex items-center justify-between backdrop-blur-xl sticky top-0 z-10">
                             <div className="flex items-center gap-3">
                                 <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400">
@@ -204,7 +204,7 @@ export default function GangManager() {
                             </Badge>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-2">
+                        <div className="flex-1 p-4 space-y-2">
                             {isMembersLoading ? (
                                 <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
                                     <div className="relative">
@@ -224,9 +224,9 @@ export default function GangManager() {
                                             className="group flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-800/50 border border-transparent hover:border-slate-700 transition-all duration-200"
                                         >
                                             <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${idx === 0 ? 'bg-amber-500/20 text-amber-500' :
-                                                    idx === 1 ? 'bg-slate-300/20 text-slate-300' :
-                                                        idx === 2 ? 'bg-orange-700/20 text-orange-700' :
-                                                            'bg-slate-800 text-slate-500'
+                                                idx === 1 ? 'bg-slate-300/20 text-slate-300' :
+                                                    idx === 2 ? 'bg-orange-700/20 text-orange-700' :
+                                                        'bg-slate-800 text-slate-500'
                                                 }`}>
                                                 #{idx + 1}
                                             </div>
