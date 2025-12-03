@@ -15,11 +15,11 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 
--- Dumping database structure for esxlegacy_17b6de
-CREATE DATABASE IF NOT EXISTS `esxlegacy_17b6de` /*!40100 DEFAULT CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci */;
-USE `esxlegacy_17b6de`;
+-- Dumping database structure for freshtown
+CREATE DATABASE IF NOT EXISTS `freshtown` /*!40100 DEFAULT CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci */;
+USE `freshtown`;
 
--- Dumping structure for table esxlegacy_17b6de.users
+-- Dumping structure for table freshtown.users
 CREATE TABLE IF NOT EXISTS `users` (
   `identifier` varchar(60) NOT NULL,
   `discord_id` varchar(50) DEFAULT NULL,
@@ -55,7 +55,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `unique_ssn` (`ssn`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_uca1400_ai_ci;
 
--- Dumping data for table esxlegacy_17b6de.users: ~0 rows (approximately)
+-- Dumping data for table freshtown.users: ~0 rows (approximately)
 
 /*!40103 SET TIME_ZONE=IFNULL(@OLD_TIME_ZONE, 'system') */;
 /*!40101 SET SQL_MODE=IFNULL(@OLD_SQL_MODE, '') */;
