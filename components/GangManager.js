@@ -264,79 +264,86 @@ export default function GangManager() {
     // View: Create or Join
     return (
         <div className="h-full flex items-center justify-center p-4">
-            <Card className="w-full max-w-md border-border/50 shadow-lg">
-                <CardHeader className="text-center pb-2">
-                    <div className="mx-auto w-12 h-12 bg-amber-500/10 rounded-full flex items-center justify-center mb-4">
-                        <Shield className="w-6 h-6 text-amber-600" />
-                    </div>
-                    <CardTitle className="text-2xl font-bold">ระบบแก๊ง</CardTitle>
-                    <CardDescription>
-                        เข้าร่วมหรือสร้างแก๊งเพื่อเริ่มต้นการผจญภัย
-                    </CardDescription>
-                </CardHeader>
-                <CardContent className="pt-6">
-                    <Tabs defaultValue="join" className="w-full">
-                        <TabsList className="grid w-full grid-cols-2 mb-6">
-                            <TabsTrigger value="join">เข้าร่วม</TabsTrigger>
-                            <TabsTrigger value="create">สร้างใหม่</TabsTrigger>
-                        </TabsList>
-
-                        <TabsContent value="join" className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    รหัสแก๊ง
-                                </label>
-                                <Input
-                                    placeholder="G-XXXXXX"
-                                    value={joinCode}
-                                    onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                                    className="font-mono uppercase text-center tracking-widest"
-                                />
-                            </div>
-                            <Button
-                                className="w-full bg-amber-600 hover:bg-amber-700 text-white"
-                                onClick={() => handleAction('join')}
-                                disabled={!joinCode || isActionLoading}
-                            >
-                                {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Users className="mr-2 h-4 w-4" />}
-                                เข้าร่วมแก๊ง
-                            </Button>
-                        </TabsContent>
-
-                        <TabsContent value="create" className="space-y-4">
-                            <div className="space-y-2">
-                                <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                    ชื่อแก๊ง
-                                </label>
-                                <Input
-                                    placeholder="ตั้งชื่อแก๊งของคุณ"
-                                    value={createName}
-                                    onChange={(e) => setCreateName(e.target.value)}
-                                    maxLength={20}
-                                />
-                                <p className="text-[10px] text-muted-foreground text-right">
-                                    {createName.length}/20
-                                </p>
-                            </div>
-                            <Button
-                                className="w-full bg-amber-600 hover:bg-amber-700 text-white"
-                                onClick={() => handleAction('create')}
-                                disabled={!createName || isActionLoading}
-                            >
-                                {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-                                สร้างแก๊ง
-                            </Button>
-                        </TabsContent>
-                    </Tabs>
-
-                    {error && (
-                        <div className="mt-4 p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-center gap-2">
-                            <AlertCircle className="w-4 h-4" />
-                            {error}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-5xl">
+                {/* Join Gang Card */}
+                <Card className="border-border/50 shadow-lg flex flex-col">
+                    <CardHeader>
+                        <div className="w-12 h-12 bg-amber-500/10 rounded-full flex items-center justify-center mb-4">
+                            <Users className="w-6 h-6 text-amber-600" />
                         </div>
-                    )}
-                </CardContent>
-            </Card>
+                        <CardTitle className="text-2xl font-bold">เข้าร่วมแก๊ง</CardTitle>
+                        <CardDescription>
+                            หากคุณมีรหัสเชิญจากหัวหน้าแก๊ง สามารถกรอกเพื่อเข้าร่วมได้ทันที
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-1 flex flex-col justify-end space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                รหัสแก๊ง
+                            </label>
+                            <Input
+                                placeholder="G-XXXXXX"
+                                value={joinCode}
+                                onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                                className="font-mono uppercase text-center tracking-widest h-12 text-lg"
+                            />
+                        </div>
+                        <Button
+                            className="w-full bg-amber-600 hover:bg-amber-700 text-white h-12 text-base"
+                            onClick={() => handleAction('join')}
+                            disabled={!joinCode || isActionLoading}
+                        >
+                            {isActionLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <ArrowRight className="mr-2 h-5 w-5" />}
+                            เข้าร่วมแก๊ง
+                        </Button>
+                    </CardContent>
+                </Card>
+
+                {/* Create Gang Card */}
+                <Card className="border-border/50 shadow-lg flex flex-col">
+                    <CardHeader>
+                        <div className="w-12 h-12 bg-amber-500/10 rounded-full flex items-center justify-center mb-4">
+                            <Plus className="w-6 h-6 text-amber-600" />
+                        </div>
+                        <CardTitle className="text-2xl font-bold">สร้างแก๊งใหม่</CardTitle>
+                        <CardDescription>
+                            ก่อตั้งแก๊งของคุณเอง รับสมัครสมาชิก และสร้างอิทธิพลในเมือง
+                        </CardDescription>
+                    </CardHeader>
+                    <CardContent className="flex-1 flex flex-col justify-end space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                ชื่อแก๊ง
+                            </label>
+                            <Input
+                                placeholder="ตั้งชื่อแก๊งของคุณ"
+                                value={createName}
+                                onChange={(e) => setCreateName(e.target.value)}
+                                maxLength={20}
+                                className="h-12 text-lg"
+                            />
+                            <p className="text-[10px] text-muted-foreground text-right">
+                                {createName.length}/20
+                            </p>
+                        </div>
+                        <Button
+                            className="w-full bg-amber-600 hover:bg-amber-700 text-white h-12 text-base"
+                            onClick={() => handleAction('create')}
+                            disabled={!createName || isActionLoading}
+                        >
+                            {isActionLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : <Crown className="mr-2 h-5 w-5" />}
+                            สร้างแก๊ง
+                        </Button>
+                    </CardContent>
+                </Card>
+            </div>
+
+            {error && (
+                <div className="fixed bottom-8 left-1/2 -translate-x-1/2 p-4 rounded-lg bg-destructive/90 text-white text-sm flex items-center gap-2 shadow-xl animate-in fade-in slide-in-from-bottom-4">
+                    <AlertCircle className="w-5 h-5" />
+                    {error}
+                </div>
+            )}
         </div>
     );
 }
