@@ -54,7 +54,7 @@ export default function PreRegisterDashboard({ userData }) {
                     <p className="text-muted-foreground">ยินดีต้อนรับกลับ, {localUserData?.name}</p>
                 </div>
 
-                <div className="bg-muted/30 p-1.5 rounded-2xl backdrop-blur-sm">
+                <div className="hidden md:block bg-muted/30 p-1.5 rounded-2xl backdrop-blur-sm">
                     <div className="flex items-center gap-1">
                         <Button
                             variant={activeTab === 'invite' ? 'secondary' : 'ghost'}
@@ -107,7 +107,7 @@ export default function PreRegisterDashboard({ userData }) {
             </div>
 
             {/* Content Area */}
-            <div className="flex-1 min-h-0 overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-hidden pb-24 md:pb-0">
                 <AnimatePresence mode="wait">
                     <motion.div
                         key={activeTab}
@@ -139,6 +139,48 @@ export default function PreRegisterDashboard({ userData }) {
                     </motion.div>
                 </AnimatePresence>
             </div>
-        </div>
+
+            {/* Mobile Bottom Navigation (Floating) */}
+            <div className="md:hidden fixed bottom-6 left-4 right-4 z-50">
+                <div className="bg-slate-900/90 backdrop-blur-xl border border-white/10 p-2 rounded-2xl shadow-2xl flex items-center justify-around">
+                    <button
+                        onClick={() => setActiveTab('invite')}
+                        className={`flex flex-col items-center justify-center p-2 rounded-xl w-full transition-all ${activeTab === 'invite' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}
+                    >
+                        <Users className="w-5 h-5 mb-1" />
+                        <span className="text-[10px] font-medium">เพื่อน</span>
+                    </button>
+
+                    {PREREGISTER_CONFIG.features.enableLuckyDraw && (
+                        <button
+                            onClick={() => setActiveTab('luckydraw')}
+                            className={`flex flex-col items-center justify-center p-2 rounded-xl w-full transition-all ${activeTab === 'luckydraw' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}
+                        >
+                            <Ticket className="w-5 h-5 mb-1" />
+                            <span className="text-[10px] font-medium">สุ่ม</span>
+                        </button>
+                    )}
+
+                    {PREREGISTER_CONFIG.features.enableGang && (
+                        <>
+                            <button
+                                onClick={() => setActiveTab('gang')}
+                                className={`flex flex-col items-center justify-center p-2 rounded-xl w-full transition-all ${activeTab === 'gang' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}
+                            >
+                                <Shield className="w-5 h-5 mb-1" />
+                                <span className="text-[10px] font-medium">แก๊ง</span>
+                            </button>
+                            <button
+                                onClick={() => setActiveTab('family')}
+                                className={`flex flex-col items-center justify-center p-2 rounded-xl w-full transition-all ${activeTab === 'family' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}
+                            >
+                                <Users className="w-5 h-5 mb-1" />
+                                <span className="text-[10px] font-medium">ครอบครัว</span>
+                            </button>
+                        </>
+                    )}
+                </div>
+            </div>
+        </div >
     );
 }
