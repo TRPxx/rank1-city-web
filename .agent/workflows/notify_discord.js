@@ -27,6 +27,26 @@ try {
       commitMessageThai += "\u001b[0;33m• แนะนำการแก้ไขปัญหา performance และ security\u001b[0m\n";
     }
     commitMessageThai += "```";
+  } else if (commitMessage.includes('Redesign') || commitMessage.includes('UI')) {
+    commitMessageThai = "```ansi\n";
+    commitMessageThai += "\u001b[1;35m🎨 อัปเดตดีไซน์ใหม่: Premium UI Redesign\u001b[0m\n\n";
+
+    commitMessageThai += "\u001b[1;36m✨ รายละเอียดการปรับปรุง:\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• 💎 Glassmorphism Design - ดีไซน์กระจกสุดหรู\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• 🎬 Animations - เพิ่ม Effect การเคลื่อนไหวด้วย Framer Motion\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• 🌈 Gradients - ปรับโทนสีให้ดูพรีเมียมขึ้น\u001b[0m\n";
+    commitMessageThai += "\u001b[0;33m  • Gang: Amber/Gold Theme (สีทองหรูหรา)\u001b[0m\n";
+    commitMessageThai += "\u001b[0;33m  • Family: Rose/Pink Theme (สีชมพูอบอุ่น)\u001b[0m\n\n";
+
+    commitMessageThai += "\u001b[1;36m📱 หน้าที่ปรับปรุง:\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• GangManager.js - หน้าจัดการแก๊ง\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• FamilyManager.js - หน้าจัดการครอบครัว\u001b[0m\n\n";
+
+    commitMessageThai += "\u001b[1;36m💡 Features:\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m✅ Card Layout แบบใหม่ ดูง่ายขึ้น\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m✅ Loading States ที่สวยงาม\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m✅ Responsive Design รองรับมือถือสมบูรณ์แบบ\u001b[0m\n";
+    commitMessageThai += "```";
   } else if (commitMessage.includes('Gang Members') || commitMessage.includes('gang members')) {
     commitMessageThai = "```ansi\n";
     commitMessageThai += "\u001b[1;35m🎉 เพิ่มฟีเจอร์ใหม่: รายชื่อสมาชิกแก๊ง (Gang Members List)\u001b[0m\n\n";
@@ -52,6 +72,36 @@ try {
     commitMessageThai += "\u001b[0;32m✅ Empty State - แสดงข้อความเมื่อยังไม่มีสมาชิก\u001b[0m\n";
     commitMessageThai += "\u001b[0;32m✅ Scrollable - รายชื่อเลื่อนได้ถ้าสมาชิกเยอะ\u001b[0m\n";
     commitMessageThai += "\u001b[0;32m✅ Hover Effect - รายการสมาชิกเปลี่ยนสีเมื่อเอาเมาส์ชี้\u001b[0m\n";
+    commitMessageThai += "```";
+  } else if (commitMessage.includes('Family') || commitMessage.includes('family')) {
+    commitMessageThai = "```ansi\n";
+    commitMessageThai += "\u001b[1;35m👨‍👩‍👧‍👦 เพิ่มฟีเจอร์ใหม่: ระบบครอบครัว (Family System)\u001b[0m\n\n";
+
+    commitMessageThai += "\u001b[1;36m1️⃣ API Endpoints ใหม่:\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• POST /api/family - สร้าง/เข้าร่วมครอบครัว\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• GET /api/family - ดูข้อมูลครอบครัว\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• GET /api/family/members - รายชื่อสมาชิก\u001b[0m\n";
+    commitMessageThai += "\u001b[0;33m• รหัสครอบครัว: FAM-XXXX\u001b[0m\n\n";
+
+    commitMessageThai += "\u001b[1;36m2️⃣ Component ใหม่:\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• FamilyManager.js - โคลนจาก GangManager\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• เปลี่ยน emoji เป็น 👨‍👩‍👧‍👦 (ครอบครัว)\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• UI เหมือนแก๊ง แต่เป็นครอบครัว\u001b[0m\n\n";
+
+    commitMessageThai += "\u001b[1;36m3️⃣ ⚠️ เงื่อนไข Exclusive (สำคัญ!):\u001b[0m\n";
+    commitMessageThai += "\u001b[1;31m• ห้ามมีทั้งแก๊งและครอบครัวพร้อมกัน\u001b[0m\n";
+    commitMessageThai += "\u001b[0;33m  • มีแก๊ง → ไม่สามารถเข้าครอบครัว\u001b[0m\n";
+    commitMessageThai += "\u001b[0;33m  • มีครอบครัว → ไม่สามารถเข้าแก๊ง\u001b[0m\n\n";
+
+    commitMessageThai += "\u001b[1;36m4️⃣ การแก้ไข Gang API:\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• เช็ค family_id ก่อนสร้าง/เข้าร่วมแก๊ง\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• Query: SELECT gang_id, family_id FROM preregistrations\u001b[0m\n\n";
+
+    commitMessageThai += "\u001b[1;36m5️⃣ UI Features:\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m✅ รายชื่อสมาชิกพร้อม Avatar\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m✅ Badge \"หัวหน้า\" สำหรับหัวหน้าครอบครัว\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m✅ Responsive Design + Loading/Empty States\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m✅ Scrollable Member List\u001b[0m\n";
     commitMessageThai += "```";
   } else {
     commitMessageThai = commitMessage;
