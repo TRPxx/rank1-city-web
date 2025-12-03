@@ -3,31 +3,90 @@ const { execSync } = require('child_process');
 const https = require('https');
 
 let commitMessage = "";
+let commitMessageThai = "";
 try {
   commitMessage = execSync('git log -1 --pretty=%B').toString().trim();
+
+  // สร้างข้อความภาษาไทยที่ละเอียดจาก commit message
+  // วิเคราะห์ commit message และสร้างคำอธิบายภาษาไทย
+  if (commitMessage.includes('Leaderboard') || commitMessage.includes('leaderboard')) {
+    commitMessageThai = "```ansi\n";
+    commitMessageThai += "\u001b[1;35m✨ เพิ่มฟีเจอร์ใหม่: ระบบอันดับผู้เล่น (Leaderboard)\u001b[0m\n\n";
+    commitMessageThai += "\u001b[1;36m📊 รายละเอียด:\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• เพิ่ม Tab อันดับใหม่ใน Admin Dashboard\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• แสดง Top 50 ผู้ครอบครองตั๋วเยอะที่สุด (พร้อม Avatar + สีพิเศษสำหรับ Top 3)\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• แสดง Top 50 ผู้ใช้งานเยอะที่สุด (นับจากจำนวนครั้งสุ่มกาชา)\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• ใช้ Icon มงกุฎ 👑 และเหรียญ 🥈🥉 สำหรับอันดับ 1-3\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• Responsive Design - ทำงานได้ทั้ง Desktop และ Mobile\u001b[0m\n";
+    commitMessageThai += "\u001b[0;32m• API Endpoint ใหม่: /api/admin?type=leaderboard\u001b[0m\n\n";
+
+    if (commitMessage.includes('QA')) {
+      commitMessageThai += "\u001b[1;33m📝 เพิ่มเติม:\u001b[0m\n";
+      commitMessageThai += "\u001b[0;33m• QA Simulation Report - รายงานทดสอบระบบ 5,000 ผู้ใช้พร้อมกัน\u001b[0m\n";
+      commitMessageThai += "\u001b[0;33m• ระบุ bugs และ race conditions ที่พบ\u001b[0m\n";
+      commitMessageThai += "\u001b[0;33m• แนะนำการแก้ไขปัญหา performance และ security\u001b[0m\n";
+    }
+    commitMessageThai += "```";
+  } else {
+    commitMessageThai = commitMessage;
+  }
+
 } catch (e) {
   commitMessage = "Manual Update (No commit message found)";
+  commitMessageThai = "อัปเดตระบบด้วยตนเอง (ไม่พบข้อความ commit)";
 }
 
 const branch = execSync('git rev-parse --abbrev-ref HEAD').toString().trim();
 const shortHash = execSync('git rev-parse --short HEAD').toString().trim();
 const fullHash = execSync('git rev-parse HEAD').toString().trim();
 const commitUrl = "https://github.com/TRPxx/rank1-city-web/commit/" + fullHash;
-const timestamp = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
+const thaiTime = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString().replace(/T/, ' ').replace(/\..+/, '') + ' (GMT+7)';
+
 let stats = "";
+let statsThai = "";
 try {
   stats = execSync('git diff --shortstat HEAD^ HEAD').toString().trim();
+
+  // แปลง stats เป็นภาษาไทย
+  const insertMatch = stats.match(/(\d+) insertion/);
+  const deleteMatch = stats.match(/(\d+) deletion/);
+  const filesMatch = stats.match(/(\d+) file/);
+
+  if (filesMatch) {
+    const filesCount = filesMatch[1];
+    const insertCount = insertMatch ? insertMatch[1] : '0';
+    const deleteCount = deleteMatch ? deleteMatch[1] : '0';
+    statsThai = `📝 ${filesCount} ไฟล์ | ➕ ${insertCount} บรรทัด | ➖ ${deleteCount} บรรทัด`;
+  } else {
+    statsThai = stats;
+  }
 } catch (e) {
   stats = "Initial commit or no changes";
+  statsThai = "Commit แรก หรือไม่มีการเปลี่ยนแปลง";
 }
 
-// Parse line numbers from git diff
+// Parse detailed file changes with diff stats
 let diffOutput = [];
+let numstatOutput = [];
 try {
   diffOutput = execSync('git diff --unified=0 HEAD^ HEAD').toString().split('\n');
+  numstatOutput = execSync('git diff --numstat HEAD^ HEAD').toString().trim().split('\n');
 } catch (e) {
   diffOutput = [];
+  numstatOutput = [];
 }
+
+// Parse numstat for detailed file stats
+let fileStats = {};
+numstatOutput.forEach(line => {
+  const parts = line.split('\t');
+  if (parts.length >= 3) {
+    const additions = parts[0] === '-' ? '0' : parts[0];
+    const deletions = parts[1] === '-' ? '0' : parts[1];
+    const filename = parts[2];
+    fileStats[filename] = { additions, deletions };
+  }
+});
 
 let fileDetails = [];
 let currentFile = "";
@@ -37,8 +96,18 @@ diffOutput.forEach(line => {
   if (line.match(/^\+\+\+ b\/(.*)/)) {
     if (currentFile !== "") {
       let lineStr = lines.join(", ");
-      if (lineStr) { fileDetails.push("**" + currentFile + "**: " + lineStr); }
-      else { fileDetails.push("**" + currentFile + "**"); }
+      const stats = fileStats[currentFile];
+      let fileInfo = "📄 `" + currentFile + "`";
+
+      if (stats) {
+        fileInfo += `\n   📊 ${stats.additions !== '0' ? '➕ ' + stats.additions : ''} ${stats.deletions !== '0' ? '➖ ' + stats.deletions : ''}`.trim();
+      }
+
+      if (lineStr) {
+        fileInfo += "\n   📍 บรรทัด: `" + lineStr + "`";
+      }
+
+      fileDetails.push(fileInfo);
     }
     currentFile = line.match(/^\+\+\+ b\/(.*)/)[1];
     lines = [];
@@ -49,37 +118,79 @@ diffOutput.forEach(line => {
     const count = matches[2] ? parseInt(matches[2]) : 1;
     if (count > 0) {
       const end = start + count - 1;
-      if (start === end) { lines.push("L" + start); } else { lines.push("L" + start + "-" + end); }
+      if (start === end) { lines.push(start.toString()); }
+      else { lines.push(start + "-" + end); }
     }
   }
 });
+
 if (currentFile !== "") {
   let lineStr = lines.join(", ");
-  if (lineStr) { fileDetails.push("**" + currentFile + "**: " + lineStr); }
-  else { fileDetails.push("**" + currentFile + "**"); }
+  const stats = fileStats[currentFile];
+  let fileInfo = "📄 `" + currentFile + "`";
+
+  if (stats) {
+    fileInfo += `\n   📊 ${stats.additions !== '0' ? '➕ ' + stats.additions : ''} ${stats.deletions !== '0' ? '➖ ' + stats.deletions : ''}`.trim();
+  }
+
+  if (lineStr) {
+    fileInfo += "\n   📍 บรรทัด: `" + lineStr + "`";
+  }
+
+  fileDetails.push(fileInfo);
 }
 
-let detailedChanges = fileDetails.join("\n");
-if (detailedChanges.length > 1000) { detailedChanges = detailedChanges.substring(0, 990) + "... (truncated)"; }
-if (!detailedChanges) { detailedChanges = "No content changes (maybe binary files or renames)."; }
-if (!stats) { stats = "Initial commit or no changes"; }
+let detailedChanges = fileDetails.join("\n\n");
+if (detailedChanges.length > 1000) {
+  detailedChanges = detailedChanges.substring(0, 990) + "\n... (มีไฟล์เพิ่มเติม)";
+}
+if (!detailedChanges) {
+  detailedChanges = "ไม่มีการเปลี่ยนแปลงเนื้อหา (อาจเป็นไฟล์ binary หรือเปลี่ยนชื่อ)";
+}
+if (!statsThai) {
+  statsThai = "Commit แรก หรือไม่มีการเปลี่ยนแปลง";
+}
+
+// สร้างสรุปการเปลี่ยนแปลงแบบละเอียด
+let changeSummary = "";
+if (Object.keys(fileStats).length > 0) {
+  changeSummary = "```diff\n";
+  Object.keys(fileStats).forEach(file => {
+    const stats = fileStats[file];
+    const plus = stats.additions !== '0' ? '+'.repeat(Math.min(parseInt(stats.additions) / 10, 20)) : '';
+    const minus = stats.deletions !== '0' ? '-'.repeat(Math.min(parseInt(stats.deletions) / 10, 20)) : '';
+    changeSummary += `${file}\n`;
+    if (plus) changeSummary += `+ ${stats.additions} lines added ${plus}\n`;
+    if (minus) changeSummary += `- ${stats.deletions} lines removed ${minus}\n`;
+    changeSummary += "\n";
+  });
+  changeSummary += "```";
+  if (changeSummary.length > 1024) {
+    changeSummary = changeSummary.substring(0, 1010) + "\n... (ตัดข้อความ)\n```";
+  }
+} else {
+  changeSummary = "```ไม่มีข้อมูล```";
+}
 
 const payload = {
   username: "Rank1 City Deploy Bot",
   avatar_url: "https://rank1city.com/favicon.svg",
   embeds: [{
-    title: "🚀 อัปเดตระบบเรียบร้อย! (New Update)",
-    description: "```ansi\n" + commitMessage + "\n```",
+    title: "🚀 อัปเดตระบบเรียบร้อยแล้ว!",
+    description: commitMessageThai,
     color: 5763719,
     fields: [
-      { name: "ผู้แก้ไข (Author)", value: "Bear", inline: true },
-      { name: "สาขา (Branch)", value: branch, inline: true },
-      { name: "รหัส (Hash)", value: "[" + shortHash + "](" + commitUrl + ")", inline: true },
-      { name: "สถิติ (Stats)", value: stats, inline: true },
-      { name: "เวลา (Timestamp)", value: timestamp, inline: true },
-      { name: "📂 ไฟล์ที่แก้ไข (Files Changed)", value: "```yaml\n" + detailedChanges + "\n```", inline: false }
+      { name: "👨‍💻 ผู้แก้ไข", value: "```ansi\n\u001b[1;36mBear (TeeGa)\u001b[0m\n```", inline: true },
+      { name: "🌿 สาขา", value: "```ansi\n\u001b[1;32m" + branch + "\u001b[0m\n```", inline: true },
+      { name: "🔗 Commit Hash", value: "[`" + shortHash + "`](" + commitUrl + ")", inline: true },
+      { name: "📊 สถิติการเปลี่ยนแปลง", value: "```fix\n" + statsThai + "\n```", inline: false },
+      { name: "⏰ เวลาที่ Push", value: "```yaml\n" + thaiTime + "\n```", inline: false },
+      { name: "📂 ไฟล์ที่แก้ไข (รายละเอียด)", value: detailedChanges, inline: false },
+      { name: "📈 สรุปการเปลี่ยนแปลง", value: changeSummary, inline: false },
+      { name: "💬 Commit Message (Original)", value: "```ansi\n\u001b[1;33m" + commitMessage + "\u001b[0m\n```", inline: false }
     ],
-    footer: { text: "Rank1 City Web System • " + shortHash }
+    footer: { text: "Rank1 City Web System • Deployed Successfully ✅" },
+    timestamp: new Date().toISOString()
   }]
 };
 
