@@ -482,7 +482,7 @@ export default function AdminDashboard() {
                                                     )}
                                                 </div>
                                                 <div>
-                                                    <h2 className="text-3xl font-bold">{selectedUser.discord_name || 'Unknown User'}</h2>
+                                                    <DialogTitle className="text-3xl font-bold">{selectedUser.discord_name || 'Unknown User'}</DialogTitle>
                                                     <div className="flex items-center gap-2 mt-2 text-white/80 font-mono bg-black/20 px-3 py-1 rounded-full w-fit">
                                                         <Hash className="h-4 w-4" />
                                                         {selectedUser.discord_id}
