@@ -25,7 +25,7 @@ export async function POST(request) {
 
         const discordId = session.user.id;
         const body = await request.json();
-        const { action, name, familyCode } = body; // action: 'create' | 'join'
+        const { action, name, familyCode, logoUrl } = body; // action: 'create' | 'join' | 'update_logo'
 
         const connection = await pool.getConnection();
         await connection.beginTransaction();
@@ -46,6 +46,20 @@ export async function POST(request) {
                 throw new Error('คุณอยู่ในแก๊งแล้ว ไม่สามารถเข้าร่วมครอบครัวได้');
             }
 
+            if (action === 'update_logo') {
+                if (!userCheck[0].family_id) throw new Error('You are not in a family');
+
+                // Verify Leader
+                const [family] = await connection.query('SELECT leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
+                if (family[0].leader_discord_id !== discordId) {
+                    throw new Error('Only the leader can update the logo');
+                }
+
+                await connection.query('UPDATE families SET logo_url = ? WHERE id = ?', [logoUrl, userCheck[0].family_id]);
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'Logo updated' });
+            }
+
             if (userCheck[0].family_id) {
                 throw new Error('You are already in a family');
             }
@@ -58,8 +72,8 @@ export async function POST(request) {
 
                 // Insert Family
                 const [result] = await connection.query(
-                    'INSERT INTO families (name, family_code, leader_discord_id, member_count) VALUES (?, ?, ?, 1)',
-                    [name, newFamilyCode, discordId]
+                    'INSERT INTO families (name, family_code, leader_discord_id, member_count, logo_url) VALUES (?, ?, ?, 1, ?)',
+                    [name, newFamilyCode, discordId, logoUrl || null]
                 );
                 const familyId = result.insertId;
 
@@ -124,7 +138,7 @@ export async function GET(request) {
 
         // Get User's Family Info
         const [rows] = await pool.query(`
-            SELECT f.name, f.family_code, f.member_count, f.max_members, f.leader_discord_id
+            SELECT f.name, f.family_code, f.member_count, f.max_members, f.leader_discord_id, f.logo_url
             FROM preregistrations p
             JOIN families f ON p.family_id = f.id
             WHERE p.discord_id = ?

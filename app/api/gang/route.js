@@ -25,7 +25,7 @@ export async function POST(request) {
 
         const discordId = session.user.id;
         const body = await request.json();
-        const { action, name, gangCode } = body; // action: 'create' | 'join'
+        const { action, name, gangCode, logoUrl } = body; // action: 'create' | 'join' | 'update_logo'
 
         const connection = await pool.getConnection();
         await connection.beginTransaction();
@@ -46,6 +46,20 @@ export async function POST(request) {
                 throw new Error('คุณอยู่ในครอบครัวแล้ว ไม่สามารถเข้าร่วมแก๊งได้');
             }
 
+            if (action === 'update_logo') {
+                if (!userCheck[0].gang_id) throw new Error('You are not in a gang');
+
+                // Verify Leader
+                const [gang] = await connection.query('SELECT leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
+                if (gang[0].leader_discord_id !== discordId) {
+                    throw new Error('Only the leader can update the logo');
+                }
+
+                await connection.query('UPDATE gangs SET logo_url = ? WHERE id = ?', [logoUrl, userCheck[0].gang_id]);
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'Logo updated' });
+            }
+
             if (userCheck[0].gang_id) {
                 throw new Error('You are already in a gang');
             }
@@ -58,8 +72,8 @@ export async function POST(request) {
 
                 // Insert Gang
                 const [result] = await connection.query(
-                    'INSERT INTO gangs (name, gang_code, leader_discord_id, member_count) VALUES (?, ?, ?, 1)',
-                    [name, newGangCode, discordId]
+                    'INSERT INTO gangs (name, gang_code, leader_discord_id, member_count, logo_url) VALUES (?, ?, ?, 1, ?)',
+                    [name, newGangCode, discordId, logoUrl || null]
                 );
                 const gangId = result.insertId;
 
@@ -124,7 +138,7 @@ export async function GET(request) {
 
         // Get User's Gang Info
         const [rows] = await pool.query(`
-            SELECT g.name, g.gang_code, g.member_count, g.max_members, g.leader_discord_id
+            SELECT g.name, g.gang_code, g.member_count, g.max_members, g.leader_discord_id, g.logo_url
             FROM preregistrations p
             JOIN gangs g ON p.gang_id = g.id
             WHERE p.discord_id = ?

@@ -105,10 +105,10 @@ export default function PreRegisterDashboard({ userData }) {
                         )}
 
                         {activeTab === 'gang' && (
-                            <GangManager />
+                            <GangManager userData={localUserData} />
                         )}
                         {activeTab === 'family' && (
-                            <FamilyManager />
+                            <FamilyManager userData={localUserData} />
                         )}
 
                     </motion.div>
