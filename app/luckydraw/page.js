@@ -82,10 +82,10 @@ export default function LuckyDrawPage() {
                 <div className="flex-1 container max-w-7xl mx-auto py-8 px-4">
                     {/* Header */}
                     <div className="relative text-center mb-10 space-y-2">
-                        <div className="absolute right-0 top-0 hidden md:block">
+                        <div className="absolute right-0 top-0 hidden md:block z-50">
                             <DrawHistory refreshTrigger={refreshHistory} />
                         </div>
-                        <div className="md:hidden absolute right-0 top-0">
+                        <div className="md:hidden absolute right-0 top-0 z-50">
                             <DrawHistory refreshTrigger={refreshHistory} />
                         </div>
 

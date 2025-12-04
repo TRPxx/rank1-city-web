@@ -40,11 +40,9 @@ export default function DrawHistory({ refreshTrigger }) {
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogTrigger asChild>
-                <Button variant="outline" size="sm" className="gap-2 bg-black/40 border-white/10 hover:bg-white/10 text-white">
-                    <History className="w-4 h-4" />
-                    ประวัติการสุ่ม
-                </Button>
+            <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 h-9 px-3 gap-2 bg-black/40 border border-white/10 hover:bg-white/10 text-white">
+                <History className="w-4 h-4" />
+                ประวัติการสุ่ม
             </DialogTrigger>
             <DialogContent className="sm:max-w-md bg-zinc-900 border-white/10 text-white">
                 <DialogHeader>
