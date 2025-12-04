@@ -46,8 +46,10 @@ export default function PrizeShowcase() {
     return (
         <div className="space-y-4">
             <div className="flex items-center gap-2 mb-4">
-                <Crown className="w-5 h-5 text-yellow-500" />
-                <h3 className="text-lg font-bold text-white">รางวัลใหญ่ (Jackpot)</h3>
+                <div className="p-2 bg-primary/10 rounded-lg">
+                    <Crown className="w-5 h-5 text-primary" />
+                </div>
+                <h3 className="text-lg font-bold text-foreground">รางวัลใหญ่ (Jackpot)</h3>
             </div>
 
             <div className="grid grid-cols-1 gap-4">
@@ -57,19 +59,19 @@ export default function PrizeShowcase() {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.1 }}
-                        className={`relative group overflow-hidden rounded-2xl border p-4 transition-all hover:scale-[1.02] ${prize.rarity === 'LEGENDARY'
-                                ? 'bg-gradient-to-br from-yellow-950/40 to-black/60 border-yellow-500/30 hover:border-yellow-500/60 hover:shadow-[0_0_20px_rgba(234,179,8,0.2)]'
-                                : 'bg-gradient-to-br from-purple-950/40 to-black/60 border-purple-500/30 hover:border-purple-500/60 hover:shadow-[0_0_20px_rgba(168,85,247,0.2)]'
+                        className={`relative group overflow-hidden rounded-2xl border p-4 transition-all hover:scale-[1.02] bg-card/50 hover:bg-card ${prize.rarity === 'LEGENDARY'
+                                ? 'border-yellow-500/20 hover:border-yellow-500/50 hover:shadow-[0_0_20px_rgba(234,179,8,0.1)]'
+                                : 'border-purple-500/20 hover:border-purple-500/50 hover:shadow-[0_0_20px_rgba(168,85,247,0.1)]'
                             }`}
                     >
                         {/* Background Glow Effect */}
-                        <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity ${prize.rarity === 'LEGENDARY' ? 'bg-yellow-500' : 'bg-purple-500'
+                        <div className={`absolute -right-10 -top-10 w-32 h-32 rounded-full blur-3xl opacity-10 group-hover:opacity-20 transition-opacity ${prize.rarity === 'LEGENDARY' ? 'bg-yellow-500' : 'bg-purple-500'
                             }`} />
 
                         <div className="flex items-center gap-4 relative z-10">
-                            <div className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border-2 shadow-lg ${prize.rarity === 'LEGENDARY'
-                                    ? 'bg-yellow-500/10 border-yellow-500/50 text-yellow-500'
-                                    : 'bg-purple-500/10 border-purple-500/50 text-purple-500'
+                            <div className={`flex h-16 w-16 shrink-0 items-center justify-center rounded-xl border-2 shadow-sm ${prize.rarity === 'LEGENDARY'
+                                    ? 'bg-yellow-500/5 border-yellow-500/30 text-yellow-500'
+                                    : 'bg-purple-500/5 border-purple-500/30 text-purple-500'
                                 }`}>
                                 {prize.image ? (
                                     <Image src={prize.image} alt={prize.name} width={64} height={64} className="object-contain" />
@@ -80,10 +82,10 @@ export default function PrizeShowcase() {
 
                             <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1">
-                                    <h4 className={`font-bold truncate ${prize.rarity === 'LEGENDARY' ? 'text-yellow-400' : 'text-purple-400'
+                                    <h4 className={`font-bold truncate ${prize.rarity === 'LEGENDARY' ? 'text-yellow-600 dark:text-yellow-400' : 'text-purple-600 dark:text-purple-400'
                                         }`}>{prize.name}</h4>
                                     {prize.rarity === 'LEGENDARY' && (
-                                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-yellow-500 text-black animate-pulse">
+                                        <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-yellow-500/10 text-yellow-600 dark:text-yellow-400 border border-yellow-500/20 animate-pulse">
                                             SSR
                                         </span>
                                     )}
