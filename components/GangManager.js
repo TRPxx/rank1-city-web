@@ -9,10 +9,11 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from 'sonner';
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Shield, LogOut, Settings, Search, Filter, Trophy, Loader2, Hexagon, ChevronDown, Copy, Users } from 'lucide-react';
+import { Shield, LogOut, Settings, Search, Filter, Trophy, Loader2, Hexagon, ChevronDown, Copy, Users, ArrowRight, Plus, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function GangManager({ userData }) {
@@ -29,14 +30,14 @@ export default function GangManager({ userData }) {
     const [logoUrl, setLogoUrl] = useState('');
     const [isEditingLogo, setIsEditingLogo] = useState(false);
 
-    // Theme Configuration (Royal Blue)
+    // Theme Configuration (Amber/Orange)
     const theme = {
-        from: 'from-blue-600',
-        to: 'to-indigo-600',
-        text: 'text-blue-400',
-        bg: 'bg-blue-500',
-        border: 'border-blue-500/20',
-        ring: 'ring-blue-500',
+        from: 'from-amber-600',
+        to: 'to-orange-600',
+        text: 'text-amber-400',
+        bg: 'bg-amber-500',
+        border: 'border-amber-500/20',
+        ring: 'ring-amber-500',
         glass: 'bg-zinc-900/60 backdrop-blur-md border-white/10'
     };
 
@@ -156,77 +157,102 @@ export default function GangManager({ userData }) {
 
     if (!gang) {
         return (
-            <div className="max-w-4xl mx-auto p-6">
-                <div className="grid md:grid-cols-2 gap-8 items-center">
-                    <div className="space-y-6">
-                        <div className="relative">
-                            <div className={`absolute -inset-1 bg-gradient-to-r ${theme.from} ${theme.to} rounded-2xl blur opacity-25`}></div>
-                            <div className="relative bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
-                                <h1 className="text-4xl font-bold text-white mb-2">Create Your Legacy</h1>
-                                <p className="text-zinc-400 mb-8">Establish your own gang, recruit members, and dominate the streets of Rank1 City.</p>
+            <div className="h-full w-full p-4 lg:p-8 flex items-center justify-center">
+                <div className="w-full h-full max-h-[800px] overflow-hidden rounded-[2rem] border border-border/50 bg-background shadow-2xl grid lg:grid-cols-2">
 
-                                <form onSubmit={handleCreateGang} className="space-y-4">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-zinc-300">Gang Name</label>
-                                        <Input
-                                            placeholder="e.g. Peaky Blinders"
-                                            value={createName}
-                                            onChange={(e) => setCreateName(e.target.value)}
-                                            className="bg-black/50 border-zinc-700 focus:border-blue-500"
-                                            required
-                                        />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium text-zinc-300">Logo URL (Optional)</label>
-                                        <Input
-                                            placeholder="https://..."
-                                            value={createLogo}
-                                            onChange={(e) => setCreateLogo(e.target.value)}
-                                            className="bg-black/50 border-zinc-700 focus:border-blue-500"
-                                        />
-                                    </div>
-                                    <Button
-                                        type="submit"
-                                        className={`w-full bg-gradient-to-r ${theme.from} ${theme.to} hover:opacity-90`}
-                                        disabled={isCreating}
-                                    >
-                                        {isCreating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Shield className="w-4 h-4 mr-2" />}
-                                        Create Gang
-                                    </Button>
-                                </form>
-                            </div>
+                    {/* Left Side: Hero Section */}
+                    <div className="relative hidden lg:flex flex-col justify-between bg-zinc-900 p-10 text-white dark:border-r">
+                        <div className="absolute inset-0 bg-[url('/images/gang-hero.png')] bg-cover bg-center opacity-40" />
+                        <div className="relative z-20 flex items-center text-lg font-medium">
+                            <Shield className="mr-2 h-6 w-6 text-amber-500" />
+                            Rank1 City Gangs
+                        </div>
+                        <div className="relative z-20 mt-auto">
+                            <blockquote className="space-y-2">
+                                <p className="text-lg">
+                                    &ldquo;อำนาจไม่ใช่สิ่งที่ใครจะมอบให้ คุณต้องคว้ามันมาเอง สร้างตำนาน รวบรวมพรรคพวก และปกครองถนนแห่ง Rank1 City&rdquo;
+                                </p>
+                                <footer className="text-sm text-zinc-400">เดอะ ก็อดฟาเธอร์</footer>
+                            </blockquote>
                         </div>
                     </div>
 
-                    <div className="space-y-6">
-                        <div className="relative">
-                            <div className="absolute -inset-1 bg-gradient-to-r from-zinc-700 to-zinc-600 rounded-2xl blur opacity-25"></div>
-                            <div className="relative bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
-                                <h2 className="text-2xl font-bold text-white mb-2">Join Existing Gang</h2>
-                                <p className="text-zinc-400 mb-8">Have an invite code? Enter it below to join your allies.</p>
+                    {/* Right Side: Form Section */}
+                    <div className="flex flex-col justify-center p-8 lg:p-12 bg-background/50 backdrop-blur-sm">
+                        <div className="mx-auto w-full max-w-[400px] flex flex-col justify-center space-y-6">
+                            <div className="flex flex-col space-y-2 text-center">
+                                <h1 className="text-3xl font-bold tracking-tight">ลงทะเบียนล่วงหน้า สำหรับแก๊ง</h1>
+                                <p className="text-sm text-muted-foreground">
+                                    กรอกรหัสเชิญเพื่อเข้าร่วม หรือก่อตั้งองค์กรใหม่
+                                </p>
+                            </div>
 
-                                <form onSubmit={handleJoinGang} className="space-y-4">
+                            <Tabs defaultValue="join" className="w-full">
+                                <TabsList className="grid w-full grid-cols-2 mb-6">
+                                    <TabsTrigger value="join">เข้าร่วมแก๊ง</TabsTrigger>
+                                    <TabsTrigger value="create">สร้างแก๊ง</TabsTrigger>
+                                </TabsList>
+
+                                <TabsContent value="join" className="space-y-4">
                                     <div className="space-y-2">
-                                        <label className="text-sm font-medium text-zinc-300">Invite Code</label>
+                                        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                            รหัสเชิญ
+                                        </label>
                                         <Input
-                                            placeholder="e.g. G-1234"
+                                            placeholder="G-XXXXXX"
                                             value={joinCode}
-                                            onChange={(e) => setJoinCode(e.target.value)}
-                                            className="bg-black/50 border-zinc-700 focus:border-zinc-500"
-                                            required
+                                            onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
+                                            className="font-mono uppercase text-center tracking-widest h-11"
                                         />
                                     </div>
                                     <Button
-                                        type="submit"
-                                        variant="outline"
-                                        className="w-full border-zinc-700 hover:bg-zinc-800 text-white"
-                                        disabled={isJoining}
+                                        className="w-full h-11 bg-amber-600 hover:bg-amber-700 text-white"
+                                        onClick={handleJoinGang}
+                                        disabled={!joinCode || isJoining}
                                     >
-                                        {isJoining ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Users className="w-4 h-4 mr-2" />}
-                                        Join Gang
+                                        {isJoining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Users className="mr-2 h-4 w-4" />}
+                                        เข้าร่วมแก๊ง
                                     </Button>
-                                </form>
-                            </div>
+                                </TabsContent>
+
+                                <TabsContent value="create" className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                                            ชื่อแก๊ง
+                                        </label>
+                                        <Input
+                                            placeholder="ตั้งชื่อแก๊งของคุณ"
+                                            value={createName}
+                                            onChange={(e) => setCreateName(e.target.value)}
+                                            maxLength={20}
+                                            className="h-11"
+                                        />
+                                        <p className="text-[10px] text-muted-foreground text-right">
+                                            {createName.length}/20
+                                        </p>
+                                    </div>
+                                    <Button
+                                        className="w-full h-11 bg-amber-600 hover:bg-amber-700 text-white"
+                                        onClick={handleCreateGang}
+                                        disabled={!createName || isCreating}
+                                    >
+                                        {isCreating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
+                                        สร้างแก๊ง
+                                    </Button>
+                                </TabsContent>
+                            </Tabs>
+
+                            <p className="px-8 text-center text-sm text-muted-foreground">
+                                การสร้างแก๊งถือว่าคุณยอมรับ{" "}
+                                <span className="underline underline-offset-4 hover:text-primary cursor-pointer">
+                                    กฎของเซิร์ฟเวอร์
+                                </span>{" "}
+                                และ{" "}
+                                <span className="underline underline-offset-4 hover:text-primary cursor-pointer">
+                                    นโยบายแก๊ง
+                                </span>
+                                ของเรา
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -235,7 +261,7 @@ export default function GangManager({ userData }) {
     }
 
     return (
-        <div className="max-w-7xl mx-auto pt-20 px-6 pb-6 font-sans">
+        <div className="max-w-7xl mx-auto pt-4 px-6 pb-6 font-sans">
             <div className="grid grid-cols-12 gap-8">
 
                 {/* Left Sidebar (Profile) */}
@@ -514,7 +540,7 @@ export default function GangManager({ userData }) {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className={`${theme.glass} rounded-[2rem] overflow-hidden border shadow-xl flex flex-col h-[600px]`}
+                        className={`${theme.glass} rounded-[2rem] overflow-hidden border shadow-xl flex flex-col h-[450px]`}
                     >
                         {/* Toolbar */}
                         <div className="p-6 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
@@ -543,7 +569,7 @@ export default function GangManager({ userData }) {
                         {/* Content with ScrollArea */}
                         <div className="flex-1 bg-black/20 overflow-hidden relative">
                             <ScrollArea className="h-full w-full">
-                                <div className="p-6">
+                                <div className="p-6 pb-12">
                                     <div className="space-y-2">
                                         <div className="grid grid-cols-12 text-xs font-bold text-zinc-500 uppercase tracking-wider px-4 pb-2 sticky top-0 bg-black/40 backdrop-blur-md z-10 rounded-lg mb-2 py-2">
                                             <div className="col-span-6 md:col-span-6">Member</div>
