@@ -16,7 +16,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { Gamepad2, ChevronDown, Globe, Menu, X, User, Gift, Newspaper, LogOut, LayoutDashboard, Shield, Star } from 'lucide-react';
+import { Gamepad2, ChevronDown, Globe, Menu, X, User, Gift, Newspaper, LogOut, LayoutDashboard, Shield, Star, Ticket } from 'lucide-react';
 import { AnimatePresence, motion } from 'framer-motion';
 import staticConfig from '@/lib/config';
 import { useSession, signIn, signOut } from "next-auth/react";
@@ -48,7 +48,12 @@ export default function Navbar({ siteConfig: propConfig }) {
                     {/* Activity & Gachapon Link (Simple Style) */}
                     <Link href="/preregister" className="flex items-center gap-2 transition-colors hover:text-primary">
                         <Gift className="w-4 h-4" />
-                        หน้ากิจกรรม & กาชาปอง
+                        ลงทะเบียนล่วงหน้า
+                    </Link>
+
+                    <Link href="/luckydraw" className="flex items-center gap-2 transition-colors hover:text-primary">
+                        <Ticket className="w-4 h-4" />
+                        สุ่มรางวัล
                     </Link>
 
                     {/* News Link */}
@@ -171,7 +176,12 @@ export default function Navbar({ siteConfig: propConfig }) {
                             {/* Mobile Custom Menu */}
                             <Link href="/preregister" className="flex items-center gap-2 text-sm font-medium hover:text-primary px-2 py-1" onClick={toggleMobileMenu}>
                                 <Gift className="w-4 h-4" />
-                                หน้ากิจกรรม & กาชาปอง
+                                ลงทะเบียนล่วงหน้า
+                            </Link>
+
+                            <Link href="/luckydraw" className="flex items-center gap-2 text-sm font-medium hover:text-primary px-2 py-1" onClick={toggleMobileMenu}>
+                                <Ticket className="w-4 h-4" />
+                                สุ่มรางวัล
                             </Link>
 
                             <Link href="/news" className="flex items-center gap-2 text-sm font-medium hover:text-primary px-2 py-1" onClick={toggleMobileMenu}>

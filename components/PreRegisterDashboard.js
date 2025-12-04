@@ -12,7 +12,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Components
 import InviteEarn from './InviteEarn';
-import LuckyDraw from './LuckyDraw';
+
 import GangManager from './GangManager';
 import FamilyManager from './FamilyManager';
 
@@ -31,17 +31,7 @@ export default function PreRegisterDashboard({ userData }) {
         setMounted(true);
     }, []);
 
-    const handleLuckyDrawComplete = async () => {
-        try {
-            const res = await fetch('/api/preregister');
-            const data = await res.json();
-            if (data.isRegistered) {
-                setLocalUserData(data);
-            }
-        } catch (error) {
-            console.error("Failed to refresh user data", error);
-        }
-    };
+
 
     if (!mounted) return null;
 
@@ -66,17 +56,7 @@ export default function PreRegisterDashboard({ userData }) {
                             ชวนเพื่อน
                         </Button>
 
-                        {PREREGISTER_CONFIG.features.enableLuckyDraw && (
-                            <Button
-                                variant={activeTab === 'luckydraw' ? 'secondary' : 'ghost'}
-                                size="sm"
-                                onClick={() => setActiveTab('luckydraw')}
-                                className={`gap-2 rounded-xl transition-all ${activeTab === 'luckydraw' ? 'bg-background shadow-sm' : 'hover:bg-background/50'}`}
-                            >
-                                <Ticket className="w-4 h-4" />
-                                สุ่มรางวัล
-                            </Button>
-                        )}
+
 
                         {PREREGISTER_CONFIG.features.enableGang && (
                             <>
@@ -123,12 +103,7 @@ export default function PreRegisterDashboard({ userData }) {
                                 inviteCount={localUserData?.inviteCount}
                             />
                         )}
-                        {activeTab === 'luckydraw' && (
-                            <LuckyDraw
-                                ticketCount={localUserData?.ticketCount}
-                                onDrawComplete={handleLuckyDrawComplete}
-                            />
-                        )}
+
                         {activeTab === 'gang' && (
                             <GangManager />
                         )}
@@ -151,15 +126,7 @@ export default function PreRegisterDashboard({ userData }) {
                         <span className="text-[10px] font-medium">เพื่อน</span>
                     </button>
 
-                    {PREREGISTER_CONFIG.features.enableLuckyDraw && (
-                        <button
-                            onClick={() => setActiveTab('luckydraw')}
-                            className={`flex flex-col items-center justify-center p-2 rounded-xl w-full transition-all ${activeTab === 'luckydraw' ? 'bg-white/10 text-white' : 'text-slate-400 hover:text-white'}`}
-                        >
-                            <Ticket className="w-5 h-5 mb-1" />
-                            <span className="text-[10px] font-medium">สุ่ม</span>
-                        </button>
-                    )}
+
 
                     {PREREGISTER_CONFIG.features.enableGang && (
                         <>
