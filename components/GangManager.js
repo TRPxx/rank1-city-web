@@ -28,7 +28,20 @@ export default function GangManager({ userData }) {
     const [isCreating, setIsCreating] = useState(false);
     const [isJoining, setIsJoining] = useState(false);
     const [logoUrl, setLogoUrl] = useState('');
+
     const [isEditingLogo, setIsEditingLogo] = useState(false);
+    const [isLeaving, setIsLeaving] = useState(false);
+    const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
+    const [isDissolving, setIsDissolving] = useState(false);
+    const [settingsName, setSettingsName] = useState('');
+    const [settingsMotd, setSettingsMotd] = useState('');
+
+    useEffect(() => {
+        if (gang) {
+            setSettingsName(gang.name);
+            setSettingsMotd(gang.motd || '');
+        }
+    }, [gang]);
 
     // Theme Configuration (Primary/Blue - Matching InviteEarn)
     const theme = {
@@ -137,6 +150,81 @@ export default function GangManager({ userData }) {
             toast.error('Failed to update logo');
         } finally {
             setIsEditingLogo(false);
+        }
+    };
+
+    const handleLeaveGang = async () => {
+        if (!confirm('Are you sure you want to leave this gang?')) return;
+        setIsLeaving(true);
+        try {
+            const res = await fetch('/api/gang', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'leave' }),
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                toast.success('Left gang successfully');
+                fetchGangData();
+            } else {
+                toast.error(data.error || 'Failed to leave gang');
+            }
+        } catch (error) {
+            toast.error('Something went wrong');
+        } finally {
+            setIsLeaving(false);
+        }
+    };
+
+    const handleUpdateSettings = async () => {
+        setIsUpdatingSettings(true);
+        try {
+            const res = await fetch('/api/gang', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'update_settings',
+                    name: settingsName,
+                    motd: settingsMotd
+                }),
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                toast.success('Settings updated successfully');
+                fetchGangData();
+            } else {
+                toast.error(data.error || 'Failed to update settings');
+            }
+        } catch (error) {
+            toast.error('Something went wrong');
+        } finally {
+            setIsUpdatingSettings(false);
+        }
+    };
+
+    const handleDissolveGang = async () => {
+        if (!confirm('DANGER: Are you sure you want to dissolve this gang? This action cannot be undone.')) return;
+        setIsDissolving(true);
+        try {
+            const res = await fetch('/api/gang', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'dissolve' }),
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                toast.success('Gang dissolved successfully');
+                fetchGangData();
+            } else {
+                toast.error(data.error || 'Failed to dissolve gang');
+            }
+        } catch (error) {
+            toast.error('Something went wrong');
+        } finally {
+            setIsDissolving(false);
         }
     };
 
@@ -361,20 +449,46 @@ export default function GangManager({ userData }) {
                                         <div className="space-y-4">
                                             <div className="grid gap-2">
                                                 <Label>ชื่อแก๊ง</Label>
-                                                <Input defaultValue={gang.name} className="bg-black/20 border-white/10" />
+                                                <Input
+                                                    value={settingsName}
+                                                    onChange={(e) => setSettingsName(e.target.value)}
+                                                    className="bg-black/20 border-white/10"
+                                                />
                                             </div>
                                             <div className="grid gap-2">
                                                 <Label>ประกาศแก๊ง (MOTD)</Label>
-                                                <Textarea placeholder="เขียนข้อความถึงสมาชิกของคุณ..." className="bg-black/20 border-white/10 min-h-[100px]" />
+                                                <Textarea
+                                                    value={settingsMotd}
+                                                    onChange={(e) => setSettingsMotd(e.target.value)}
+                                                    placeholder="เขียนข้อความถึงสมาชิกของคุณ..."
+                                                    className="bg-black/20 border-white/10 min-h-[100px]"
+                                                />
                                                 <p className="text-xs text-zinc-500">ข้อความนี้จะถูกปักหมุดไว้ด้านบนของแชทสมาชิก</p>
                                             </div>
+                                            <Button
+                                                onClick={handleUpdateSettings}
+                                                disabled={isUpdatingSettings}
+                                                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                                            >
+                                                {isUpdatingSettings ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                                บันทึกการเปลี่ยนแปลง
+                                            </Button>
                                         </div>
                                         <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 space-y-3">
                                             <h4 className="text-red-400 font-bold flex items-center gap-2">
                                                 <Shield className="w-4 h-4" /> เขตอันตราย
                                             </h4>
                                             <p className="text-xs text-zinc-400">การกระทำที่ไม่สามารถย้อนกลับได้</p>
-                                            <Button variant="destructive" size="sm" className="w-full">ยุบแก๊ง</Button>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                className="w-full"
+                                                onClick={handleDissolveGang}
+                                                disabled={isDissolving}
+                                            >
+                                                {isDissolving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                                ยุบแก๊ง
+                                            </Button>
                                         </div>
                                     </div>
                                 </DialogContent>
@@ -428,9 +542,11 @@ export default function GangManager({ userData }) {
                         <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            className={`${theme.glass} p-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-white/5 transition-colors group text-red-400 hover:text-red-300`}
+                            onClick={handleLeaveGang}
+                            disabled={isLeaving}
+                            className={`${theme.glass} p-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-white/5 transition-colors group text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
-                            <LogOut className="w-5 h-5" />
+                            {isLeaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogOut className="w-5 h-5" />}
                             <span className="font-medium">Leave Gang</span>
                         </motion.button>
                     </div>

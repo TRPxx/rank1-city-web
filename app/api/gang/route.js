@@ -112,6 +112,57 @@ export async function POST(request) {
 
                 await connection.commit();
                 return NextResponse.json({ success: true, message: 'Joined gang successfully' });
+
+            } else if (action === 'leave') {
+                if (!userCheck[0].gang_id) throw new Error('You are not in a gang');
+
+                // Check if leader
+                const [gang] = await connection.query('SELECT id, leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
+                if (gang[0].leader_discord_id === discordId) {
+                    throw new Error('Leader cannot leave. You must dissolve the gang.');
+                }
+
+                // Update User
+                await connection.query('UPDATE preregistrations SET gang_id = NULL WHERE discord_id = ?', [discordId]);
+
+                // Update Gang Count
+                await connection.query('UPDATE gangs SET member_count = member_count - 1 WHERE id = ?', [userCheck[0].gang_id]);
+
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'Left gang successfully' });
+
+            } else if (action === 'update_settings') {
+                if (!userCheck[0].gang_id) throw new Error('You are not in a gang');
+
+                const { name, motd } = body;
+
+                // Verify Leader
+                const [gang] = await connection.query('SELECT leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
+                if (gang[0].leader_discord_id !== discordId) {
+                    throw new Error('Only the leader can update settings');
+                }
+
+                await connection.query('UPDATE gangs SET name = ?, motd = ? WHERE id = ?', [name, motd, userCheck[0].gang_id]);
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'Settings updated' });
+
+            } else if (action === 'dissolve') {
+                if (!userCheck[0].gang_id) throw new Error('You are not in a gang');
+
+                // Verify Leader
+                const [gang] = await connection.query('SELECT leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
+                if (gang[0].leader_discord_id !== discordId) {
+                    throw new Error('Only the leader can dissolve the gang');
+                }
+
+                // Remove all members
+                await connection.query('UPDATE preregistrations SET gang_id = NULL WHERE gang_id = ?', [userCheck[0].gang_id]);
+
+                // Delete Gang
+                await connection.query('DELETE FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
+
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'Gang dissolved' });
             }
 
             throw new Error('Invalid action');

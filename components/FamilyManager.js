@@ -28,7 +28,20 @@ export default function FamilyManager({ userData }) {
     const [isCreating, setIsCreating] = useState(false);
     const [isJoining, setIsJoining] = useState(false);
     const [logoUrl, setLogoUrl] = useState('');
+
     const [isEditingLogo, setIsEditingLogo] = useState(false);
+    const [isLeaving, setIsLeaving] = useState(false);
+    const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
+    const [isDissolving, setIsDissolving] = useState(false);
+    const [settingsName, setSettingsName] = useState('');
+    const [settingsMotd, setSettingsMotd] = useState('');
+
+    useEffect(() => {
+        if (family) {
+            setSettingsName(family.name);
+            setSettingsMotd(family.motd || '');
+        }
+    }, [family]);
 
     // Theme Configuration (Primary/Blue - Matching InviteEarn)
     const theme = {
@@ -137,6 +150,81 @@ export default function FamilyManager({ userData }) {
             toast.error('Failed to update logo');
         } finally {
             setIsEditingLogo(false);
+        }
+    };
+
+    const handleLeaveFamily = async () => {
+        if (!confirm('Are you sure you want to leave this family?')) return;
+        setIsLeaving(true);
+        try {
+            const res = await fetch('/api/family', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'leave' }),
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                toast.success('Left family successfully');
+                fetchFamilyData();
+            } else {
+                toast.error(data.error || 'Failed to leave family');
+            }
+        } catch (error) {
+            toast.error('Something went wrong');
+        } finally {
+            setIsLeaving(false);
+        }
+    };
+
+    const handleUpdateSettings = async () => {
+        setIsUpdatingSettings(true);
+        try {
+            const res = await fetch('/api/family', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'update_settings',
+                    name: settingsName,
+                    motd: settingsMotd
+                }),
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                toast.success('Settings updated successfully');
+                fetchFamilyData();
+            } else {
+                toast.error(data.error || 'Failed to update settings');
+            }
+        } catch (error) {
+            toast.error('Something went wrong');
+        } finally {
+            setIsUpdatingSettings(false);
+        }
+    };
+
+    const handleDissolveFamily = async () => {
+        if (!confirm('DANGER: Are you sure you want to dissolve this family? This action cannot be undone.')) return;
+        setIsDissolving(true);
+        try {
+            const res = await fetch('/api/family', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'dissolve' }),
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                toast.success('Family dissolved successfully');
+                fetchFamilyData();
+            } else {
+                toast.error(data.error || 'Failed to dissolve family');
+            }
+        } catch (error) {
+            toast.error('Something went wrong');
+        } finally {
+            setIsDissolving(false);
         }
     };
 
@@ -357,20 +445,46 @@ export default function FamilyManager({ userData }) {
                                         <div className="space-y-4">
                                             <div className="grid gap-2">
                                                 <Label>ชื่อครอบครัว</Label>
-                                                <Input defaultValue={family.name} className="bg-black/20 border-white/10" />
+                                                <Input
+                                                    value={settingsName}
+                                                    onChange={(e) => setSettingsName(e.target.value)}
+                                                    className="bg-black/20 border-white/10"
+                                                />
                                             </div>
                                             <div className="grid gap-2">
                                                 <Label>ประกาศครอบครัว (MOTD)</Label>
-                                                <Textarea placeholder="เขียนข้อความถึงสมาชิกของคุณ..." className="bg-black/20 border-white/10 min-h-[100px]" />
+                                                <Textarea
+                                                    value={settingsMotd}
+                                                    onChange={(e) => setSettingsMotd(e.target.value)}
+                                                    placeholder="เขียนข้อความถึงสมาชิกของคุณ..."
+                                                    className="bg-black/20 border-white/10 min-h-[100px]"
+                                                />
                                                 <p className="text-xs text-zinc-500">ข้อความนี้จะถูกปักหมุดไว้ด้านบนของแชทสมาชิก</p>
                                             </div>
+                                            <Button
+                                                onClick={handleUpdateSettings}
+                                                disabled={isUpdatingSettings}
+                                                className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+                                            >
+                                                {isUpdatingSettings ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                                บันทึกการเปลี่ยนแปลง
+                                            </Button>
                                         </div>
                                         <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 space-y-3">
                                             <h4 className="text-red-400 font-bold flex items-center gap-2">
                                                 <Shield className="w-4 h-4" /> เขตอันตราย
                                             </h4>
                                             <p className="text-xs text-zinc-400">การกระทำที่ไม่สามารถย้อนกลับได้</p>
-                                            <Button variant="destructive" size="sm" className="w-full">ยุบครอบครัว</Button>
+                                            <Button
+                                                variant="destructive"
+                                                size="sm"
+                                                className="w-full"
+                                                onClick={handleDissolveFamily}
+                                                disabled={isDissolving}
+                                            >
+                                                {isDissolving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                                ยุบครอบครัว
+                                            </Button>
                                         </div>
                                     </div>
 
@@ -425,9 +539,11 @@ export default function FamilyManager({ userData }) {
                         <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            className={`${theme.glass} p-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-white/5 transition-colors group text-red-400 hover:text-red-300`}
+                            onClick={handleLeaveFamily}
+                            disabled={isLeaving}
+                            className={`${theme.glass} p-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-white/5 transition-colors group text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed`}
                         >
-                            <LogOut className="w-5 h-5" />
+                            {isLeaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogOut className="w-5 h-5" />}
                             <span className="font-medium">Leave Family</span>
                         </motion.button>
                     </div>

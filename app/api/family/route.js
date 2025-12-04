@@ -112,6 +112,57 @@ export async function POST(request) {
 
                 await connection.commit();
                 return NextResponse.json({ success: true, message: 'Joined family successfully' });
+
+            } else if (action === 'leave') {
+                if (!userCheck[0].family_id) throw new Error('You are not in a family');
+
+                // Check if leader
+                const [family] = await connection.query('SELECT id, leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
+                if (family[0].leader_discord_id === discordId) {
+                    throw new Error('Leader cannot leave. You must dissolve the family.');
+                }
+
+                // Update User
+                await connection.query('UPDATE preregistrations SET family_id = NULL WHERE discord_id = ?', [discordId]);
+
+                // Update Family Count
+                await connection.query('UPDATE families SET member_count = member_count - 1 WHERE id = ?', [userCheck[0].family_id]);
+
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'Left family successfully' });
+
+            } else if (action === 'update_settings') {
+                if (!userCheck[0].family_id) throw new Error('You are not in a family');
+
+                const { name, motd } = body;
+
+                // Verify Leader
+                const [family] = await connection.query('SELECT leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
+                if (family[0].leader_discord_id !== discordId) {
+                    throw new Error('Only the leader can update settings');
+                }
+
+                await connection.query('UPDATE families SET name = ?, motd = ? WHERE id = ?', [name, motd, userCheck[0].family_id]);
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'Settings updated' });
+
+            } else if (action === 'dissolve') {
+                if (!userCheck[0].family_id) throw new Error('You are not in a family');
+
+                // Verify Leader
+                const [family] = await connection.query('SELECT leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
+                if (family[0].leader_discord_id !== discordId) {
+                    throw new Error('Only the leader can dissolve the family');
+                }
+
+                // Remove all members
+                await connection.query('UPDATE preregistrations SET family_id = NULL WHERE family_id = ?', [userCheck[0].family_id]);
+
+                // Delete Family
+                await connection.query('DELETE FROM families WHERE id = ?', [userCheck[0].family_id]);
+
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'Family dissolved' });
             }
 
             throw new Error('Invalid action');
