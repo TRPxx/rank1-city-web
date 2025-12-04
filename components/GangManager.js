@@ -30,15 +30,15 @@ export default function GangManager({ userData }) {
     const [logoUrl, setLogoUrl] = useState('');
     const [isEditingLogo, setIsEditingLogo] = useState(false);
 
-    // Theme Configuration (Amber/Orange)
+    // Theme Configuration (Primary/Blue - Matching InviteEarn)
     const theme = {
-        from: 'from-amber-600',
-        to: 'to-orange-600',
-        text: 'text-amber-400',
-        bg: 'bg-amber-500',
-        border: 'border-amber-500/20',
-        ring: 'ring-amber-500',
-        glass: 'bg-zinc-900/60 backdrop-blur-md border-white/10'
+        from: 'from-blue-600',
+        to: 'to-indigo-600',
+        text: 'text-primary',
+        bg: 'bg-primary',
+        border: 'border-primary/20',
+        ring: 'ring-primary',
+        glass: 'bg-muted/10 backdrop-blur-md border-white/5'
     };
 
     useEffect(() => {
@@ -161,10 +161,10 @@ export default function GangManager({ userData }) {
                 <div className="w-full h-full max-h-[800px] overflow-hidden rounded-[2rem] border border-border/50 bg-background shadow-2xl grid lg:grid-cols-2">
 
                     {/* Left Side: Hero Section */}
-                    <div className="relative hidden lg:flex flex-col justify-between bg-zinc-900 p-10 text-white dark:border-r">
+                    <div className="relative hidden lg:flex flex-col justify-between bg-muted/10 p-10 text-foreground dark:border-r">
                         <div className="absolute inset-0 bg-[url('/images/gang-hero.png')] bg-cover bg-center opacity-40" />
                         <div className="relative z-20 flex items-center text-lg font-medium">
-                            <Shield className="mr-2 h-6 w-6 text-amber-500" />
+                            <Shield className="mr-2 h-6 w-6 text-primary" />
                             Rank1 City Gangs
                         </div>
                         <div className="relative z-20 mt-auto">
@@ -172,7 +172,7 @@ export default function GangManager({ userData }) {
                                 <p className="text-lg">
                                     &ldquo;อำนาจไม่ใช่สิ่งที่ใครจะมอบให้ คุณต้องคว้ามันมาเอง สร้างตำนาน รวบรวมพรรคพวก และปกครองถนนแห่ง Rank1 City&rdquo;
                                 </p>
-                                <footer className="text-sm text-zinc-400">เดอะ ก็อดฟาเธอร์</footer>
+                                <footer className="text-sm text-muted-foreground">เดอะ ก็อดฟาเธอร์</footer>
                             </blockquote>
                         </div>
                     </div>
@@ -206,7 +206,7 @@ export default function GangManager({ userData }) {
                                         />
                                     </div>
                                     <Button
-                                        className="w-full h-11 bg-amber-600 hover:bg-amber-700 text-white"
+                                        className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
                                         onClick={handleJoinGang}
                                         disabled={!joinCode || isJoining}
                                     >
@@ -232,7 +232,7 @@ export default function GangManager({ userData }) {
                                         </p>
                                     </div>
                                     <Button
-                                        className="w-full h-11 bg-amber-600 hover:bg-amber-700 text-white"
+                                        className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
                                         onClick={handleCreateGang}
                                         disabled={!createName || isCreating}
                                     >
@@ -278,7 +278,7 @@ export default function GangManager({ userData }) {
                             <div className={`w-28 h-28 rounded-2xl p-1 bg-gradient-to-br ${theme.from} ${theme.to}`}>
                                 <Avatar className="w-full h-full rounded-xl border-4 border-black/50">
                                     <AvatarImage src={gang.logo_url} className="object-cover" />
-                                    <AvatarFallback className="bg-zinc-900 text-blue-400 text-2xl font-bold">
+                                    <AvatarFallback className="bg-muted text-primary text-2xl font-bold">
                                         {gang.name.substring(0, 2).toUpperCase()}
                                     </AvatarFallback>
                                 </Avatar>
@@ -323,19 +323,19 @@ export default function GangManager({ userData }) {
                             )}
                         </div>
 
-                        <h2 className="text-2xl font-bold text-white mb-1 tracking-tight">{gang.name}</h2>
+                        <h2 className="text-2xl font-bold text-foreground mb-1 tracking-tight">{gang.name}</h2>
                         <div
                             onClick={copyInviteCode}
-                            className="flex items-center justify-center gap-2 text-zinc-400 text-sm mb-6 bg-black/20 py-1 px-3 rounded-full mx-auto w-fit border border-white/5 cursor-pointer hover:bg-black/40 transition-colors"
+                            className="flex items-center justify-center gap-2 text-muted-foreground text-sm mb-6 bg-background/30 py-1 px-3 rounded-full mx-auto w-fit border border-white/5 cursor-pointer hover:bg-background/50 transition-colors"
                         >
                             <span className="font-mono">{gang.invite_code}</span>
                             <Copy className="w-3 h-3" />
                         </div>
 
                         <div className="grid grid-cols-1 gap-3 mb-6">
-                            <div className="bg-black/20 rounded-xl p-3 border border-white/5">
-                                <div className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Members</div>
-                                <div className="text-lg font-bold">{members.length}</div>
+                            <div className="bg-background/30 rounded-xl p-3 border border-white/5">
+                                <div className="text-[10px] text-muted-foreground uppercase tracking-wider mb-1">Members</div>
+                                <div className="text-lg font-bold text-foreground">{members.length}</div>
                             </div>
                         </div>
 
@@ -452,14 +452,14 @@ export default function GangManager({ userData }) {
                                             <Trophy className="w-6 h-6" />
                                         </div>
                                         <div className="text-left">
-                                            <h3 className="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors">รางวัลแก๊ง</h3>
-                                            <p className="text-zinc-400 text-sm">เลเวล {gang.level || 1} • {members.length}/{gang.max_members || 25} สมาชิก</p>
+                                            <h3 className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">รางวัลแก๊ง</h3>
+                                            <p className="text-muted-foreground text-sm">เลเวล {gang.level || 1} • {members.length}/{gang.max_members || 25} สมาชิก</p>
                                         </div>
                                     </div>
                                     <div className="flex items-center gap-3 pr-2">
                                         <div className="text-right hidden sm:block">
-                                            <div className="text-xs text-zinc-500 uppercase font-bold">รางวัลถัดไป</div>
-                                            <div className="text-sm font-medium text-white">15 สมาชิก</div>
+                                            <div className="text-xs text-muted-foreground uppercase font-bold">รางวัลถัดไป</div>
+                                            <div className="text-sm font-medium text-foreground">15 สมาชิก</div>
                                         </div>
                                         <ChevronDown className="w-5 h-5 text-zinc-500 -rotate-90 group-hover:translate-x-1 transition-transform" />
                                     </div>
@@ -545,11 +545,11 @@ export default function GangManager({ userData }) {
                         {/* Toolbar */}
                         <div className="p-6 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
                             <div>
-                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                <h3 className="text-xl font-bold text-foreground flex items-center gap-2">
                                     Team Members
-                                    <Badge variant="secondary" className="bg-white/10 text-zinc-300 hover:bg-white/20 border-0">{members.length}</Badge>
+                                    <Badge variant="secondary" className="bg-background/30 text-muted-foreground hover:bg-background/50 border-0">{members.length}</Badge>
                                 </h3>
-                                <p className="text-zinc-500 text-sm mt-1">Gang hierarchy and roster</p>
+                                <p className="text-muted-foreground text-sm mt-1">Gang hierarchy and roster</p>
                             </div>
                             <div className="flex items-center gap-3">
                                 <div className="relative">
@@ -567,11 +567,11 @@ export default function GangManager({ userData }) {
                         </div>
 
                         {/* Content with ScrollArea */}
-                        <div className="flex-1 bg-black/20 overflow-hidden relative">
+                        <div className="flex-1 bg-background/20 overflow-hidden relative">
                             <ScrollArea className="h-full w-full">
                                 <div className="p-6 pb-12">
                                     <div className="space-y-2">
-                                        <div className="grid grid-cols-12 text-xs font-bold text-zinc-500 uppercase tracking-wider px-4 pb-2 sticky top-0 bg-black/40 backdrop-blur-md z-10 rounded-lg mb-2 py-2">
+                                        <div className="grid grid-cols-12 text-xs font-bold text-muted-foreground uppercase tracking-wider px-4 pb-2 sticky top-0 bg-background/40 backdrop-blur-md z-10 rounded-lg mb-2 py-2">
                                             <div className="col-span-6 md:col-span-6">Member</div>
                                             <div className="col-span-4 md:col-span-4">Role</div>
                                             <div className="col-span-2 md:col-span-2 text-right">Joined</div>
@@ -595,16 +595,16 @@ export default function GangManager({ userData }) {
                                                             </Avatar>
                                                         </div>
                                                         <div className="overflow-hidden">
-                                                            <div className="font-bold text-zinc-200 group-hover:text-white transition-colors truncate">{m.discord_name}</div>
-                                                            <div className="text-xs text-zinc-500 font-mono truncate">ID: {m.discord_id}</div>
+                                                            <div className="font-bold text-foreground group-hover:text-primary transition-colors truncate">{m.discord_name}</div>
+                                                            <div className="text-xs text-muted-foreground font-mono truncate">ID: {m.discord_id}</div>
                                                         </div>
                                                     </div>
                                                     <div className="col-span-4 md:col-span-4">
-                                                        <Badge variant="outline" className={`${m.is_leader ? `${theme.bg}/20 ${theme.text} ${theme.border}` : 'bg-zinc-800/50 text-zinc-400 border-zinc-700/50'}`}>
+                                                        <Badge variant="outline" className={`${m.is_leader ? `${theme.bg}/20 ${theme.text} ${theme.border}` : 'bg-background/30 text-muted-foreground border-white/5'}`}>
                                                             {m.is_leader ? 'Leader' : 'Member'}
                                                         </Badge>
                                                     </div>
-                                                    <div className="col-span-2 md:col-span-2 text-right text-zinc-500 text-xs font-mono">
+                                                    <div className="col-span-2 md:col-span-2 text-right text-muted-foreground text-xs font-mono">
                                                         {new Date(m.joined_at).toLocaleDateString()}
                                                     </div>
                                                 </motion.div>
