@@ -154,7 +154,6 @@ export default function FamilyManager({ userData }) {
     };
 
     const handleLeaveFamily = async () => {
-        if (!confirm('Are you sure you want to leave this family?')) return;
         setIsLeaving(true);
         try {
             const res = await fetch('/api/family', {
@@ -205,7 +204,6 @@ export default function FamilyManager({ userData }) {
     };
 
     const handleDissolveFamily = async () => {
-        if (!confirm('DANGER: Are you sure you want to dissolve this family? This action cannot be undone.')) return;
         setIsDissolving(true);
         try {
             const res = await fetch('/api/family', {
@@ -475,16 +473,44 @@ export default function FamilyManager({ userData }) {
                                                 <Shield className="w-4 h-4" /> เขตอันตราย
                                             </h4>
                                             <p className="text-xs text-zinc-400">การกระทำที่ไม่สามารถย้อนกลับได้</p>
-                                            <Button
-                                                variant="destructive"
-                                                size="sm"
-                                                className="w-full"
-                                                onClick={handleDissolveFamily}
-                                                disabled={isDissolving}
-                                            >
-                                                {isDissolving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                                ยุบครอบครัว
-                                            </Button>
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
+                                                        className="w-full"
+                                                        disabled={isDissolving}
+                                                    >
+                                                        {isDissolving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                                        ยุบครอบครัว
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent className="bg-zinc-950 border-red-500/20">
+                                                    <DialogHeader>
+                                                        <DialogTitle className="text-red-500 flex items-center gap-2">
+                                                            <AlertCircle className="w-5 h-5" />
+                                                            ยืนยันการยุบครอบครัว
+                                                        </DialogTitle>
+                                                        <DialogDescription className="text-zinc-400">
+                                                            การกระทำนี้ไม่สามารถย้อนกลับได้ สมาชิกทั้งหมดจะถูกเตะออกและข้อมูลครอบครัวจะถูกลบถาวร
+                                                            คุณแน่ใจหรือไม่ที่จะดำเนินการต่อ?
+                                                        </DialogDescription>
+                                                    </DialogHeader>
+                                                    <DialogFooter className="gap-2 sm:gap-0">
+                                                        <DialogTrigger asChild>
+                                                            <Button variant="ghost">ยกเลิก</Button>
+                                                        </DialogTrigger>
+                                                        <Button
+                                                            variant="destructive"
+                                                            onClick={handleDissolveFamily}
+                                                            disabled={isDissolving}
+                                                        >
+                                                            {isDissolving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                                            ยืนยันยุบครอบครัว
+                                                        </Button>
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
                                         </div>
                                     </div>
 
@@ -536,16 +562,43 @@ export default function FamilyManager({ userData }) {
 
                     {/* Quick Actions */}
                     <div className="grid grid-cols-1 gap-4">
-                        <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={handleLeaveFamily}
-                            disabled={isLeaving}
-                            className={`${theme.glass} p-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-white/5 transition-colors group text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed`}
-                        >
-                            {isLeaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogOut className="w-5 h-5" />}
-                            <span className="font-medium">Leave Family</span>
-                        </motion.button>
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <motion.button
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    disabled={isLeaving}
+                                    className={`${theme.glass} p-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-white/5 transition-colors group text-red-400 hover:text-red-300 disabled:opacity-50 disabled:cursor-not-allowed`}
+                                >
+                                    {isLeaving ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogOut className="w-5 h-5" />}
+                                    <span className="font-medium">Leave Family</span>
+                                </motion.button>
+                            </DialogTrigger>
+                            <DialogContent className="bg-zinc-950 border-white/10">
+                                <DialogHeader>
+                                    <DialogTitle className="text-white flex items-center gap-2">
+                                        <LogOut className="w-5 h-5 text-red-400" />
+                                        ออกจากครอบครัว
+                                    </DialogTitle>
+                                    <DialogDescription className="text-zinc-400">
+                                        คุณแน่ใจหรือไม่ที่จะออกจากครอบครัวนี้? คุณจะต้องได้รับเชิญใหม่หากต้องการกลับเข้ามาอีกครั้ง
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter className="gap-2 sm:gap-0">
+                                    <DialogTrigger asChild>
+                                        <Button variant="ghost" className="text-zinc-400 hover:text-white">ยกเลิก</Button>
+                                    </DialogTrigger>
+                                    <Button
+                                        variant="destructive"
+                                        onClick={handleLeaveFamily}
+                                        disabled={isLeaving}
+                                    >
+                                        {isLeaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                        ยืนยันออกจากครอบครัว
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
                     </div>
                 </div>
 
