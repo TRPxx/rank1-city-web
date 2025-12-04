@@ -780,6 +780,7 @@ export default function GangManager({ userData }) {
                                         <div className="p-3 rounded-lg bg-white/5 border border-white/10">
                                             <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Discord Username</div>
                                             <div className="text-sm text-zinc-300">@{selectedMember.discord_name}</div>
+                                            <div className="text-xs text-zinc-500 font-mono mt-1">ID: {selectedMember.discord_id}</div>
                                         </div>
                                         <div className="p-3 rounded-lg bg-white/5 border border-white/10">
                                             <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">วันที่เข้าร่วม</div>
