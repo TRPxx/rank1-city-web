@@ -163,6 +163,42 @@ export async function POST(request) {
 
                 await connection.commit();
                 return NextResponse.json({ success: true, message: 'Family dissolved' });
+
+            } else if (action === 'kick_member') {
+                if (!userCheck[0].family_id) throw new Error('You are not in a family');
+
+                const { targetDiscordId } = body;
+                if (!targetDiscordId) throw new Error('Target member ID required');
+
+                // Verify Leader
+                const [family] = await connection.query('SELECT leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
+                if (family[0].leader_discord_id !== discordId) {
+                    throw new Error('Only the leader can kick members');
+                }
+
+                // Prevent leader from kicking themselves
+                if (targetDiscordId === discordId) {
+                    throw new Error('Leader cannot kick themselves');
+                }
+
+                // Check if target is in the same family
+                const [targetUser] = await connection.query(
+                    'SELECT family_id FROM preregistrations WHERE discord_id = ?',
+                    [targetDiscordId]
+                );
+
+                if (targetUser.length === 0 || targetUser[0].family_id !== userCheck[0].family_id) {
+                    throw new Error('Member not found in your family');
+                }
+
+                // Remove member from family
+                await connection.query('UPDATE preregistrations SET family_id = NULL WHERE discord_id = ?', [targetDiscordId]);
+
+                // Update Family Count
+                await connection.query('UPDATE families SET member_count = member_count - 1 WHERE id = ?', [userCheck[0].family_id]);
+
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'Member kicked successfully' });
             }
 
             throw new Error('Invalid action');
