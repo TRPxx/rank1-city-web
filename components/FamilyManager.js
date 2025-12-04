@@ -422,6 +422,9 @@ export default function FamilyManager({ userData }) {
                                                 placeholder="https://example.com/logo.png"
                                                 className="bg-black/50"
                                             />
+                                            <p className="text-xs text-zinc-500 text-center">
+                                                แนะนำขนาด: 512x512px (Square Ratio) เพื่อความสวยงาม
+                                            </p>
                                         </div>
                                         <DialogFooter>
                                             <Button onClick={handleUpdateLogo} disabled={isEditingLogo} className="bg-blue-600 hover:bg-blue-700">
