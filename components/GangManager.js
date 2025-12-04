@@ -1,226 +1,295 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from "@/components/ui/dialog";
-import { Users, Shield, Copy, LogOut, Crown, Plus, ArrowRight, Loader2, CheckCircle2, AlertCircle, Search, ImageIcon, Edit } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { toast } from 'sonner';
+import { Textarea } from "@/components/ui/textarea";
+import { Label } from "@/components/ui/label";
+import { Shield, LogOut, Settings, Search, Filter, Trophy, Loader2, Hexagon, ChevronDown, Copy, Users } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
 
 export default function GangManager({ userData }) {
-    const [gangData, setGangData] = useState(null);
+    const { data: session } = useSession();
+    const [gang, setGang] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [members, setMembers] = useState([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [isMembersLoading, setIsMembersLoading] = useState(false);
-    const [isActionLoading, setIsActionLoading] = useState(false);
-
-    // Forms
+    const [inviteCode, setInviteCode] = useState('');
     const [joinCode, setJoinCode] = useState('');
     const [createName, setCreateName] = useState('');
-    const [createLogoUrl, setCreateLogoUrl] = useState('');
-    const [editLogoUrl, setEditLogoUrl] = useState('');
-    const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+    const [createLogo, setCreateLogo] = useState('');
+    const [isCreating, setIsCreating] = useState(false);
+    const [isJoining, setIsJoining] = useState(false);
+    const [logoUrl, setLogoUrl] = useState('');
+    const [isEditingLogo, setIsEditingLogo] = useState(false);
 
-    const [error, setError] = useState('');
-    const [copied, setCopied] = useState(false);
+    // Theme Configuration (Royal Blue)
+    const theme = {
+        from: 'from-blue-600',
+        to: 'to-indigo-600',
+        text: 'text-blue-400',
+        bg: 'bg-blue-500',
+        border: 'border-blue-500/20',
+        ring: 'ring-blue-500',
+        glass: 'bg-zinc-900/60 backdrop-blur-md border-white/10'
+    };
 
-    const fetchGang = async () => {
+    useEffect(() => {
+        fetchGangData();
+    }, []);
+
+    const fetchGangData = async () => {
         try {
             const res = await fetch('/api/gang');
             const data = await res.json();
-            if (data.hasGang) {
-                setGangData(data.gang);
-                setEditLogoUrl(data.gang.logo_url || '');
+
+            if (data.gang) {
+                setGang(data.gang);
+                setInviteCode(data.gang.invite_code);
+                setMembers(data.members || []);
+                setLogoUrl(data.gang.logo_url || '');
             } else {
-                setGangData(null);
+                setGang(null);
             }
-        } catch (err) {
-            console.error(err);
+        } catch (error) {
+            console.error('Error fetching gang:', error);
         } finally {
-            setIsLoading(false);
+            setLoading(false);
         }
     };
 
-    const fetchMembers = async (gangCode) => {
-        setIsMembersLoading(true);
-        try {
-            const res = await fetch(`/api/gang/members?gangCode=${gangCode}`);
-            const data = await res.json();
-            if (data.members) {
-                setMembers(data.members);
-            }
-        } catch (err) {
-            console.error(err);
-        } finally {
-            setIsMembersLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchGang();
-    }, []);
-
-    useEffect(() => {
-        if (gangData?.gang_code) {
-            fetchMembers(gangData.gang_code);
-        }
-    }, [gangData]);
-
-    const handleAction = async (action) => {
-        setError('');
-        setIsActionLoading(true);
-        try {
-            const payload = {
-                action,
-                name: createName,
-                gangCode: joinCode,
-                logoUrl: action === 'create' ? createLogoUrl : undefined
-            };
-
-            const res = await fetch('/api/gang', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
-
-            fetchGang(); // Refresh data
-            setCreateName('');
-            setJoinCode('');
-            setCreateLogoUrl('');
-        } catch (err) {
-            setError(err.message);
-        } finally {
-            setIsActionLoading(false);
-        }
-    };
-
-    const handleUpdateLogo = async () => {
-        setError('');
-        setIsActionLoading(true);
+    const handleCreateGang = async (e) => {
+        e.preventDefault();
+        setIsCreating(true);
         try {
             const res = await fetch('/api/gang', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    action: 'update_logo',
-                    logoUrl: editLogoUrl
+                    action: 'create',
+                    name: createName,
+                    logoUrl: createLogo
                 }),
             });
+
             const data = await res.json();
-            if (!res.ok) throw new Error(data.error);
-
-            setIsEditDialogOpen(false);
-            fetchGang(); // Refresh data
-        } catch (err) {
-            setError(err.message);
+            if (res.ok) {
+                toast.success('Gang created successfully!');
+                fetchGangData();
+            } else {
+                toast.error(data.error || 'Failed to create gang');
+            }
+        } catch (error) {
+            toast.error('Something went wrong');
         } finally {
-            setIsActionLoading(false);
+            setIsCreating(false);
         }
     };
 
-    const copyGangCode = () => {
-        if (gangData?.gang_code) {
-            navigator.clipboard.writeText(gangData.gang_code);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
+    const handleJoinGang = async (e) => {
+        e.preventDefault();
+        setIsJoining(true);
+        try {
+            const res = await fetch('/api/gang', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'join', inviteCode: joinCode }),
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                toast.success('Joined gang successfully!');
+                fetchGangData();
+            } else {
+                toast.error(data.error || 'Failed to join gang');
+            }
+        } catch (error) {
+            toast.error('Something went wrong');
+        } finally {
+            setIsJoining(false);
         }
     };
 
-    const isLeader = gangData?.leader_discord_id === userData?.discordId;
+    const handleUpdateLogo = async () => {
+        setIsEditingLogo(true);
+        try {
+            const res = await fetch('/api/gang', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'update_logo', logoUrl }),
+            });
 
-    if (isLoading) {
+            if (res.ok) {
+                toast.success('Logo updated successfully!');
+                fetchGangData();
+            } else {
+                const data = await res.json();
+                toast.error(data.error || 'Failed to update logo');
+            }
+        } catch (error) {
+            toast.error('Failed to update logo');
+        } finally {
+            setIsEditingLogo(false);
+        }
+    };
+
+    const copyInviteCode = () => {
+        navigator.clipboard.writeText(inviteCode);
+        toast.success('Invite code copied!');
+    };
+
+    const isLeader = members.find(m => m.discord_id === userData?.discordId)?.is_leader;
+
+    if (loading) {
         return (
-            <div className="flex items-center justify-center h-full">
-                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+            <div className="flex items-center justify-center h-[60vh]">
+                <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
             </div>
         );
     }
 
-    // View: Already in Gang
-    if (gangData) {
+    if (!gang) {
         return (
-            <div className="h-full p-1 space-y-6">
-                {/* Hero / Header Section */}
-                <div className="relative overflow-hidden rounded-3xl bg-card border border-border/50 shadow-lg">
-                    <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-transparent opacity-50" />
-                    <div className="relative z-10 p-6 sm:p-8 flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
+            <div className="max-w-4xl mx-auto p-6">
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                    <div className="space-y-6">
+                        <div className="relative">
+                            <div className={`absolute -inset-1 bg-gradient-to-r ${theme.from} ${theme.to} rounded-2xl blur opacity-25`}></div>
+                            <div className="relative bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
+                                <h1 className="text-4xl font-bold text-white mb-2">Create Your Legacy</h1>
+                                <p className="text-zinc-400 mb-8">Establish your own gang, recruit members, and dominate the streets of Rank1 City.</p>
 
-                        {/* Logo */}
-                        <div className="relative group shrink-0">
-                            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-2xl bg-muted border-2 border-border flex items-center justify-center overflow-hidden shadow-xl">
-                                {gangData.logo_url ? (
-                                    <Image
-                                        src={gangData.logo_url}
-                                        alt={gangData.name}
-                                        width={128}
-                                        height={128}
-                                        className="object-cover w-full h-full"
-                                    />
-                                ) : (
-                                    <Shield className="w-12 h-12 text-muted-foreground/50" />
-                                )}
+                                <form onSubmit={handleCreateGang} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-zinc-300">Gang Name</label>
+                                        <Input
+                                            placeholder="e.g. Peaky Blinders"
+                                            value={createName}
+                                            onChange={(e) => setCreateName(e.target.value)}
+                                            className="bg-black/50 border-zinc-700 focus:border-blue-500"
+                                            required
+                                        />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-zinc-300">Logo URL (Optional)</label>
+                                        <Input
+                                            placeholder="https://..."
+                                            value={createLogo}
+                                            onChange={(e) => setCreateLogo(e.target.value)}
+                                            className="bg-black/50 border-zinc-700 focus:border-blue-500"
+                                        />
+                                    </div>
+                                    <Button
+                                        type="submit"
+                                        className={`w-full bg-gradient-to-r ${theme.from} ${theme.to} hover:opacity-90`}
+                                        disabled={isCreating}
+                                    >
+                                        {isCreating ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Shield className="w-4 h-4 mr-2" />}
+                                        Create Gang
+                                    </Button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        <div className="relative">
+                            <div className="absolute -inset-1 bg-gradient-to-r from-zinc-700 to-zinc-600 rounded-2xl blur opacity-25"></div>
+                            <div className="relative bg-zinc-900 border border-zinc-800 p-8 rounded-2xl">
+                                <h2 className="text-2xl font-bold text-white mb-2">Join Existing Gang</h2>
+                                <p className="text-zinc-400 mb-8">Have an invite code? Enter it below to join your allies.</p>
+
+                                <form onSubmit={handleJoinGang} className="space-y-4">
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-zinc-300">Invite Code</label>
+                                        <Input
+                                            placeholder="e.g. G-1234"
+                                            value={joinCode}
+                                            onChange={(e) => setJoinCode(e.target.value)}
+                                            className="bg-black/50 border-zinc-700 focus:border-zinc-500"
+                                            required
+                                        />
+                                    </div>
+                                    <Button
+                                        type="submit"
+                                        variant="outline"
+                                        className="w-full border-zinc-700 hover:bg-zinc-800 text-white"
+                                        disabled={isJoining}
+                                    >
+                                        {isJoining ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Users className="w-4 h-4 mr-2" />}
+                                        Join Gang
+                                    </Button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="max-w-7xl mx-auto pt-24 px-6 pb-6 font-sans">
+            <div className="grid grid-cols-12 gap-8">
+
+                {/* Left Sidebar (Profile) */}
+                <div className="col-span-12 lg:col-span-3 space-y-6">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className={`${theme.glass} p-8 rounded-[2rem] text-center border shadow-xl relative overflow-hidden group`}
+                    >
+                        {/* Glow Effect */}
+                        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-tr ${theme.from} ${theme.to} rounded-full blur-[50px] opacity-20 group-hover:opacity-40 transition-opacity duration-500`} />
+
+                        <div className="relative mb-6 inline-block group/avatar">
+                            <div className={`w-28 h-28 rounded-2xl p-1 bg-gradient-to-br ${theme.from} ${theme.to}`}>
+                                <Avatar className="w-full h-full rounded-xl border-4 border-black/50">
+                                    <AvatarImage src={gang.logo_url} className="object-cover" />
+                                    <AvatarFallback className="bg-zinc-900 text-blue-400 text-2xl font-bold">
+                                        {gang.name.substring(0, 2).toUpperCase()}
+                                    </AvatarFallback>
+                                </Avatar>
                             </div>
                             {isLeader && (
-                                <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                                <Dialog>
                                     <DialogTrigger asChild>
-                                        <Button size="icon" variant="secondary" className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <Edit className="w-4 h-4" />
+                                        <Button
+                                            size="icon"
+                                            variant="secondary"
+                                            className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full shadow-lg opacity-0 group-hover/avatar:opacity-100 transition-opacity"
+                                        >
+                                            <Settings className="w-4 h-4" />
                                         </Button>
                                     </DialogTrigger>
-                                    <DialogContent>
+                                    <DialogContent className="bg-zinc-900 border-zinc-800">
                                         <DialogHeader>
-                                            <DialogTitle>แก้ไขโลโก้แก๊ง</DialogTitle>
-                                            <DialogDescription>
-                                                ใส่ URL ของรูปภาพที่ต้องการใช้เป็นโลโก้ (แนะนำขนาด 512x512)
-                                            </DialogDescription>
+                                            <DialogTitle>Update Gang Logo</DialogTitle>
+                                            <DialogDescription>Enter a new URL for your gang's logo.</DialogDescription>
                                         </DialogHeader>
                                         <div className="space-y-4 py-4">
-                                            <div className="space-y-2">
-                                                <label className="text-sm font-medium">Logo URL</label>
-                                                <Input
-                                                    placeholder="https://example.com/logo.png"
-                                                    value={editLogoUrl}
-                                                    onChange={(e) => setEditLogoUrl(e.target.value)}
-                                                />
+                                            <div className="flex justify-center">
+                                                <Avatar className="h-24 w-24 border-2 border-zinc-700">
+                                                    <AvatarImage src={logoUrl} />
+                                                    <AvatarFallback>Preview</AvatarFallback>
+                                                </Avatar>
                                             </div>
-                                            {editLogoUrl && (
-                                                <div className="flex justify-center p-4 bg-muted/50 rounded-lg">
-                                                    <div className="w-24 h-24 relative rounded-lg overflow-hidden border">
-                                                        <img src={editLogoUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => e.target.style.display = 'none'} />
-                                                    </div>
-                                                </div>
-                                            )}
+                                            <Input
+                                                value={logoUrl}
+                                                onChange={(e) => setLogoUrl(e.target.value)}
+                                                placeholder="https://example.com/logo.png"
+                                                className="bg-black/50"
+                                            />
                                         </div>
                                         <DialogFooter>
-                                            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>ยกเลิก</Button>
-                                            <Button onClick={handleUpdateLogo} disabled={isActionLoading}>
-                                                {isActionLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                                บันทึก
+                                            <Button onClick={handleUpdateLogo} disabled={isEditingLogo} className="bg-blue-600 hover:bg-blue-700">
+                                                {isEditingLogo ? 'Updating...' : 'Save Changes'}
                                             </Button>
                                         </DialogFooter>
                                     </DialogContent>
@@ -228,242 +297,300 @@ export default function GangManager({ userData }) {
                             )}
                         </div>
 
-                        {/* Info */}
-                        <div className="flex-1 text-center sm:text-left space-y-2">
-                            <div className="flex items-center justify-center sm:justify-start gap-3">
-                                <h2 className="text-3xl font-bold tracking-tight text-foreground">{gangData.name}</h2>
-                                <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">Level 1</Badge>
-                            </div>
-
-                            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-4 text-sm text-muted-foreground">
-                                <div className="flex items-center gap-2 bg-muted/50 px-3 py-1 rounded-lg border border-border/50">
-                                    <Users className="w-4 h-4" />
-                                    <span>สมาชิก: <span className="text-foreground font-medium">{gangData.member_count} / {gangData.max_members}</span></span>
-                                </div>
-                                <div className="flex items-center gap-2 bg-muted/50 px-3 py-1 rounded-lg border border-border/50 cursor-pointer hover:bg-muted transition-colors" onClick={copyGangCode}>
-                                    <span className="font-mono font-bold text-foreground tracking-wider">{gangData.gang_code}</span>
-                                    {copied ? <CheckCircle2 className="w-3 h-3 text-green-500" /> : <Copy className="w-3 h-3" />}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Content Grid */}
-                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 h-[calc(100%-200px)]">
-                    {/* Member List */}
-                    <div className="lg:col-span-12 h-full">
-                        <Card className="h-full flex flex-col border-border/50 shadow-sm overflow-hidden bg-card/50 backdrop-blur-sm">
-                            <CardHeader className="pb-3 border-b border-border/50">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <CardTitle className="text-lg flex items-center gap-2">
-                                            <Users className="w-5 h-5 text-primary" />
-                                            รายชื่อสมาชิก
-                                        </CardTitle>
-                                        <CardDescription>สมาชิกทั้งหมดในแก๊งของคุณ</CardDescription>
-                                    </div>
-                                    <div className="relative w-64 hidden sm:block">
-                                        <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                                        <Input placeholder="ค้นหาสมาชิก..." className="pl-8 h-9 bg-background/50" />
-                                    </div>
-                                </div>
-                            </CardHeader>
-                            <div className="flex-1 overflow-hidden">
-                                <ScrollArea className="h-full">
-                                    <Table>
-                                        <TableHeader className="bg-muted/50 sticky top-0 z-10">
-                                            <TableRow className="hover:bg-transparent border-border/50">
-                                                <TableHead className="w-[80px]">ลำดับ</TableHead>
-                                                <TableHead>ชื่อสมาชิก</TableHead>
-                                                <TableHead>Discord ID</TableHead>
-                                                <TableHead className="text-right">วันที่เข้าร่วม</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {isMembersLoading ? (
-                                                <TableRow>
-                                                    <TableCell colSpan={4} className="h-24 text-center">
-                                                        <div className="flex items-center justify-center gap-2 text-muted-foreground">
-                                                            <Loader2 className="w-4 h-4 animate-spin" />
-                                                            กำลังโหลดข้อมูล...
-                                                        </div>
-                                                    </TableCell>
-                                                </TableRow>
-                                            ) : members.length > 0 ? (
-                                                members.map((member, idx) => (
-                                                    <TableRow key={member.discord_id} className="hover:bg-muted/30 border-border/50">
-                                                        <TableCell className="font-medium">
-                                                            <span className={`inline-flex items-center justify-center w-6 h-6 rounded text-xs ${idx < 3 ? 'bg-primary/10 text-primary font-bold' : 'text-muted-foreground'
-                                                                }`}>
-                                                                #{idx + 1}
-                                                            </span>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <div className="flex items-center gap-3">
-                                                                <Avatar className="h-8 w-8 border border-border/50">
-                                                                    <AvatarImage src={member.avatar_url} />
-                                                                    <AvatarFallback>
-                                                                        {member.discord_name?.substring(0, 2).toUpperCase()}
-                                                                    </AvatarFallback>
-                                                                </Avatar>
-                                                                <div className="flex flex-col">
-                                                                    <span className="font-medium text-sm flex items-center gap-2">
-                                                                        {member.discord_name}
-                                                                        {member.is_leader && (
-                                                                            <Badge variant="secondary" className="h-4 px-1 text-[10px] bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border-amber-500/20">
-                                                                                LEADER
-                                                                            </Badge>
-                                                                        )}
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell className="text-muted-foreground font-mono text-xs">
-                                                            {member.discord_id}
-                                                        </TableCell>
-                                                        <TableCell className="text-right text-muted-foreground text-xs">
-                                                            {new Date(member.joined_at).toLocaleDateString('th-TH', {
-                                                                day: 'numeric',
-                                                                month: 'short',
-                                                                year: '2-digit'
-                                                            })}
-                                                        </TableCell>
-                                                    </TableRow>
-                                                ))
-                                            ) : (
-                                                <TableRow>
-                                                    <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
-                                                        ไม่พบสมาชิก
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </ScrollArea>
-                            </div>
-                        </Card>
-                    </div>
-                </div>
-            </div>
-        );
-    }
-
-    // View: Create or Join
-    return (
-        <div className="h-full w-full p-4 lg:p-8 flex items-center justify-center">
-            <div className="w-full h-full max-h-[800px] overflow-hidden rounded-[2rem] border border-border/50 bg-card shadow-2xl grid lg:grid-cols-2">
-
-                {/* Left Side: Hero Section */}
-                <div className="relative hidden lg:flex flex-col justify-between bg-zinc-950 p-10 text-white dark:border-r border-border/50">
-                    <div className="absolute inset-0 bg-[url('/images/gang-hero.png')] bg-cover bg-center opacity-40 mix-blend-overlay" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-transparent to-zinc-950/90" />
-
-                    <div className="relative z-20 flex items-center text-lg font-medium">
-                        <Shield className="mr-2 h-6 w-6 text-primary" />
-                        Rank1 City Gangs
-                    </div>
-                    <div className="relative z-20 mt-auto">
-                        <blockquote className="space-y-2">
-                            <p className="text-lg font-light italic">
-                                &ldquo;อำนาจไม่ใช่สิ่งที่ใครจะมอบให้ คุณต้องคว้ามันมาเอง สร้างตำนาน รวบรวมพรรคพวก และปกครองถนนแห่ง Rank1 City&rdquo;
-                            </p>
-                            <footer className="text-sm text-zinc-400 font-medium">— The Godfather</footer>
-                        </blockquote>
-                    </div>
-                </div>
-
-                {/* Right Side: Form Section */}
-                <div className="flex flex-col justify-center p-8 lg:p-12 bg-background/50 backdrop-blur-sm">
-                    <div className="mx-auto w-full max-w-[400px] flex flex-col justify-center space-y-6">
-                        <div className="flex flex-col space-y-2 text-center">
-                            <h1 className="text-3xl font-bold tracking-tight text-foreground">ระบบแก๊ง</h1>
-                            <p className="text-sm text-muted-foreground">
-                                เข้าร่วมกับพันธมิตร หรือสร้างอาณาจักรของคุณเอง
-                            </p>
+                        <h2 className="text-2xl font-bold text-white mb-1 tracking-tight">{gang.name}</h2>
+                        <div
+                            onClick={copyInviteCode}
+                            className="flex items-center justify-center gap-2 text-zinc-400 text-sm mb-6 bg-black/20 py-1 px-3 rounded-full mx-auto w-fit border border-white/5 cursor-pointer hover:bg-black/40 transition-colors"
+                        >
+                            <span className="font-mono">{gang.invite_code}</span>
+                            <Copy className="w-3 h-3" />
                         </div>
 
-                        <Tabs defaultValue="join" className="w-full">
-                            <TabsList className="grid w-full grid-cols-2 mb-6 bg-muted/50 p-1">
-                                <TabsTrigger value="join" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">เข้าร่วม</TabsTrigger>
-                                <TabsTrigger value="create" className="data-[state=active]:bg-background data-[state=active]:shadow-sm">สร้างใหม่</TabsTrigger>
-                            </TabsList>
+                        <div className="grid grid-cols-1 gap-3 mb-6">
+                            <div className="bg-black/20 rounded-xl p-3 border border-white/5">
+                                <div className="text-[10px] text-zinc-500 uppercase tracking-wider mb-1">Members</div>
+                                <div className="text-lg font-bold">{members.length}</div>
+                            </div>
+                        </div>
 
-                            <TabsContent value="join" className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium leading-none">
-                                        รหัสเชิญ (Invite Code)
-                                    </label>
-                                    <div className="relative">
-                                        <Input
-                                            placeholder="G-XXXXXX"
-                                            value={joinCode}
-                                            onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                                            className="font-mono uppercase text-center tracking-widest h-12 text-lg bg-background/50"
-                                        />
-                                        <div className="absolute inset-y-0 right-3 flex items-center pointer-events-none text-muted-foreground">
-                                            <Users className="w-4 h-4" />
+                        {isLeader ? (
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button className={`w-full rounded-xl bg-gradient-to-r ${theme.from} ${theme.to} text-white font-semibold shadow-lg shadow-black/20 hover:opacity-90 transition-opacity`}>
+                                        จัดการแก๊ง
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="bg-zinc-950/95 backdrop-blur-xl border-white/10 max-w-2xl max-h-[85vh] overflow-hidden flex flex-col p-0">
+                                    <div className="p-6 border-b border-white/10">
+                                        <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                                            <Settings className="w-6 h-6 text-zinc-400" />
+                                            ศูนย์บัญชาการ
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                            จัดการการตั้งค่าแก๊ง
+                                        </DialogDescription>
+                                    </div>
+
+                                    <div className="flex-1 overflow-y-auto p-6 space-y-6">
+                                        <div className="space-y-4">
+                                            <div className="grid gap-2">
+                                                <Label>ชื่อแก๊ง</Label>
+                                                <Input defaultValue={gang.name} className="bg-black/20 border-white/10" />
+                                            </div>
+                                            <div className="grid gap-2">
+                                                <Label>ประกาศแก๊ง (MOTD)</Label>
+                                                <Textarea placeholder="เขียนข้อความถึงสมาชิกของคุณ..." className="bg-black/20 border-white/10 min-h-[100px]" />
+                                                <p className="text-xs text-zinc-500">ข้อความนี้จะถูกปักหมุดไว้ด้านบนของแชทสมาชิก</p>
+                                            </div>
+                                        </div>
+                                        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 space-y-3">
+                                            <h4 className="text-red-400 font-bold flex items-center gap-2">
+                                                <Shield className="w-4 h-4" /> เขตอันตราย
+                                            </h4>
+                                            <p className="text-xs text-zinc-400">การกระทำที่ไม่สามารถย้อนกลับได้</p>
+                                            <Button variant="destructive" size="sm" className="w-full">ยุบแก๊ง</Button>
                                         </div>
                                     </div>
-                                </div>
-                                <Button
-                                    className="w-full h-12 text-base font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
-                                    onClick={() => handleAction('join')}
-                                    disabled={!joinCode || isActionLoading}
-                                >
-                                    {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Users className="mr-2 h-4 w-4" />}
-                                    เข้าร่วมแก๊ง
-                                </Button>
-                            </TabsContent>
-
-                            <TabsContent value="create" className="space-y-4">
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium leading-none">
-                                        ชื่อแก๊ง
-                                    </label>
-                                    <Input
-                                        placeholder="ตั้งชื่อแก๊งของคุณ"
-                                        value={createName}
-                                        onChange={(e) => setCreateName(e.target.value)}
-                                        maxLength={20}
-                                        className="h-11 bg-background/50"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <label className="text-sm font-medium leading-none flex items-center justify-between">
-                                        <span>ลิงก์โลโก้ (Optional)</span>
-                                        <span className="text-[10px] text-muted-foreground">URL รูปภาพ</span>
-                                    </label>
-                                    <div className="relative">
-                                        <Input
-                                            placeholder="https://..."
-                                            value={createLogoUrl}
-                                            onChange={(e) => setCreateLogoUrl(e.target.value)}
-                                            className="h-11 bg-background/50 pl-9"
-                                        />
-                                        <ImageIcon className="absolute left-3 top-3 h-5 w-5 text-muted-foreground" />
+                                </DialogContent>
+                            </Dialog>
+                        ) : (
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button variant="outline" className="w-full rounded-xl border-zinc-700 text-zinc-400 hover:bg-zinc-800 hover:text-white mb-6">
+                                        ดูรายละเอียด
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent className="bg-zinc-950/95 backdrop-blur-xl border-white/10">
+                                    <DialogHeader>
+                                        <DialogTitle className="text-xl font-bold flex items-center gap-2">
+                                            <Shield className="w-5 h-5 text-blue-400" />
+                                            ข้อมูลแก๊ง
+                                        </DialogTitle>
+                                        <DialogDescription>
+                                            รายละเอียดและประกาศจากหัวหน้าแก๊ง
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <div className="space-y-6 py-4">
+                                        <div className="space-y-2">
+                                            <Label className="text-zinc-400">ชื่อแก๊ง</Label>
+                                            <div className="text-lg font-bold text-white">{gang.name}</div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label className="text-zinc-400">ประกาศ (MOTD)</Label>
+                                            <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-zinc-300 min-h-[100px] text-sm leading-relaxed whitespace-pre-wrap">
+                                                {gang.motd || "ยังไม่มีประกาศจากหัวหน้าแก๊ง"}
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-4">
+                                            <div className="p-3 rounded-lg bg-black/20 border border-white/5">
+                                                <div className="text-xs text-zinc-500 uppercase">สมาชิก</div>
+                                                <div className="text-lg font-bold">{members.length} คน</div>
+                                            </div>
+                                            <div className="p-3 rounded-lg bg-black/20 border border-white/5">
+                                                <div className="text-xs text-zinc-500 uppercase">รหัสเชิญ</div>
+                                                <div className="text-lg font-mono font-bold text-zinc-400">Hidden</div>
+                                            </div>
+                                        </div>
                                     </div>
-                                </div>
-                                <Button
-                                    className="w-full h-12 text-base font-medium bg-primary hover:bg-primary/90 text-primary-foreground shadow-lg shadow-primary/20"
-                                    onClick={() => handleAction('create')}
-                                    disabled={!createName || isActionLoading}
-                                >
-                                    {isActionLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Plus className="mr-2 h-4 w-4" />}
-                                    สร้างแก๊ง
-                                </Button>
-                            </TabsContent>
-                        </Tabs>
-
-                        {error && (
-                            <div className="p-3 rounded-lg bg-destructive/10 text-destructive text-sm flex items-center gap-2 justify-center border border-destructive/20">
-                                <AlertCircle className="w-4 h-4" />
-                                {error}
-                            </div>
+                                </DialogContent>
+                            </Dialog>
                         )}
+                    </motion.div>
+
+                    {/* Quick Actions */}
+                    <div className="grid grid-cols-1 gap-4">
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            className={`${theme.glass} p-4 rounded-2xl flex items-center justify-center gap-3 hover:bg-white/5 transition-colors group text-red-400 hover:text-red-300`}
+                        >
+                            <LogOut className="w-5 h-5" />
+                            <span className="font-medium">Leave Gang</span>
+                        </motion.button>
                     </div>
                 </div>
+
+                {/* Main Content */}
+                <div className="col-span-12 lg:col-span-9">
+                    {/* Reward Progression Button & Dialog */}
+                    <div className="mb-6">
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <motion.button
+                                    whileHover={{ scale: 1.01 }}
+                                    whileTap={{ scale: 0.99 }}
+                                    className={`${theme.glass} w-full p-4 rounded-2xl border shadow-lg flex items-center justify-between group hover:bg-white/5 transition-all`}
+                                >
+                                    <div className="flex items-center gap-4">
+                                        <div className="w-12 h-12 rounded-full bg-yellow-500/20 flex items-center justify-center text-yellow-500 group-hover:scale-110 transition-transform">
+                                            <Trophy className="w-6 h-6" />
+                                        </div>
+                                        <div className="text-left">
+                                            <h3 className="text-lg font-bold text-white group-hover:text-yellow-400 transition-colors">รางวัลแก๊ง</h3>
+                                            <p className="text-zinc-400 text-sm">เลเวล {gang.level || 1} • {members.length}/{gang.max_members || 25} สมาชิก</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3 pr-2">
+                                        <div className="text-right hidden sm:block">
+                                            <div className="text-xs text-zinc-500 uppercase font-bold">รางวัลถัดไป</div>
+                                            <div className="text-sm font-medium text-white">15 สมาชิก</div>
+                                        </div>
+                                        <ChevronDown className="w-5 h-5 text-zinc-500 -rotate-90 group-hover:translate-x-1 transition-transform" />
+                                    </div>
+                                </motion.button>
+                            </DialogTrigger>
+                            <DialogContent className="bg-zinc-900/95 backdrop-blur-xl border-white/10 max-w-2xl">
+                                <DialogHeader>
+                                    <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                                        <Trophy className="w-6 h-6 text-yellow-500" />
+                                        ความคืบหน้ารางวัลแก๊ง
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        รับสมาชิกเพิ่มเพื่อปลดล็อกสิทธิพิเศษและรางวัลของแก๊ง
+                                    </DialogDescription>
+                                </DialogHeader>
+
+                                <div className="py-12 px-4">
+                                    <div className="flex items-center justify-between mb-12">
+                                        <div className="text-center">
+                                            <div className="text-3xl font-bold text-white">{members.length}</div>
+                                            <div className="text-xs text-zinc-500 uppercase tracking-wider">สมาชิกปัจจุบัน</div>
+                                        </div>
+                                        <div className="text-center">
+                                            <div className="text-3xl font-bold text-zinc-500">{gang.max_members || 25}</div>
+                                            <div className="text-xs text-zinc-500 uppercase tracking-wider">เป้าหมายสูงสุด</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Progress Bar Container */}
+                                    <div className="relative h-4 bg-black/40 rounded-full mb-8 mx-4">
+                                        {/* Progress Fill */}
+                                        <motion.div
+                                            initial={{ width: 0 }}
+                                            animate={{ width: `${(members.length / (gang.max_members || 25)) * 100}%` }}
+                                            transition={{ duration: 1.5, ease: "easeOut" }}
+                                            className={`absolute top-0 left-0 h-full rounded-full bg-gradient-to-r ${theme.from} ${theme.to} shadow-[0_0_15px_rgba(59,130,246,0.5)]`}
+                                        />
+
+                                        {/* Milestones */}
+                                        {[10, 15, 20, 25].map((milestone) => {
+                                            const isUnlocked = members.length >= milestone;
+                                            const position = (milestone / (gang.max_members || 25)) * 100;
+
+                                            return (
+                                                <div
+                                                    key={milestone}
+                                                    className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center group"
+                                                    style={{ left: `${position}%` }}
+                                                >
+                                                    {/* Dot on line */}
+                                                    <div className={`w-4 h-4 rounded-full border-2 transition-all duration-500 z-10 ${isUnlocked ? `${theme.bg} border-white shadow-[0_0_10px_white]` : 'bg-zinc-900 border-zinc-700'}`} />
+
+                                                    {/* Label */}
+                                                    <div className={`absolute top-6 whitespace-nowrap text-xs font-bold transition-colors duration-500 ${isUnlocked ? 'text-white' : 'text-zinc-600'}`}>
+                                                        {milestone}
+                                                    </div>
+
+                                                    {/* Reward Box Icon */}
+                                                    <div className={`absolute bottom-6 p-2 rounded-lg border transition-all duration-500 ${isUnlocked ? `${theme.glass} border-yellow-500/50 text-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.2)]` : 'bg-black/40 border-white/5 text-zinc-700'}`}>
+                                                        <Hexagon className="w-5 h-5" />
+                                                    </div>
+
+                                                    {/* Tooltip (Hover) */}
+                                                    <div className="absolute bottom-16 opacity-0 group-hover:opacity-100 transition-opacity bg-black/90 border border-white/10 px-3 py-1 rounded-lg text-xs text-white whitespace-nowrap pointer-events-none transform translate-y-2 group-hover:translate-y-0 z-20">
+                                                        รางวัลระดับ {milestone}
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            </DialogContent>
+                        </Dialog>
+                    </div>
+
+                    {/* Members Section */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.1 }}
+                        className={`${theme.glass} rounded-[2rem] overflow-hidden border shadow-xl flex flex-col h-[600px]`}
+                    >
+                        {/* Toolbar */}
+                        <div className="p-6 border-b border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0">
+                            <div>
+                                <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                                    Team Members
+                                    <Badge variant="secondary" className="bg-white/10 text-zinc-300 hover:bg-white/20 border-0">{members.length}</Badge>
+                                </h3>
+                                <p className="text-zinc-500 text-sm mt-1">Gang hierarchy and roster</p>
+                            </div>
+                            <div className="flex items-center gap-3">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search..."
+                                        className="bg-black/20 border border-white/10 rounded-xl pl-9 pr-4 py-2 text-sm text-white placeholder:text-zinc-600 focus:outline-none focus:ring-2 focus:ring-white/10 w-40 sm:w-64 transition-all"
+                                    />
+                                </div>
+                                <Button size="icon" variant="ghost" className="rounded-xl hover:bg-white/5 text-zinc-400">
+                                    <Filter className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Content with ScrollArea */}
+                        <div className="flex-1 bg-black/20 overflow-hidden relative">
+                            <ScrollArea className="h-full w-full">
+                                <div className="p-6">
+                                    <div className="space-y-2">
+                                        <div className="grid grid-cols-12 text-xs font-bold text-zinc-500 uppercase tracking-wider px-4 pb-2 sticky top-0 bg-black/40 backdrop-blur-md z-10 rounded-lg mb-2 py-2">
+                                            <div className="col-span-6 md:col-span-6">Member</div>
+                                            <div className="col-span-4 md:col-span-4">Role</div>
+                                            <div className="col-span-2 md:col-span-2 text-right">Joined</div>
+                                        </div>
+                                        <AnimatePresence>
+                                            {members.map((m, i) => (
+                                                <motion.div
+                                                    key={m.discord_id}
+                                                    initial={{ opacity: 0, y: 10 }}
+                                                    animate={{ opacity: 1, y: 0 }}
+                                                    transition={{ delay: i * 0.05 }}
+                                                    className="grid grid-cols-12 items-center p-3 rounded-xl hover:bg-white/5 transition-colors group cursor-pointer border border-transparent hover:border-white/5"
+                                                >
+                                                    <div className="col-span-6 md:col-span-6 flex items-center gap-4">
+                                                        <div className="relative">
+                                                            <Avatar className={`h-10 w-10 ring-2 ring-transparent group-hover:${theme.ring} transition-all`}>
+                                                                <AvatarImage src={m.avatar_url} />
+                                                                <AvatarFallback className="bg-zinc-800 text-zinc-400 font-bold">
+                                                                    {m.discord_name[0]}
+                                                                </AvatarFallback>
+                                                            </Avatar>
+                                                        </div>
+                                                        <div className="overflow-hidden">
+                                                            <div className="font-bold text-zinc-200 group-hover:text-white transition-colors truncate">{m.discord_name}</div>
+                                                            <div className="text-xs text-zinc-500 font-mono truncate">ID: {m.discord_id}</div>
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-span-4 md:col-span-4">
+                                                        <Badge variant="outline" className={`${m.is_leader ? `${theme.bg}/20 ${theme.text} ${theme.border}` : 'bg-zinc-800/50 text-zinc-400 border-zinc-700/50'}`}>
+                                                            {m.is_leader ? 'Leader' : 'Member'}
+                                                        </Badge>
+                                                    </div>
+                                                    <div className="col-span-2 md:col-span-2 text-right text-zinc-500 text-xs font-mono">
+                                                        {new Date(m.joined_at).toLocaleDateString()}
+                                                    </div>
+                                                </motion.div>
+                                            ))}
+                                        </AnimatePresence>
+                                    </div>
+                                </div>
+                            </ScrollArea>
+                        </div>
+                    </motion.div>
+                </div>
             </div>
-        </div>
+        </div >
     );
 }
