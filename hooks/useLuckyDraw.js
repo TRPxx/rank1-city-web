@@ -70,6 +70,12 @@ export function useLuckyDraw({ onDrawComplete }) {
             // Use requestAnimationFrame to ensure DOM is ready
             requestAnimationFrame(() => {
                 setTimeout(() => {
+                    if (!tapeRef.current) {
+                        console.error("Tape ref not found");
+                        setIsSpinning(false);
+                        return;
+                    }
+
                     if (tapeRef.current) {
                         // Get actual card width and gap from DOM for accuracy
                         const cards = tapeRef.current.children;
@@ -79,6 +85,7 @@ export function useLuckyDraw({ onDrawComplete }) {
 
                         if (!firstCard || !secondCard || !winningCard) {
                             console.error('Cards not found in DOM');
+                            setIsSpinning(false);
                             return;
                         }
 
@@ -104,27 +111,6 @@ export function useLuckyDraw({ onDrawComplete }) {
                         // targetPosition is how much we translate the tape to the LEFT (negative X)
                         const randomOffset = 0; // Temporarily disabled for testing
                         const targetPosition = winningCardCenter - centerOfScreen + randomOffset;
-
-                        // Debug: Show all items in tape
-                        const tapeItemsDebug = Array.from(cards).map((card, idx) => {
-                            const itemName = newTape[idx]?.name || 'Unknown';
-                            return `[${idx}] ${itemName}${idx === WIN_INDEX ? ' ⭐ WIN' : ''}`;
-                        });
-
-                        console.log('🎯 Lucky Draw Debug:', {
-                            '📦 Result Item': result.name,
-                            '🎲 Win Index': WIN_INDEX,
-                            '📏 Card Width': actualCardWidth,
-                            '↔️ Gap': actualGap,
-                            '📐 Item Total Width': itemTotalWidth,
-                            '🖥️ Container Width': containerWidth,
-                            '🎯 Center of Screen': centerOfScreen,
-                            '📍 Winning Card Left': winningCardLeft,
-                            '⭐ Winning Card Center': winningCardCenter,
-                            '🚀 Target Position': targetPosition,
-                            '🔀 Random Offset': randomOffset,
-                            '📋 Tape Items': tapeItemsDebug.join('\n')
-                        });
 
                         // Reset position instantly
                         tapeRef.current.style.transition = 'none';

@@ -49,7 +49,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete, showHistory = t
     // Let's keep it consistent.
 
     return (
-        <div className="w-full max-w-6xl mx-auto p-4 space-y-6 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6">
+        <div className={showHistory ? "w-full max-w-6xl mx-auto p-4 space-y-6 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6" : "w-full max-w-full mx-auto p-4 space-y-6"}>
 
             {/* Winner Dialog (Responsive) */}
             <AnimatePresence>
@@ -146,7 +146,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete, showHistory = t
             </AnimatePresence>
 
             {/* Main Game Area */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className={showHistory ? "lg:col-span-2 space-y-6" : "w-full space-y-6"}>
                 <div className="overflow-hidden rounded-3xl bg-muted/10 p-6 sm:p-8">
                     <div className="mb-6">
                         <h3 className="text-xl font-bold mb-1">Lucky Draw</h3>
@@ -204,12 +204,12 @@ export default function LuckyDraw({ ticketCount, onDrawComplete, showHistory = t
                     <div className="flex flex-col items-center justify-center gap-4 sm:flex-row sm:justify-between bg-background/30 p-4 rounded-xl">
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                             <Ticket className="h-4 w-4 text-primary" />
-                            <span>ตั๋วคงเหลือ: <span className="font-bold text-foreground text-lg ml-1">{ticketCount}</span></span>
+                            <span>ตั๋วคงเหลือ: <span className="font-bold text-foreground text-lg ml-1">{ticketCount || 0}</span></span>
                         </div>
                         <Button
                             size="lg"
                             onClick={() => spin(ticketCount)}
-                            disabled={isSpinning || ticketCount <= 0}
+                            disabled={isSpinning || !ticketCount || ticketCount <= 0}
                             className="w-full sm:w-auto min-w-[160px] h-14 text-lg shadow-lg shadow-primary/20"
                         >
                             {isSpinning ? (
@@ -217,9 +217,7 @@ export default function LuckyDraw({ ticketCount, onDrawComplete, showHistory = t
                                     <Loader2 className="mr-2 h-4 w-4 animate-spin" /> กำลังประมวลผล...
                                 </>
                             ) : (
-                                <>
-                                    หมุนเลย
-                                </>
+                                (!ticketCount || ticketCount <= 0) ? 'ตั๋วไม่พอ' : 'หมุนเลย'
                             )}
                         </Button>
                     </div>
