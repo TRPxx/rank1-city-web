@@ -29,7 +29,7 @@ const getCardBorderClass = (rarity) => {
     }
 };
 
-export default function LuckyDraw({ ticketCount, onDrawComplete }) {
+export default function LuckyDraw({ ticketCount, onDrawComplete, showHistory = true }) {
     const {
         isSpinning,
         tapeItems,
@@ -227,49 +227,51 @@ export default function LuckyDraw({ ticketCount, onDrawComplete }) {
             </div>
 
             {/* History Sidebar */}
-            <div className="h-[400px] lg:h-auto lg:max-h-[600px] flex flex-col rounded-3xl bg-muted/10 p-6">
-                <div className="mb-4 flex items-center gap-2">
-                    <History className="h-4 w-4 text-primary" />
-                    <h3 className="font-bold">ประวัติการสุ่ม</h3>
-                </div>
-                <ScrollArea className="flex-1 -mr-4 pr-4 touch-pan-y">
-                    <div className="space-y-3">
-                        {history.length > 0 ? (
-                            history.map((item, index) => (
-                                <div key={index} className="flex items-center justify-between gap-4 text-sm bg-background/40 p-3 rounded-xl">
-                                    <div className="flex items-center gap-3 overflow-hidden">
-                                        <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 p-1 ${item.rarity === 'LEGENDARY' ? 'text-yellow-500' :
-                                            item.rarity === 'EPIC' ? 'text-purple-500' : 'text-muted-foreground'
-                                            }`}>
-                                            <Gift className="h-4 w-4" />
-                                        </div>
-                                        <div className="grid gap-0.5">
-                                            <span className="font-medium truncate">{item.reward_name}</span>
-                                            <span className="text-xs text-muted-foreground">
-                                                {new Date(item.created_at).toLocaleString('th-TH', {
-                                                    year: 'numeric',
-                                                    month: 'short',
-                                                    day: 'numeric',
-                                                    hour: '2-digit',
-                                                    minute: '2-digit'
-                                                })}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <Badge variant="secondary" className="shrink-0 text-[10px] bg-background/50">
-                                        {item.rarity}
-                                    </Badge>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="flex h-32 flex-col items-center justify-center gap-2 text-sm text-muted-foreground">
-                                <History className="h-8 w-8 opacity-20" />
-                                <p>ยังไม่มีประวัติ</p>
-                            </div>
-                        )}
+            {showHistory && (
+                <div className="h-[400px] lg:h-auto lg:max-h-[600px] flex flex-col rounded-3xl bg-muted/10 p-6">
+                    <div className="mb-4 flex items-center gap-2">
+                        <History className="h-4 w-4 text-primary" />
+                        <h3 className="font-bold">ประวัติการสุ่ม</h3>
                     </div>
-                </ScrollArea>
-            </div>
+                    <ScrollArea className="flex-1 -mr-4 pr-4 touch-pan-y">
+                        <div className="space-y-3">
+                            {history.length > 0 ? (
+                                history.map((item, index) => (
+                                    <div key={index} className="flex items-center justify-between gap-4 text-sm bg-background/40 p-3 rounded-xl">
+                                        <div className="flex items-center gap-3 overflow-hidden">
+                                            <div className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/50 p-1 ${item.rarity === 'LEGENDARY' ? 'text-yellow-500' :
+                                                item.rarity === 'EPIC' ? 'text-purple-500' : 'text-muted-foreground'
+                                                }`}>
+                                                <Gift className="h-4 w-4" />
+                                            </div>
+                                            <div className="grid gap-0.5">
+                                                <span className="font-medium truncate">{item.reward_name}</span>
+                                                <span className="text-xs text-muted-foreground">
+                                                    {new Date(item.created_at).toLocaleString('th-TH', {
+                                                        year: 'numeric',
+                                                        month: 'short',
+                                                        day: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </span>
+                                            </div>
+                                        </div>
+                                        <Badge variant="secondary" className="shrink-0 text-[10px] bg-background/50">
+                                            {item.rarity}
+                                        </Badge>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="flex h-32 flex-col items-center justify-center gap-2 text-sm text-muted-foreground">
+                                    <History className="h-8 w-8 opacity-20" />
+                                    <p>ยังไม่มีประวัติ</p>
+                                </div>
+                            )}
+                        </div>
+                    </ScrollArea>
+                </div>
+            )}
         </div>
     );
 }
