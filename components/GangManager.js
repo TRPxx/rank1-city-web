@@ -763,7 +763,12 @@ export default function GangManager({ userData }) {
                                             </AvatarFallback>
                                         </Avatar>
                                         <div className="flex-1">
-                                            <h3 className="text-xl font-bold text-white">{selectedMember.discord_name}</h3>
+                                            <h3 className="text-xl font-bold text-white">
+                                                {selectedMember.firstname && selectedMember.lastname
+                                                    ? `${selectedMember.firstname} ${selectedMember.lastname}`
+                                                    : selectedMember.discord_name}
+                                            </h3>
+                                            <p className="text-sm text-zinc-400">@{selectedMember.discord_name}</p>
                                             <Badge variant="outline" className={`mt-1 ${selectedMember.is_leader ? `${theme.bg}/20 ${theme.text} ${theme.border}` : 'bg-background/30 text-muted-foreground border-white/5'}`}>
                                                 {selectedMember.is_leader ? 'Leader' : 'Member'}
                                             </Badge>
@@ -773,8 +778,8 @@ export default function GangManager({ userData }) {
                                     {/* Member Info */}
                                     <div className="space-y-3">
                                         <div className="p-3 rounded-lg bg-white/5 border border-white/10">
-                                            <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Discord ID</div>
-                                            <div className="text-sm font-mono text-zinc-300">{selectedMember.discord_id}</div>
+                                            <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Discord Username</div>
+                                            <div className="text-sm text-zinc-300">@{selectedMember.discord_name}</div>
                                         </div>
                                         <div className="p-3 rounded-lg bg-white/5 border border-white/10">
                                             <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">วันที่เข้าร่วม</div>
@@ -895,8 +900,12 @@ export default function GangManager({ userData }) {
                                                             </Avatar>
                                                         </div>
                                                         <div className="overflow-hidden">
-                                                            <div className="font-bold text-foreground group-hover:text-primary transition-colors truncate">{m.discord_name}</div>
-                                                            <div className="text-xs text-muted-foreground font-mono truncate">ID: {m.discord_id}</div>
+                                                            <div className="font-bold text-foreground group-hover:text-primary transition-colors truncate">
+                                                                {m.firstname && m.lastname ? `${m.firstname} ${m.lastname}` : m.discord_name}
+                                                            </div>
+                                                            <div className="text-xs text-muted-foreground truncate">
+                                                                @{m.discord_name}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div className="col-span-4 md:col-span-4">

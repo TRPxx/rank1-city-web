@@ -209,9 +209,12 @@ export async function GET(request) {
                 p.avatar_url,
                 p.created_at as joined_at,
                 f.leader_discord_id,
-                (p.discord_id = f.leader_discord_id) as is_leader
+                (p.discord_id = f.leader_discord_id) as is_leader,
+                u.firstname,
+                u.lastname
             FROM preregistrations p
             JOIN families f ON p.family_id = f.id
+            LEFT JOIN users u ON p.discord_id = u.discord_id
             WHERE p.family_id = ?
             ORDER BY is_leader DESC, p.created_at ASC
         `, [family.id]);

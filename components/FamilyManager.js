@@ -763,8 +763,12 @@ export default function FamilyManager({ userData }) {
                                                             </Avatar>
                                                         </div>
                                                         <div className="overflow-hidden">
-                                                            <div className="font-bold text-foreground group-hover:text-primary transition-colors truncate">{m.discord_name}</div>
-                                                            <div className="text-xs text-muted-foreground font-mono truncate">ID: {m.discord_id}</div>
+                                                            <div className="font-bold text-foreground group-hover:text-primary transition-colors truncate">
+                                                                {m.firstname && m.lastname ? `${m.firstname} ${m.lastname}` : m.discord_name}
+                                                            </div>
+                                                            <div className="text-xs text-muted-foreground truncate">
+                                                                @{m.discord_name}
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <div className="col-span-4 md:col-span-4">
