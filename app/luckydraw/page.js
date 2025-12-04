@@ -81,7 +81,14 @@ export default function LuckyDrawPage() {
 
                 <div className="flex-1 container max-w-7xl mx-auto py-8 px-4">
                     {/* Header */}
-                    <div className="text-center mb-10 space-y-2">
+                    <div className="relative text-center mb-10 space-y-2">
+                        <div className="absolute right-0 top-0 hidden md:block">
+                            <DrawHistory refreshTrigger={refreshHistory} />
+                        </div>
+                        <div className="md:hidden absolute right-0 top-0">
+                            <DrawHistory refreshTrigger={refreshHistory} />
+                        </div>
+
                         <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-white drop-shadow-lg">
                             <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-amber-600">
                                 LUCKY DRAW
@@ -125,16 +132,11 @@ export default function LuckyDrawPage() {
                             </div>
                         </div>
 
-                        {/* Right Column: Showcase & History (4 cols) */}
+                        {/* Right Column: Showcase (4 cols) */}
                         <div className="lg:col-span-4 space-y-6">
                             {/* Prize Showcase */}
-                            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-xl">
+                            <div className="bg-black/40 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-xl sticky top-24">
                                 <PrizeShowcase />
-                            </div>
-
-                            {/* History */}
-                            <div className="h-[400px]">
-                                <DrawHistory refreshTrigger={refreshHistory} />
                             </div>
                         </div>
                     </div>
