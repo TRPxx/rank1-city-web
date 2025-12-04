@@ -201,20 +201,19 @@ export async function GET(request) {
 
         const family = rows[0];
 
-        // Get Family Members
+        // Get Family Members (firstname/lastname from preregistrations)
         const [members] = await pool.query(`
             SELECT 
                 p.discord_id,
                 p.discord_name,
                 p.avatar_url,
+                p.firstname,
+                p.lastname,
                 p.created_at as joined_at,
                 f.leader_discord_id,
-                (p.discord_id = f.leader_discord_id) as is_leader,
-                u.firstname,
-                u.lastname
+                (p.discord_id = f.leader_discord_id) as is_leader
             FROM preregistrations p
             JOIN families f ON p.family_id = f.id
-            LEFT JOIN users u ON p.discord_id = u.discord_id
             WHERE p.family_id = ?
             ORDER BY is_leader DESC, p.created_at ASC
         `, [family.id]);

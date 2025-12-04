@@ -72,8 +72,8 @@ export async function POST(request) {
 
                 // Insert Gang
                 const [result] = await connection.query(
-                    'INSERT INTO gangs (name, gang_code, leader_discord_id, member_count, logo_url) VALUES (?, ?, ?, 1, ?)',
-                    [name, newGangCode, discordId, logoUrl || null]
+                    'INSERT INTO gangs (name, gang_code, invite_code, leader_discord_id, member_count, logo_url) VALUES (?, ?, ?, ?, 1, ?)',
+                    [name, newGangCode, newGangCode, discordId, logoUrl || null]
                 );
                 const gangId = result.insertId;
 
@@ -237,20 +237,19 @@ export async function GET(request) {
 
         const gang = rows[0];
 
-        // Get Gang Members
+        // Get Gang Members (firstname/lastname from preregistrations)
         const [members] = await pool.query(`
             SELECT 
                 p.discord_id,
                 p.discord_name,
                 p.avatar_url,
+                p.firstname,
+                p.lastname,
                 p.created_at as joined_at,
                 g.leader_discord_id,
-                (p.discord_id = g.leader_discord_id) as is_leader,
-                u.firstname,
-                u.lastname
+                (p.discord_id = g.leader_discord_id) as is_leader
             FROM preregistrations p
             JOIN gangs g ON p.gang_id = g.id
-            LEFT JOIN users u ON p.discord_id = u.discord_id
             WHERE p.gang_id = ?
             ORDER BY is_leader DESC, p.created_at ASC
         `, [gang.id]);

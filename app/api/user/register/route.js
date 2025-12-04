@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import pool from '@/lib/db';
+import { webDb } from '@/lib/db';
 
 import { rateLimit } from '@/lib/rate-limit';
 
@@ -135,6 +136,18 @@ export async function POST(request) {
 
         if (!registered) {
             throw new Error('Server Busy: Unable to generate unique SSN after multiple attempts.');
+        }
+
+        // Sync firstname/lastname to preregistrations (webDb)
+        try {
+            await webDb.query(
+                'UPDATE preregistrations SET firstname = ?, lastname = ? WHERE discord_id = ?',
+                [formattedFirstname, formattedLastname, rawDiscordId]
+            );
+            console.log(`Synced name to preregistrations for ${rawDiscordId}`);
+        } catch (syncError) {
+            console.error('Failed to sync to preregistrations:', syncError);
+            // ไม่ throw error เพราะการลงทะเบียนสำเร็จแล้ว แค่ sync ไม่ได้
         }
 
         return NextResponse.json({ success: true, message: 'ลงทะเบียนสำเร็จ' });
