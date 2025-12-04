@@ -189,7 +189,7 @@ export async function GET(request) {
 
         // Get User's Family Info
         const [rows] = await pool.query(`
-            SELECT f.name, f.family_code, f.member_count, f.max_members, f.leader_discord_id, f.logo_url
+            SELECT f.id, f.name, f.family_code AS invite_code, f.member_count, f.max_members, f.leader_discord_id, f.logo_url, f.motd, f.level
             FROM preregistrations p
             JOIN families f ON p.family_id = f.id
             WHERE p.discord_id = ?
@@ -199,7 +199,28 @@ export async function GET(request) {
             return NextResponse.json({ hasFamily: false });
         }
 
-        return NextResponse.json({ hasFamily: true, family: rows[0] });
+        const family = rows[0];
+
+        // Get Family Members
+        const [members] = await pool.query(`
+            SELECT 
+                p.discord_id,
+                p.discord_name,
+                p.avatar_url,
+                p.created_at as joined_at,
+                f.leader_discord_id,
+                (p.discord_id = f.leader_discord_id) as is_leader
+            FROM preregistrations p
+            JOIN families f ON p.family_id = f.id
+            WHERE p.family_id = ?
+            ORDER BY is_leader DESC, p.created_at ASC
+        `, [family.id]);
+
+        return NextResponse.json({
+            hasFamily: true,
+            family: family,
+            members: members
+        });
 
     } catch (error) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });

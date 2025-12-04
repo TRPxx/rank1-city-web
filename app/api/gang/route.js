@@ -189,7 +189,7 @@ export async function GET(request) {
 
         // Get User's Gang Info
         const [rows] = await pool.query(`
-            SELECT g.name, g.gang_code, g.member_count, g.max_members, g.leader_discord_id, g.logo_url
+            SELECT g.id, g.name, g.gang_code AS invite_code, g.member_count, g.max_members, g.leader_discord_id, g.logo_url, g.motd, g.level
             FROM preregistrations p
             JOIN gangs g ON p.gang_id = g.id
             WHERE p.discord_id = ?
@@ -199,7 +199,28 @@ export async function GET(request) {
             return NextResponse.json({ hasGang: false });
         }
 
-        return NextResponse.json({ hasGang: true, gang: rows[0] });
+        const gang = rows[0];
+
+        // Get Gang Members
+        const [members] = await pool.query(`
+            SELECT 
+                p.discord_id,
+                p.discord_name,
+                p.avatar_url,
+                p.created_at as joined_at,
+                g.leader_discord_id,
+                (p.discord_id = g.leader_discord_id) as is_leader
+            FROM preregistrations p
+            JOIN gangs g ON p.gang_id = g.id
+            WHERE p.gang_id = ?
+            ORDER BY is_leader DESC, p.created_at ASC
+        `, [gang.id]);
+
+        return NextResponse.json({
+            hasGang: true,
+            gang: gang,
+            members: members
+        });
 
     } catch (error) {
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
