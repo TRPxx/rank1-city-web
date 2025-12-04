@@ -235,7 +235,7 @@ export default function FamilyManager({ userData }) {
     }
 
     return (
-        <div className="max-w-7xl mx-auto pt-24 px-6 pb-6 font-sans">
+        <div className="max-w-7xl mx-auto pt-20 px-6 pb-6 font-sans">
             <div className="grid grid-cols-12 gap-8">
 
                 {/* Left Sidebar (Profile) */}
