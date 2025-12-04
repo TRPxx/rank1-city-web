@@ -168,7 +168,7 @@ const payload = {
       { name: "⏰ เวลาที่ Push", value: "```yaml\n" + thaiTime + "\n```", inline: false },
       { name: "📂 ไฟล์ที่แก้ไข (รายละเอียด)", value: detailedChanges, inline: false },
       { name: "📈 สรุปการเปลี่ยนแปลง", value: changeSummary, inline: false },
-      { name: "💬 Commit Message (Original)", value: "```ansi\n\u001b[1;33m" + commitMessage + "\u001b[0m\n```", inline: false }
+
     ],
     footer: { text: "Rank1 City Web System • Deployed Successfully ✅" },
     timestamp: new Date().toISOString()

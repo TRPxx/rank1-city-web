@@ -163,6 +163,42 @@ export async function POST(request) {
 
                 await connection.commit();
                 return NextResponse.json({ success: true, message: 'Gang dissolved' });
+
+            } else if (action === 'kick_member') {
+                if (!userCheck[0].gang_id) throw new Error('You are not in a gang');
+
+                const { targetDiscordId } = body;
+                if (!targetDiscordId) throw new Error('Target member ID required');
+
+                // Verify Leader
+                const [gang] = await connection.query('SELECT leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
+                if (gang[0].leader_discord_id !== discordId) {
+                    throw new Error('Only the leader can kick members');
+                }
+
+                // Prevent leader from kicking themselves
+                if (targetDiscordId === discordId) {
+                    throw new Error('Leader cannot kick themselves');
+                }
+
+                // Check if target is in the same gang
+                const [targetUser] = await connection.query(
+                    'SELECT gang_id FROM preregistrations WHERE discord_id = ?',
+                    [targetDiscordId]
+                );
+
+                if (targetUser.length === 0 || targetUser[0].gang_id !== userCheck[0].gang_id) {
+                    throw new Error('Member not found in your gang');
+                }
+
+                // Remove member from gang
+                await connection.query('UPDATE preregistrations SET gang_id = NULL WHERE discord_id = ?', [targetDiscordId]);
+
+                // Update Gang Count
+                await connection.query('UPDATE gangs SET member_count = member_count - 1 WHERE id = ?', [userCheck[0].gang_id]);
+
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'Member kicked successfully' });
             }
 
             throw new Error('Invalid action');
@@ -216,10 +252,18 @@ export async function GET(request) {
             ORDER BY is_leader DESC, p.created_at ASC
         `, [gang.id]);
 
+        // Convert is_leader from 0/1 to proper boolean
+        const membersWithBoolean = members.map(m => ({
+            ...m,
+            is_leader: Boolean(m.is_leader)
+        }));
+
+        console.log('Gang members with is_leader:', membersWithBoolean);
+
         return NextResponse.json({
             hasGang: true,
             gang: gang,
-            members: members
+            members: membersWithBoolean
         });
 
     } catch (error) {

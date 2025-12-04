@@ -33,6 +33,8 @@ export default function GangManager({ userData }) {
     const [isLeaving, setIsLeaving] = useState(false);
     const [isUpdatingSettings, setIsUpdatingSettings] = useState(false);
     const [isDissolving, setIsDissolving] = useState(false);
+    const [selectedMember, setSelectedMember] = useState(null);
+    const [isKicking, setIsKicking] = useState(false);
     const [settingsName, setSettingsName] = useState('');
     const [settingsMotd, setSettingsMotd] = useState('');
 
@@ -95,7 +97,8 @@ export default function GangManager({ userData }) {
             const data = await res.json();
             if (res.ok) {
                 toast.success('Gang created successfully!');
-                fetchGangData();
+                setLoading(true); // Reset loading to trigger re-render
+                await fetchGangData();
             } else {
                 toast.error(data.error || 'Failed to create gang');
             }
@@ -231,7 +234,39 @@ export default function GangManager({ userData }) {
         toast.success('Invite code copied!');
     };
 
-    const isLeader = members.find(m => m.discord_id === userData?.discordId)?.is_leader;
+    const handleKickMember = async (targetDiscordId) => {
+        setIsKicking(true);
+        try {
+            const res = await fetch('/api/gang', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'kick_member', targetDiscordId }),
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                toast.success('สมาชิกถูกเตะออกจากแก๊งแล้ว');
+                setSelectedMember(null); // Close dialog
+                setLoading(true);
+                await fetchGangData(); // Refresh data
+            } else {
+                toast.error(data.error || 'Failed to kick member');
+            }
+        } catch (error) {
+            toast.error('Something went wrong');
+        } finally {
+            setIsKicking(false);
+        }
+    };
+
+    const isLeader = members.find(m => m.discord_id === userData?.discord_id)?.is_leader;
+
+    // Debug logging
+    console.log('GangManager Debug:', {
+        userData_discordId: userData?.discord_id,
+        members: members,
+        isLeader: isLeader
+    });
 
     if (loading) {
         return (
@@ -704,6 +739,101 @@ export default function GangManager({ userData }) {
                         </Dialog>
                     </div>
 
+                    {/* Member Detail Dialog */}
+                    <Dialog open={!!selectedMember} onOpenChange={() => setSelectedMember(null)}>
+                        <DialogContent className="bg-zinc-950/95 backdrop-blur-xl border-white/10 max-w-md">
+                            <DialogHeader>
+                                <DialogTitle className="text-2xl font-bold flex items-center gap-2">
+                                    <Users className="w-6 h-6 text-primary" />
+                                    ข้อมูลสมาชิก
+                                </DialogTitle>
+                                <DialogDescription>
+                                    รายละเอียดและการจัดการสมาชิกในแก๊ง
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            {selectedMember && (
+                                <div className="space-y-6 py-4">
+                                    {/* Member Avatar & Name */}
+                                    <div className="flex items-center gap-4">
+                                        <Avatar className="h-20 w-20 ring-2 ring-primary/20">
+                                            <AvatarImage src={selectedMember.avatar_url} />
+                                            <AvatarFallback className="bg-zinc-800 text-zinc-400 text-2xl font-bold">
+                                                {selectedMember.discord_name[0]}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1">
+                                            <h3 className="text-xl font-bold text-white">{selectedMember.discord_name}</h3>
+                                            <Badge variant="outline" className={`mt-1 ${selectedMember.is_leader ? `${theme.bg}/20 ${theme.text} ${theme.border}` : 'bg-background/30 text-muted-foreground border-white/5'}`}>
+                                                {selectedMember.is_leader ? 'Leader' : 'Member'}
+                                            </Badge>
+                                        </div>
+                                    </div>
+
+                                    {/* Member Info */}
+                                    <div className="space-y-3">
+                                        <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                                            <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">Discord ID</div>
+                                            <div className="text-sm font-mono text-zinc-300">{selectedMember.discord_id}</div>
+                                        </div>
+                                        <div className="p-3 rounded-lg bg-white/5 border border-white/10">
+                                            <div className="text-xs text-zinc-500 uppercase tracking-wider mb-1">วันที่เข้าร่วม</div>
+                                            <div className="text-sm text-zinc-300">{new Date(selectedMember.joined_at).toLocaleString('th-TH')}</div>
+                                        </div>
+                                    </div>
+
+                                    {/* Leader Actions */}
+                                    {isLeader && !selectedMember.is_leader && (
+                                        <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/20 space-y-3">
+                                            <h4 className="text-red-400 font-bold flex items-center gap-2 text-sm">
+                                                <Shield className="w-4 h-4" /> การจัดการสมาชิก
+                                            </h4>
+                                            <p className="text-xs text-zinc-400">เตะสมาชิกออกจากแก๊ง (ไม่สามารถย้อนกลับได้)</p>
+                                            <Dialog>
+                                                <DialogTrigger asChild>
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
+                                                        className="w-full"
+                                                        disabled={isKicking}
+                                                    >
+                                                        {isKicking ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <LogOut className="mr-2 h-4 w-4" />}
+                                                        เตะออกจากแก๊ง
+                                                    </Button>
+                                                </DialogTrigger>
+                                                <DialogContent className="bg-zinc-950 border-red-500/20">
+                                                    <DialogHeader>
+                                                        <DialogTitle className="text-red-500 flex items-center gap-2">
+                                                            <AlertCircle className="w-5 h-5" />
+                                                            ยืนยันการเตะสมาชิก
+                                                        </DialogTitle>
+                                                        <DialogDescription className="text-zinc-400">
+                                                            คุณแน่ใจหรือไม่ที่จะเตะ <span className="font-bold text-white">{selectedMember.discord_name}</span> ออกจากแก๊ง?
+                                                            สมาชิกจะต้องถูกเชิญใหม่หากต้องการกลับเข้ามา
+                                                        </DialogDescription>
+                                                    </DialogHeader>
+                                                    <DialogFooter className="gap-2 sm:gap-0">
+                                                        <DialogTrigger asChild>
+                                                            <Button variant="ghost">ยกเลิก</Button>
+                                                        </DialogTrigger>
+                                                        <Button
+                                                            variant="destructive"
+                                                            onClick={() => handleKickMember(selectedMember.discord_id)}
+                                                            disabled={isKicking}
+                                                        >
+                                                            {isKicking ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                                            ยืนยันเตะสมาชิก
+                                                        </Button>
+                                                    </DialogFooter>
+                                                </DialogContent>
+                                            </Dialog>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </DialogContent>
+                    </Dialog>
+
                     {/* Members Section */}
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -752,6 +882,7 @@ export default function GangManager({ userData }) {
                                                     initial={{ opacity: 0, y: 10 }}
                                                     animate={{ opacity: 1, y: 0 }}
                                                     transition={{ delay: i * 0.05 }}
+                                                    onClick={() => setSelectedMember(m)}
                                                     className="grid grid-cols-12 items-center p-3 rounded-xl hover:bg-white/5 transition-colors group cursor-pointer border border-transparent hover:border-white/5"
                                                 >
                                                     <div className="col-span-6 md:col-span-6 flex items-center gap-4">

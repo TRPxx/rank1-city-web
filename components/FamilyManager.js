@@ -95,7 +95,8 @@ export default function FamilyManager({ userData }) {
             const data = await res.json();
             if (res.ok) {
                 toast.success('Family created successfully!');
-                fetchFamilyData();
+                setLoading(true); // Reset loading to trigger re-render
+                await fetchFamilyData();
             } else {
                 toast.error(data.error || 'Failed to create family');
             }
@@ -231,7 +232,7 @@ export default function FamilyManager({ userData }) {
         toast.success('Invite code copied!');
     };
 
-    const isLeader = members.find(m => m.discord_id === userData?.discordId)?.is_leader;
+    const isLeader = members.find(m => m.discord_id === userData?.discord_id)?.is_leader;
 
     if (loading) {
         return (

@@ -72,8 +72,8 @@ export async function POST(request) {
 
                 // Insert Family
                 const [result] = await connection.query(
-                    'INSERT INTO families (name, family_code, leader_discord_id, member_count, logo_url) VALUES (?, ?, ?, 1, ?)',
-                    [name, newFamilyCode, discordId, logoUrl || null]
+                    'INSERT INTO families (name, family_code, invite_code, leader_discord_id, member_count, logo_url) VALUES (?, ?, ?, ?, 1, ?)',
+                    [name, newFamilyCode, newFamilyCode, discordId, logoUrl || null]
                 );
                 const familyId = result.insertId;
 
@@ -189,7 +189,7 @@ export async function GET(request) {
 
         // Get User's Family Info
         const [rows] = await pool.query(`
-            SELECT f.id, f.name, f.family_code AS invite_code, f.member_count, f.max_members, f.leader_discord_id, f.logo_url, f.motd, f.level
+            SELECT f.id, f.name, f.family_code AS invite_code, f.member_count, f.max_members, f.leader_discord_id, f.logo_url
             FROM preregistrations p
             JOIN families f ON p.family_id = f.id
             WHERE p.discord_id = ?
@@ -216,13 +216,20 @@ export async function GET(request) {
             ORDER BY is_leader DESC, p.created_at ASC
         `, [family.id]);
 
+        // Convert is_leader from 0/1 to proper boolean
+        const membersWithBoolean = members.map(m => ({
+            ...m,
+            is_leader: Boolean(m.is_leader)
+        }));
+
         return NextResponse.json({
             hasFamily: true,
             family: family,
-            members: members
+            members: membersWithBoolean
         });
 
     } catch (error) {
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        console.error('Error in GET /api/family:', error);
+        return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
     }
 }
