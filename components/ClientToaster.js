@@ -11,13 +11,18 @@ export default function ClientToaster() {
             theme={theme}
             position="top-right"
             richColors
-            duration={10000}
+            closeButton
+            duration={3000}
             toastOptions={{
                 style: {
                     marginTop: '50px',
                 },
-                className: "group toast group-[.toaster]:bg-background group-[.toaster]:text-foreground group-[.toaster]:border-border group-[.toaster]:shadow-lg font-sans",
-                descriptionClassName: "group-[.toast]:text-muted-foreground",
+                classNames: {
+                    toast: "group toast group-[.toaster]:bg-background/90 group-[.toaster]:backdrop-blur-xl group-[.toaster]:text-foreground group-[.toaster]:border-border/40 group-[.toaster]:shadow-2xl group-[.toaster]:rounded-[1.5rem] font-sans",
+                    description: "group-[.toast]:text-muted-foreground",
+                    actionButton: "group-[.toast]:bg-primary group-[.toast]:text-primary-foreground",
+                    cancelButton: "group-[.toast]:bg-muted group-[.toast]:text-muted-foreground",
+                },
             }}
         />
     );

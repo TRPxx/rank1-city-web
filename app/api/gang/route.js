@@ -4,6 +4,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { webDb as pool } from '@/lib/db';
 import { PREREGISTER_CONFIG } from '@/lib/preregister-config';
 
+export const dynamic = 'force-dynamic';
+
 // Helper to generate gang code
 function generateGangCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -25,7 +27,7 @@ export async function POST(request) {
 
         const discordId = session.user.id;
         const body = await request.json();
-        const { action, name, gangCode, logoUrl } = body; // action: 'create' | 'join' | 'update_logo'
+        const { action, name, logoUrl } = body; // action: 'create' | 'join' | 'update_logo'
 
         const connection = await pool.getConnection();
         await connection.beginTransaction();
@@ -60,8 +62,11 @@ export async function POST(request) {
                 return NextResponse.json({ success: true, message: 'Logo updated' });
             }
 
-            if (userCheck[0].gang_id) {
-                throw new Error('You are already in a gang');
+            // For create and join, user must NOT be in a gang
+            if (['create', 'join'].includes(action)) {
+                if (userCheck[0].gang_id) {
+                    throw new Error('You are already in a gang');
+                }
             }
 
             if (action === 'create') {
@@ -83,16 +88,55 @@ export async function POST(request) {
                     [gangId, discordId]
                 );
 
+                // Get user info for member list
+                const [userInfo] = await connection.query(
+                    'SELECT discord_id, discord_name, avatar_url, firstname, lastname FROM preregistrations WHERE discord_id = ?',
+                    [discordId]
+                );
+
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Gang created', gangCode: newGangCode });
+
+                // Return full gang data so frontend can display immediately
+                const gangData = {
+                    id: gangId,
+                    name: name,
+                    invite_code: newGangCode,
+                    member_count: 1,
+                    max_members: 25,
+                    leader_discord_id: discordId,
+                    logo_url: logoUrl || null,
+                    motd: null,
+                    level: 1
+                };
+
+                const membersData = userInfo.length > 0 ? [{
+                    discord_id: String(userInfo[0].discord_id),
+                    discord_name: userInfo[0].discord_name,
+                    avatar_url: userInfo[0].avatar_url,
+                    firstname: userInfo[0].firstname,
+                    lastname: userInfo[0].lastname,
+                    joined_at: new Date().toISOString(),
+                    is_leader: true
+                }] : [];
+
+                return NextResponse.json({
+                    success: true,
+                    message: 'Gang created',
+                    gangCode: newGangCode,
+                    gang: gangData,
+                    members: membersData
+                });
 
             } else if (action === 'join') {
-                if (!gangCode) throw new Error('Gang code required');
+                const { inviteCode } = body;
+                if (!inviteCode) throw new Error('Gang code required');
+
+                console.log(`[Gang] Join Request: User=${discordId}, Code=${inviteCode}`);
 
                 // Find Gang
                 const [gang] = await connection.query(
                     'SELECT id, member_count, max_members FROM gangs WHERE gang_code = ?',
-                    [gangCode]
+                    [inviteCode]
                 );
 
                 if (gang.length === 0) throw new Error('Gang not found');
@@ -167,8 +211,13 @@ export async function POST(request) {
             } else if (action === 'kick_member') {
                 if (!userCheck[0].gang_id) throw new Error('You are not in a gang');
 
-                const { targetDiscordId } = body;
+                let { targetDiscordId } = body;
                 if (!targetDiscordId) throw new Error('Target member ID required');
+
+                // Ensure string
+                targetDiscordId = String(targetDiscordId);
+
+                console.log(`[Gang] Kicking member: Leader=${discordId}, Target=${targetDiscordId}`);
 
                 // Verify Leader
                 const [gang] = await connection.query('SELECT leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
@@ -187,12 +236,24 @@ export async function POST(request) {
                     [targetDiscordId]
                 );
 
-                if (targetUser.length === 0 || targetUser[0].gang_id !== userCheck[0].gang_id) {
+                if (targetUser.length === 0) {
+                    console.log(`[Gang] Target user not found in DB: ${targetDiscordId}`);
+                    throw new Error('Member not found in database');
+                }
+
+                if (targetUser[0].gang_id !== userCheck[0].gang_id) {
+                    console.log(`[Gang] Target user in different gang/no gang: ${targetUser[0].gang_id} vs ${userCheck[0].gang_id}`);
                     throw new Error('Member not found in your gang');
                 }
 
                 // Remove member from gang
-                await connection.query('UPDATE preregistrations SET gang_id = NULL WHERE discord_id = ?', [targetDiscordId]);
+                const [result] = await connection.query('UPDATE preregistrations SET gang_id = NULL WHERE discord_id = ?', [targetDiscordId]);
+
+                console.log(`[Gang] Kick result: AffectedRows=${result.affectedRows}`);
+
+                if (result.affectedRows === 0) {
+                    throw new Error('Failed to kick member (User not found or already kicked)');
+                }
 
                 // Update Gang Count
                 await connection.query('UPDATE gangs SET member_count = member_count - 1 WHERE id = ?', [userCheck[0].gang_id]);
@@ -240,18 +301,18 @@ export async function GET(request) {
         // Get Gang Members (firstname/lastname from preregistrations)
         const [members] = await pool.query(`
             SELECT 
-                p.discord_id,
+                CAST(p.discord_id AS CHAR) as discord_id,
                 p.discord_name,
                 p.avatar_url,
                 p.firstname,
                 p.lastname,
-                p.created_at as joined_at,
+                NOW() as joined_at,
                 g.leader_discord_id,
                 (p.discord_id = g.leader_discord_id) as is_leader
             FROM preregistrations p
             JOIN gangs g ON p.gang_id = g.id
             WHERE p.gang_id = ?
-            ORDER BY is_leader DESC, p.created_at ASC
+            ORDER BY is_leader DESC, p.discord_name ASC
         `, [gang.id]);
 
         // Convert is_leader from 0/1 to proper boolean

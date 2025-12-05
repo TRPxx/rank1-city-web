@@ -58,11 +58,13 @@ export default function GangManager({ userData }) {
 
     useEffect(() => {
         fetchGangData();
+        const interval = setInterval(fetchGangData, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     const fetchGangData = async () => {
         try {
-            const res = await fetch('/api/gang');
+            const res = await fetch(`/api/gang?_=${Date.now()}`, { cache: 'no-store' });
             const data = await res.json();
 
             if (data.gang) {
@@ -96,9 +98,22 @@ export default function GangManager({ userData }) {
 
             const data = await res.json();
             if (res.ok) {
-                toast.success('Gang created successfully!');
-                setLoading(true); // Reset loading to trigger re-render
-                await fetchGangData();
+                toast.success('สร้างแก๊งสำเร็จ!');
+                // Clear form fields
+                setCreateName('');
+                setCreateLogo('');
+                // Set gang state directly from API response if available
+                if (data.gang) {
+                    setGang(data.gang);
+                    setInviteCode(data.gang.invite_code || '');
+                    setMembers(data.members || []);
+                    setLogoUrl(data.gang.logo_url || '');
+                    setLoading(false);
+                } else {
+                    // Fallback: fetch gang data
+                    setLoading(true);
+                    await fetchGangData();
+                }
             } else {
                 toast.error(data.error || 'Failed to create gang');
             }
@@ -230,8 +245,10 @@ export default function GangManager({ userData }) {
     };
 
     const copyInviteCode = () => {
-        navigator.clipboard.writeText(inviteCode);
-        toast.success('Invite code copied!');
+        if (gang?.invite_code) {
+            navigator.clipboard.writeText(gang.invite_code);
+            toast.success('คัดลอกรหัสเชิญแล้ว!');
+        }
     };
 
     const handleKickMember = async (targetDiscordId) => {
@@ -396,50 +413,94 @@ export default function GangManager({ userData }) {
                         <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-tr ${theme.from} ${theme.to} rounded-full blur-[50px] opacity-20 group-hover:opacity-40 transition-opacity duration-500`} />
 
                         <div className="relative mb-6 inline-block group/avatar">
-                            <div className={`w-28 h-28 rounded-2xl p-1 bg-gradient-to-br ${theme.from} ${theme.to}`}>
-                                <Avatar className="w-full h-full rounded-xl border-4 border-black/50">
-                                    <AvatarImage src={gang.logo_url} className="object-cover" />
-                                    <AvatarFallback className="bg-muted text-primary text-2xl font-bold">
-                                        {gang.name.substring(0, 2).toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
+                            {/* Logo Container */}
+                            <div className={`relative w-28 h-28 rounded-2xl p-[3px] bg-gradient-to-br ${theme.from} ${theme.to} shadow-lg shadow-blue-500/30 group-hover/avatar:shadow-blue-500/50 transition-all duration-300`}>
+                                {/* Inner Glow */}
+                                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-300" />
+
+                                <div className="relative w-full h-full rounded-xl overflow-hidden bg-zinc-900">
+                                    {gang.logo_url ? (
+                                        <img
+                                            src={gang.logo_url}
+                                            alt={gang.name}
+                                            className="w-full h-full object-cover group-hover/avatar:scale-110 transition-transform duration-500"
+                                        />
+                                    ) : (
+                                        <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${theme.from}/20 ${theme.to}/20`}>
+                                            <span className="text-3xl font-bold text-white/80">
+                                                {gang.name.substring(0, 2).toUpperCase()}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* Overlay Shine Effect */}
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-300" />
+                                </div>
                             </div>
+
+                            {/* Leader Crown Badge */}
+                            {isLeader && (
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                                    <div className="relative">
+                                        <div className="absolute inset-0 bg-yellow-500/50 blur-md rounded-full" />
+                                        <div className="relative bg-gradient-to-r from-yellow-400 to-amber-500 text-black p-1.5 rounded-full shadow-lg">
+                                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                                                <path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5zm14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z" />
+                                            </svg>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Edit Button */}
                             {isLeader && (
                                 <Dialog>
                                     <DialogTrigger asChild>
                                         <Button
                                             size="icon"
                                             variant="secondary"
-                                            className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full shadow-lg opacity-0 group-hover/avatar:opacity-100 transition-opacity"
+                                            className="absolute -bottom-2 -right-2 h-9 w-9 rounded-full shadow-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white border-2 border-background opacity-0 group-hover/avatar:opacity-100 transition-all duration-200 hover:scale-110"
                                         >
                                             <Settings className="w-4 h-4" />
                                         </Button>
                                     </DialogTrigger>
-                                    <DialogContent className="bg-zinc-900 border-zinc-800">
+                                    <DialogContent className="bg-zinc-900/95 backdrop-blur-xl border-white/10">
                                         <DialogHeader>
-                                            <DialogTitle>Update Gang Logo</DialogTitle>
-                                            <DialogDescription>Enter a new URL for your gang's logo.</DialogDescription>
+                                            <DialogTitle className="flex items-center gap-2">
+                                                <div className="p-2 rounded-lg bg-primary/10">
+                                                    <Shield className="w-5 h-5 text-primary" />
+                                                </div>
+                                                อัพเดทโลโก้แก๊ง
+                                            </DialogTitle>
+                                            <DialogDescription>ใส่ลิงก์รูปภาพสำหรับโลโก้แก๊งของคุณ</DialogDescription>
                                         </DialogHeader>
                                         <div className="space-y-4 py-4">
+                                            {/* Logo Preview */}
                                             <div className="flex justify-center">
-                                                <Avatar className="h-24 w-24 border-2 border-zinc-700">
-                                                    <AvatarImage src={logoUrl} />
-                                                    <AvatarFallback>Preview</AvatarFallback>
-                                                </Avatar>
+                                                <div className={`w-24 h-24 rounded-xl p-[2px] bg-gradient-to-br ${theme.from} ${theme.to}`}>
+                                                    <div className="w-full h-full rounded-[10px] overflow-hidden bg-zinc-800 flex items-center justify-center">
+                                                        {logoUrl ? (
+                                                            <img src={logoUrl} alt="Preview" className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <span className="text-zinc-500 text-sm">ตัวอย่าง</span>
+                                                        )}
+                                                    </div>
+                                                </div>
                                             </div>
                                             <Input
                                                 value={logoUrl}
                                                 onChange={(e) => setLogoUrl(e.target.value)}
                                                 placeholder="https://example.com/logo.png"
-                                                className="bg-black/50"
+                                                className="bg-black/50 border-white/10 focus:border-primary/50"
                                             />
                                             <p className="text-xs text-zinc-500 text-center">
-                                                แนะนำขนาด: 512x512px (Square Ratio) เพื่อความสวยงาม
+                                                💡 แนะนำขนาด: 512x512px (สัดส่วน 1:1) เพื่อความสวยงาม
                                             </p>
                                         </div>
                                         <DialogFooter>
-                                            <Button onClick={handleUpdateLogo} disabled={isEditingLogo} className="bg-blue-600 hover:bg-blue-700">
-                                                {isEditingLogo ? 'Updating...' : 'Save Changes'}
+                                            <Button onClick={handleUpdateLogo} disabled={isEditingLogo} className={`bg-gradient-to-r ${theme.from} ${theme.to} hover:opacity-90 text-white`}>
+                                                {isEditingLogo ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                                {isEditingLogo ? 'กำลังบันทึก...' : 'บันทึกการเปลี่ยนแปลง'}
                                             </Button>
                                         </DialogFooter>
                                     </DialogContent>
@@ -450,7 +511,7 @@ export default function GangManager({ userData }) {
                         <h2 className="text-2xl font-bold text-foreground mb-1 tracking-tight">{gang.name}</h2>
                         <div
                             onClick={copyInviteCode}
-                            className="flex items-center justify-center gap-2 text-muted-foreground text-sm mb-6 bg-background/30 py-1 px-3 rounded-full mx-auto w-fit border border-white/5 cursor-pointer hover:bg-background/50 transition-colors"
+                            className="relative z-10 flex items-center justify-center gap-2 text-muted-foreground text-sm mb-6 bg-background/30 py-1 px-3 rounded-full mx-auto w-fit border border-white/5 cursor-pointer hover:bg-background/50 transition-colors"
                         >
                             <span className="font-mono">{gang.invite_code}</span>
                             <Copy className="w-3 h-3" />

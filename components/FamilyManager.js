@@ -58,11 +58,13 @@ export default function FamilyManager({ userData }) {
 
     useEffect(() => {
         fetchFamilyData();
+        const interval = setInterval(fetchFamilyData, 5000);
+        return () => clearInterval(interval);
     }, []);
 
     const fetchFamilyData = async () => {
         try {
-            const res = await fetch('/api/family');
+            const res = await fetch(`/api/family?_=${Date.now()}`, { cache: 'no-store' });
             const data = await res.json();
 
             if (data.family) {
@@ -230,8 +232,10 @@ export default function FamilyManager({ userData }) {
     };
 
     const copyInviteCode = () => {
-        navigator.clipboard.writeText(inviteCode);
-        toast.success('Invite code copied!');
+        if (family?.invite_code) {
+            navigator.clipboard.writeText(family.invite_code);
+            toast.success('คัดลอกรหัสเชิญแล้ว!');
+        }
     };
 
     const handleKickMember = async (targetDiscordId) => {
@@ -439,7 +443,7 @@ export default function FamilyManager({ userData }) {
                         <h2 className="text-2xl font-bold text-foreground mb-1 tracking-tight">{family.name}</h2>
                         <div
                             onClick={copyInviteCode}
-                            className="flex items-center justify-center gap-2 text-muted-foreground text-sm mb-6 bg-background/30 py-1 px-3 rounded-full mx-auto w-fit border border-white/5 cursor-pointer hover:bg-background/50 transition-colors"
+                            className="relative z-10 flex items-center justify-center gap-2 text-muted-foreground text-sm mb-6 bg-background/30 py-1 px-3 rounded-full mx-auto w-fit border border-white/5 cursor-pointer hover:bg-background/50 transition-colors"
                         >
                             <span className="font-mono">{family.invite_code}</span>
                             <Copy className="w-3 h-3" />

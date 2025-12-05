@@ -4,6 +4,8 @@ import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { webDb as pool } from '@/lib/db';
 import { PREREGISTER_CONFIG } from '@/lib/preregister-config';
 
+export const dynamic = 'force-dynamic';
+
 // Helper to generate family code
 function generateFamilyCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -87,12 +89,15 @@ export async function POST(request) {
                 return NextResponse.json({ success: true, message: 'Family created', familyCode: newFamilyCode });
 
             } else if (action === 'join') {
-                if (!familyCode) throw new Error('Family code required');
+                const { inviteCode } = body;
+                if (!inviteCode) throw new Error('Family code required');
+
+                console.log(`[Family] Join Request: User=${discordId}, Code=${inviteCode}`);
 
                 // Find Family
                 const [family] = await connection.query(
                     'SELECT id, member_count, max_members FROM families WHERE family_code = ?',
-                    [familyCode]
+                    [inviteCode]
                 );
 
                 if (family.length === 0) throw new Error('Family not found');
@@ -167,8 +172,13 @@ export async function POST(request) {
             } else if (action === 'kick_member') {
                 if (!userCheck[0].family_id) throw new Error('You are not in a family');
 
-                const { targetDiscordId } = body;
+                let { targetDiscordId } = body;
                 if (!targetDiscordId) throw new Error('Target member ID required');
+
+                // Ensure string
+                targetDiscordId = String(targetDiscordId);
+
+                console.log(`[Family] Kicking member: Leader=${discordId}, Target=${targetDiscordId}`);
 
                 // Verify Leader
                 const [family] = await connection.query('SELECT leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
@@ -187,12 +197,24 @@ export async function POST(request) {
                     [targetDiscordId]
                 );
 
-                if (targetUser.length === 0 || targetUser[0].family_id !== userCheck[0].family_id) {
+                if (targetUser.length === 0) {
+                    console.log(`[Family] Target user not found in DB: ${targetDiscordId}`);
+                    throw new Error('Member not found in database');
+                }
+
+                if (targetUser[0].family_id !== userCheck[0].family_id) {
+                    console.log(`[Family] Target user in different family/no family: ${targetUser[0].family_id} vs ${userCheck[0].family_id}`);
                     throw new Error('Member not found in your family');
                 }
 
                 // Remove member from family
-                await connection.query('UPDATE preregistrations SET family_id = NULL WHERE discord_id = ?', [targetDiscordId]);
+                const [result] = await connection.query('UPDATE preregistrations SET family_id = NULL WHERE discord_id = ?', [targetDiscordId]);
+
+                console.log(`[Family] Kick result: AffectedRows=${result.affectedRows}`);
+
+                if (result.affectedRows === 0) {
+                    throw new Error('Failed to kick member (User not found or already kicked)');
+                }
 
                 // Update Family Count
                 await connection.query('UPDATE families SET member_count = member_count - 1 WHERE id = ?', [userCheck[0].family_id]);
@@ -240,18 +262,18 @@ export async function GET(request) {
         // Get Family Members (firstname/lastname from preregistrations)
         const [members] = await pool.query(`
             SELECT 
-                p.discord_id,
+                CAST(p.discord_id AS CHAR) as discord_id,
                 p.discord_name,
                 p.avatar_url,
                 p.firstname,
                 p.lastname,
-                p.created_at as joined_at,
+                NOW() as joined_at,
                 f.leader_discord_id,
                 (p.discord_id = f.leader_discord_id) as is_leader
             FROM preregistrations p
             JOIN families f ON p.family_id = f.id
             WHERE p.family_id = ?
-            ORDER BY is_leader DESC, p.created_at ASC
+            ORDER BY is_leader DESC, p.discord_name ASC
         `, [family.id]);
 
         // Convert is_leader from 0/1 to proper boolean

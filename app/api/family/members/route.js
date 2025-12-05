@@ -21,14 +21,14 @@ export async function GET(request) {
                 p.discord_id,
                 p.discord_name,
                 p.avatar_url,
-                p.created_at,
+                NOW() as joined_at,
                 f.leader_discord_id
             FROM preregistrations p
             INNER JOIN families f ON p.family_id = f.id
             WHERE f.family_code = ?
             ORDER BY 
                 CASE WHEN p.discord_id = f.leader_discord_id THEN 0 ELSE 1 END,
-                p.created_at ASC
+                p.discord_name ASC
         `, [familyCode]);
 
         return NextResponse.json({
@@ -36,7 +36,7 @@ export async function GET(request) {
                 discord_id: m.discord_id,
                 discord_name: m.discord_name,
                 avatar_url: m.avatar_url,
-                joined_at: m.created_at,
+                joined_at: m.joined_at,
                 is_leader: m.discord_id === m.leader_discord_id
             }))
         });
