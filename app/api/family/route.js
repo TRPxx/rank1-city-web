@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { webDb as pool } from '@/lib/db';
 import { PREREGISTER_CONFIG } from '@/lib/preregister-config';
+import { rateLimit } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,8 +17,35 @@ function generateFamilyCode() {
     return code;
 }
 
+// [SECURITY FIX #8] ฟังก์ชันตรวจสอบ URL ของโลโก้
+function isValidImageUrl(url) {
+    if (!url) return true; // ว่างได้
+    try {
+        const parsed = new URL(url);
+        const allowedDomains = [
+            'pic.in.th', 'www.pic.in.th',
+            'i.imgur.com', 'imgur.com',
+            'i.ibb.co', 'ibb.co',
+            'cdn.discordapp.com',
+            'media.discordapp.net',
+            'raw.githubusercontent.com'
+        ];
+        return allowedDomains.some(domain =>
+            parsed.hostname === domain || parsed.hostname.endsWith('.' + domain)
+        );
+    } catch {
+        return false;
+    }
+}
+
 export async function POST(request) {
     try {
+        // [SECURITY FIX #7] Rate Limiting - 10 requests ต่อนาที
+        const ip = request.headers.get("x-forwarded-for") || "unknown";
+        if (!rateLimit(ip, 10, 60000)) {
+            return NextResponse.json({ error: 'คำขอมากเกินไป กรุณารอสักครู่' }, { status: 429 });
+        }
+
         const session = await getServerSession(authOptions);
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -51,6 +79,11 @@ export async function POST(request) {
             if (action === 'update_logo') {
                 if (!userCheck[0].family_id) throw new Error('You are not in a family');
 
+                // [SECURITY FIX #8] ตรวจสอบ URL ของโลโก้
+                if (!isValidImageUrl(logoUrl)) {
+                    throw new Error('URL โลโก้ไม่ถูกต้อง กรุณาใช้ pic.in.th, imgur.com หรือ imgbb.com');
+                }
+
                 // Verify Leader
                 const [family] = await connection.query('SELECT leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
                 if (family[0].leader_discord_id !== discordId) {
@@ -59,7 +92,7 @@ export async function POST(request) {
 
                 await connection.query('UPDATE families SET logo_url = ? WHERE id = ?', [logoUrl, userCheck[0].family_id]);
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Logo updated' });
+                return NextResponse.json({ success: true, message: 'อัพเดทโลโก้สำเร็จ' });
             }
 
             if (userCheck[0].family_id) {
@@ -67,15 +100,36 @@ export async function POST(request) {
             }
 
             if (action === 'create') {
-                if (!name || name.length < 3) throw new Error('Family name too short');
+                // [SECURITY FIX #9] ตรวจสอบชื่อครอบครัวอย่างละเอียด
+                const trimmedName = name?.trim();
+                if (!trimmedName) throw new Error('กรุณาใส่ชื่อครอบครัว');
+                if (trimmedName.length < 3) throw new Error('ชื่อครอบครัวต้องมีอย่างน้อย 3 ตัวอักษร');
+                if (trimmedName.length > 20) throw new Error('ชื่อครอบครัวต้องไม่เกิน 20 ตัวอักษร');
+                if (!/^[a-zA-Z0-9\s\u0E00-\u0E7F]+$/.test(trimmedName)) {
+                    throw new Error('ชื่อครอบครัวใช้ได้เฉพาะตัวอักษร ตัวเลข และภาษาไทย');
+                }
 
-                // Generate unique code
-                let newFamilyCode = generateFamilyCode();
+                // [SECURITY FIX #4] สร้างรหัสที่ไม่ซ้ำด้วย retry loop
+                let newFamilyCode;
+                let isUnique = false;
+                let attempts = 0;
+
+                while (!isUnique && attempts < 10) {
+                    newFamilyCode = generateFamilyCode();
+                    const [existing] = await connection.query(
+                        'SELECT id FROM families WHERE family_code = ?',
+                        [newFamilyCode]
+                    );
+                    if (existing.length === 0) isUnique = true;
+                    attempts++;
+                }
+
+                if (!isUnique) throw new Error('ไม่สามารถสร้างรหัสครอบครัวได้ กรุณาลองใหม่');
 
                 // Insert Family
                 const [result] = await connection.query(
                     'INSERT INTO families (name, family_code, invite_code, leader_discord_id, member_count, logo_url) VALUES (?, ?, ?, ?, 1, ?)',
-                    [name, newFamilyCode, newFamilyCode, discordId, logoUrl || null]
+                    [trimmedName, newFamilyCode, newFamilyCode, discordId, logoUrl || null]
                 );
                 const familyId = result.insertId;
 
@@ -92,21 +146,31 @@ export async function POST(request) {
                 const { inviteCode } = body;
                 if (!inviteCode) throw new Error('Family code required');
 
-                console.log(`[Family] Join Request: User=${discordId}, Code=${inviteCode}`);
-
-                // Find Family
-                const [family] = await connection.query(
-                    'SELECT id, member_count, max_members FROM families WHERE family_code = ?',
+                // [SECURITY FIX #2] Atomic UPDATE เพื่อป้องกัน Race Condition
+                // ใช้ UPDATE พร้อมเงื่อนไขใน SQL เดียว แทน SELECT แล้วเช็ค
+                const [updateResult] = await connection.query(
+                    `UPDATE families 
+                     SET member_count = member_count + 1 
+                     WHERE family_code = ? AND member_count < max_members`,
                     [inviteCode]
                 );
 
-                if (family.length === 0) throw new Error('Family not found');
-                if (family[0].member_count >= family[0].max_members) throw new Error('Family is full');
+                if (updateResult.affectedRows === 0) {
+                    // เช็คว่าไม่พบครอบครัว หรือ ครอบครัวเต็ม
+                    const [familyCheck] = await connection.query(
+                        'SELECT id, member_count, max_members FROM families WHERE family_code = ?',
+                        [inviteCode]
+                    );
+                    if (familyCheck.length === 0) {
+                        throw new Error('ไม่พบครอบครัว');
+                    }
+                    throw new Error('ครอบครัวเต็มแล้ว');
+                }
 
-                // Update Family Count
-                await connection.query(
-                    'UPDATE families SET member_count = member_count + 1 WHERE id = ?',
-                    [family[0].id]
+                // ดึง family_id สำหรับ update user
+                const [family] = await connection.query(
+                    'SELECT id FROM families WHERE family_code = ?',
+                    [inviteCode]
                 );
 
                 // Update User
@@ -116,7 +180,7 @@ export async function POST(request) {
                 );
 
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Joined family successfully' });
+                return NextResponse.json({ success: true, message: 'เข้าร่วมครอบครัวสำเร็จ' });
 
             } else if (action === 'leave') {
                 if (!userCheck[0].family_id) throw new Error('You are not in a family');

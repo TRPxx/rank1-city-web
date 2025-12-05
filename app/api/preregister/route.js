@@ -55,6 +55,7 @@ export async function POST(request) {
 
         try {
             let validReferredBy = null;
+            const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
 
             if (referralCodeInput) {
                 const [referrer] = await connection.query(
@@ -63,49 +64,60 @@ export async function POST(request) {
                 );
 
                 if (referrer.length > 0 && referrer[0].discord_id !== discordId) {
-                    validReferredBy = referralCodeInput;
-
-                    // 1. Update Referrer Stats
-                    await connection.query(
-                        'UPDATE preregistrations SET invite_count = invite_count + 1, ticket_count = ticket_count + 1 WHERE referral_code = ?',
-                        [validReferredBy]
+                    // [SECURITY FIX #5] ป้องกัน Referral Abuse - จำกัด 3 referrals ต่อ IP
+                    const [ipCheck] = await connection.query(
+                        'SELECT COUNT(*) as count FROM preregistrations WHERE ip_address = ? AND referred_by IS NOT NULL',
+                        [ipAddress]
                     );
 
-                    // 2. Check & Award Milestone Rewards
-                    const [updatedReferrer] = await connection.query(
-                        'SELECT invite_count FROM preregistrations WHERE referral_code = ?',
-                        [validReferredBy]
-                    );
+                    if (ipCheck[0].count >= 3) {
+                        // IP นี้มี referral มากเกินไป - ยังลงทะเบียนได้แต่ไม่นับ referral
+                        console.log(`[Security] Referral abuse detected from IP: ${ipAddress.slice(-8)} (${ipCheck[0].count} referrals)`);
+                        validReferredBy = null;
+                    } else {
+                        validReferredBy = referralCodeInput;
 
-                    const newInviteCount = updatedReferrer[0].invite_count;
-                    const referrerDiscordId = referrer[0].discord_id;
-                    const rewards = PREREGISTER_CONFIG.rewards.individual;
+                        // 1. Update Referrer Stats
+                        await connection.query(
+                            'UPDATE preregistrations SET invite_count = invite_count + 1, ticket_count = ticket_count + 1 WHERE referral_code = ?',
+                            [validReferredBy]
+                        );
 
-                    for (const reward of rewards) {
-                        if (newInviteCount >= reward.count) {
-                            // Unique ID for this specific milestone reward
-                            const rewardItemId = `ref_reward_${reward.count}`;
+                        // 2. Check & Award Milestone Rewards
+                        const [updatedReferrer] = await connection.query(
+                            'SELECT invite_count FROM preregistrations WHERE referral_code = ?',
+                            [validReferredBy]
+                        );
 
-                            // Check if already in queue (to avoid duplicates)
-                            const [existingClaim] = await connection.query(
-                                'SELECT id FROM claim_queue WHERE discord_id = ? AND item_id = ?',
-                                [referrerDiscordId, rewardItemId]
-                            );
+                        const newInviteCount = updatedReferrer[0].invite_count;
+                        const referrerDiscordId = referrer[0].discord_id;
+                        const rewards = PREREGISTER_CONFIG.rewards.individual;
 
-                            if (existingClaim.length === 0) {
-                                // Insert into claim_queue
-                                await connection.query(
-                                    'INSERT INTO claim_queue (discord_id, item_id, item_name, amount, status) VALUES (?, ?, ?, 1, "pending")',
-                                    [referrerDiscordId, rewardItemId, `Referral Reward: ${reward.name}`]
+                        for (const reward of rewards) {
+                            if (newInviteCount >= reward.count) {
+                                // Unique ID for this specific milestone reward
+                                const rewardItemId = `ref_reward_${reward.count}`;
+
+                                // Check if already in queue (to avoid duplicates)
+                                const [existingClaim] = await connection.query(
+                                    'SELECT id FROM claim_queue WHERE discord_id = ? AND item_id = ?',
+                                    [referrerDiscordId, rewardItemId]
                                 );
-                                console.log(`Awarded referral reward to ${referrerDiscordId}: ${reward.name}`);
+
+                                if (existingClaim.length === 0) {
+                                    // Insert into claim_queue
+                                    await connection.query(
+                                        'INSERT INTO claim_queue (discord_id, item_id, item_name, amount, status) VALUES (?, ?, ?, 1, "pending")',
+                                        [referrerDiscordId, rewardItemId, `Referral Reward: ${reward.name}`]
+                                    );
+                                    console.log(`Awarded referral reward to ${referrerDiscordId}: ${reward.name}`);
+                                }
                             }
                         }
                     }
                 }
             }
 
-            const ipAddress = request.headers.get('x-forwarded-for') || 'unknown';
             const discordName = session.user.name || 'Unknown';
             const avatarUrl = session.user.image || null;
 

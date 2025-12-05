@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { webDb as pool } from '@/lib/db';
 import { PREREGISTER_CONFIG } from '@/lib/preregister-config';
+import { rateLimit } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,8 +17,36 @@ function generateGangCode() {
     return code;
 }
 
+// [SECURITY FIX #8] ฟังก์ชันตรวจสอบ URL ของโลโก้
+function isValidImageUrl(url) {
+    if (!url) return true; // ว่างได้
+    try {
+        const parsed = new URL(url);
+        const allowedDomains = [
+            'pic.in.th', 'www.pic.in.th',
+            'i.imgur.com', 'imgur.com',
+            'i.ibb.co', 'ibb.co',
+            'cdn.discordapp.com',
+            'media.discordapp.net',
+            'raw.githubusercontent.com'
+        ];
+        // ตรวจสอบว่า hostname ตรงหรือลงท้ายด้วย domain ที่อนุญาต
+        return allowedDomains.some(domain =>
+            parsed.hostname === domain || parsed.hostname.endsWith('.' + domain)
+        );
+    } catch {
+        return false; // URL ไม่ถูกต้อง
+    }
+}
+
 export async function POST(request) {
     try {
+        // [SECURITY FIX #6] Rate Limiting - 10 requests ต่อนาที
+        const ip = request.headers.get("x-forwarded-for") || "unknown";
+        if (!rateLimit(ip, 10, 60000)) {
+            return NextResponse.json({ error: 'คำขอมากเกินไป กรุณารอสักครู่' }, { status: 429 });
+        }
+
         const session = await getServerSession(authOptions);
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
@@ -51,6 +80,11 @@ export async function POST(request) {
             if (action === 'update_logo') {
                 if (!userCheck[0].gang_id) throw new Error('You are not in a gang');
 
+                // [SECURITY FIX #8] ตรวจสอบ URL ของโลโก้
+                if (!isValidImageUrl(logoUrl)) {
+                    throw new Error('URL โลโก้ไม่ถูกต้อง กรุณาใช้ pic.in.th, imgur.com หรือ imgbb.com');
+                }
+
                 // Verify Leader
                 const [gang] = await connection.query('SELECT leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
                 if (gang[0].leader_discord_id !== discordId) {
@@ -59,7 +93,7 @@ export async function POST(request) {
 
                 await connection.query('UPDATE gangs SET logo_url = ? WHERE id = ?', [logoUrl, userCheck[0].gang_id]);
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Logo updated' });
+                return NextResponse.json({ success: true, message: 'อัพเดทโลโก้สำเร็จ' });
             }
 
             // For create and join, user must NOT be in a gang
@@ -70,15 +104,36 @@ export async function POST(request) {
             }
 
             if (action === 'create') {
-                if (!name || name.length < 3) throw new Error('Gang name too short');
+                // [SECURITY FIX #9] ตรวจสอบชื่อแก๊งอย่างละเอียด
+                const trimmedName = name?.trim();
+                if (!trimmedName) throw new Error('กรุณาใส่ชื่อแก๊ง');
+                if (trimmedName.length < 3) throw new Error('ชื่อแก๊งต้องมีอย่างน้อย 3 ตัวอักษร');
+                if (trimmedName.length > 20) throw new Error('ชื่อแก๊งต้องไม่เกิน 20 ตัวอักษร');
+                if (!/^[a-zA-Z0-9\s\u0E00-\u0E7F]+$/.test(trimmedName)) {
+                    throw new Error('ชื่อแก๊งใช้ได้เฉพาะตัวอักษร ตัวเลข และภาษาไทย');
+                }
 
-                // Generate unique code
-                let newGangCode = generateGangCode();
+                // [SECURITY FIX #3] สร้างรหัสที่ไม่ซ้ำด้วย retry loop
+                let newGangCode;
+                let isUnique = false;
+                let attempts = 0;
+
+                while (!isUnique && attempts < 10) {
+                    newGangCode = generateGangCode();
+                    const [existing] = await connection.query(
+                        'SELECT id FROM gangs WHERE gang_code = ?',
+                        [newGangCode]
+                    );
+                    if (existing.length === 0) isUnique = true;
+                    attempts++;
+                }
+
+                if (!isUnique) throw new Error('ไม่สามารถสร้างรหัสแก๊งได้ กรุณาลองใหม่');
 
                 // Insert Gang
                 const [result] = await connection.query(
                     'INSERT INTO gangs (name, gang_code, invite_code, leader_discord_id, member_count, logo_url) VALUES (?, ?, ?, ?, 1, ?)',
-                    [name, newGangCode, newGangCode, discordId, logoUrl || null]
+                    [trimmedName, newGangCode, newGangCode, discordId, logoUrl || null]
                 );
                 const gangId = result.insertId;
 
@@ -131,21 +186,31 @@ export async function POST(request) {
                 const { inviteCode } = body;
                 if (!inviteCode) throw new Error('Gang code required');
 
-                console.log(`[Gang] Join Request: User=${discordId}, Code=${inviteCode}`);
-
-                // Find Gang
-                const [gang] = await connection.query(
-                    'SELECT id, member_count, max_members FROM gangs WHERE gang_code = ?',
+                // [SECURITY FIX #1] Atomic UPDATE เพื่อป้องกัน Race Condition
+                // ใช้ UPDATE พร้อมเงื่อนไขใน SQL เดียว แทน SELECT แล้วเช็ค
+                const [updateResult] = await connection.query(
+                    `UPDATE gangs 
+                     SET member_count = member_count + 1 
+                     WHERE gang_code = ? AND member_count < max_members`,
                     [inviteCode]
                 );
 
-                if (gang.length === 0) throw new Error('Gang not found');
-                if (gang[0].member_count >= gang[0].max_members) throw new Error('Gang is full');
+                if (updateResult.affectedRows === 0) {
+                    // เช็คว่าไม่พบแก๊ง หรือ แก๊งเต็ม
+                    const [gangCheck] = await connection.query(
+                        'SELECT id, member_count, max_members FROM gangs WHERE gang_code = ?',
+                        [inviteCode]
+                    );
+                    if (gangCheck.length === 0) {
+                        throw new Error('ไม่พบแก๊ง');
+                    }
+                    throw new Error('แก๊งเต็มแล้ว');
+                }
 
-                // Update Gang Count
-                await connection.query(
-                    'UPDATE gangs SET member_count = member_count + 1 WHERE id = ?',
-                    [gang[0].id]
+                // ดึง gang_id สำหรับ update user
+                const [gang] = await connection.query(
+                    'SELECT id FROM gangs WHERE gang_code = ?',
+                    [inviteCode]
                 );
 
                 // Update User
@@ -155,7 +220,7 @@ export async function POST(request) {
                 );
 
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Joined gang successfully' });
+                return NextResponse.json({ success: true, message: 'เข้าร่วมแก๊งสำเร็จ' });
 
             } else if (action === 'leave') {
                 if (!userCheck[0].gang_id) throw new Error('You are not in a gang');
