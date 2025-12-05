@@ -45,15 +45,69 @@ export default function FamilyManager({ userData }) {
         }
     }, [family]);
 
-    // Theme Configuration (Primary/Blue - Matching InviteEarn)
+    // Dynamic Theme based on member count milestones
+    const getFamilyTierTheme = (memberCount) => {
+        if (memberCount >= 25) {
+            // 🔴 Legendary - Red/Crimson
+            return {
+                from: 'from-red-500',
+                to: 'to-rose-600',
+                shadow: 'shadow-red-500/40',
+                tierName: 'มหาตระกูล',
+                tierColor: 'text-red-400'
+            };
+        } else if (memberCount >= 20) {
+            // 🟠 Epic - Orange/Gold
+            return {
+                from: 'from-amber-500',
+                to: 'to-orange-600',
+                shadow: 'shadow-amber-500/40',
+                tierName: 'มั่นคง',
+                tierColor: 'text-amber-400'
+            };
+        } else if (memberCount >= 15) {
+            // 🟣 Rare - Purple
+            return {
+                from: 'from-purple-500',
+                to: 'to-violet-600',
+                shadow: 'shadow-purple-500/40',
+                tierName: 'เติบโต',
+                tierColor: 'text-purple-400'
+            };
+        } else if (memberCount >= 10) {
+            // 🟢 Uncommon - Green
+            return {
+                from: 'from-emerald-500',
+                to: 'to-green-600',
+                shadow: 'shadow-emerald-500/40',
+                tierName: 'รากฐาน',
+                tierColor: 'text-emerald-400'
+            };
+        }
+        // 🔵 Common - Blue (Default)
+        return {
+            from: 'from-blue-600',
+            to: 'to-indigo-600',
+            shadow: 'shadow-blue-500/30',
+            tierName: 'เริ่มต้น',
+            tierColor: 'text-blue-400'
+        };
+    };
+
+    const tierTheme = getFamilyTierTheme(members.length);
+
+    // Theme Configuration
     const theme = {
-        from: 'from-blue-600',
-        to: 'to-indigo-600',
+        from: tierTheme.from,
+        to: tierTheme.to,
         text: 'text-primary',
         bg: 'bg-primary',
         border: 'border-primary/20',
         ring: 'ring-primary',
-        glass: 'bg-muted/10 backdrop-blur-md border-white/5'
+        glass: 'bg-muted/10 backdrop-blur-md border-white/5',
+        shadow: tierTheme.shadow,
+        tierName: tierTheme.tierName,
+        tierColor: tierTheme.tierColor
     };
 
     useEffect(() => {
@@ -389,14 +443,49 @@ export default function FamilyManager({ userData }) {
                         <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-32 h-32 bg-gradient-to-tr ${theme.from} ${theme.to} rounded-full blur-[50px] opacity-20 group-hover:opacity-40 transition-opacity duration-500`} />
 
                         <div className="relative mb-6 inline-block group/avatar">
-                            <div className={`w-28 h-28 rounded-2xl p-1 bg-gradient-to-br ${theme.from} ${theme.to}`}>
-                                <Avatar className="w-full h-full rounded-xl border-4 border-black/50">
-                                    <AvatarImage src={family.logo_url} className="object-cover" />
-                                    <AvatarFallback className="bg-muted text-primary text-2xl font-bold">
-                                        {family.name.substring(0, 2).toUpperCase()}
-                                    </AvatarFallback>
-                                </Avatar>
+                            {/* Logo Container */}
+                            <div className={`relative w-28 h-28 rounded-2xl p-[3px] bg-gradient-to-br ${theme.from} ${theme.to} shadow-lg ${theme.shadow} group-hover/avatar:shadow-xl transition-all duration-300`}>
+                                {/* Inner Glow */}
+                                <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-300" />
+
+                                <div className="relative w-full h-full rounded-xl overflow-hidden bg-zinc-900">
+                                    {family.logo_url ? (
+                                        <img
+                                            src={family.logo_url}
+                                            alt={family.name}
+                                            className="w-full h-full object-cover group-hover/avatar:scale-110 transition-transform duration-500"
+                                        />
+                                    ) : (
+                                        <div className={`w-full h-full flex items-center justify-center bg-gradient-to-br ${theme.from}/20 ${theme.to}/20`}>
+                                            <span className="text-3xl font-bold text-white/80">
+                                                {family.name.substring(0, 2).toUpperCase()}
+                                            </span>
+                                        </div>
+                                    )}
+
+                                    {/* Overlay Shine Effect */}
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-300" />
+                                </div>
                             </div>
+
+                            {/* Tier Badge */}
+                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-10">
+                                <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r ${theme.from} ${theme.to} text-white shadow-lg`}>
+                                    {theme.tierName}
+                                </div>
+                            </div>
+
+                            {/* Leader Star Badge */}
+                            {isLeader && (
+                                <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+                                    <div className="relative">
+                                        <div className="absolute inset-0 bg-pink-500/50 blur-md rounded-full" />
+                                        <div className="relative bg-gradient-to-r from-pink-400 to-rose-500 text-white p-1.5 rounded-full shadow-lg">
+                                            <Star className="w-4 h-4 fill-current" />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             {isLeader && (
                                 <Dialog>
                                     <DialogTrigger asChild>

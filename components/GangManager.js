@@ -13,7 +13,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from 'sonner';
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Shield, LogOut, Settings, Search, Filter, Trophy, Loader2, Hexagon, ChevronDown, Copy, Users, ArrowRight, Plus, AlertCircle } from 'lucide-react';
+import { Shield, LogOut, Settings, Search, Filter, Trophy, Loader2, Hexagon, ChevronDown, Copy, Users, ArrowRight, Plus, AlertCircle, Star } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function GangManager({ userData }) {
@@ -45,15 +45,69 @@ export default function GangManager({ userData }) {
         }
     }, [gang]);
 
+    // Dynamic Theme based on member count milestones
+    const getGangTierTheme = (memberCount) => {
+        if (memberCount >= 25) {
+            // 🔴 Legendary - Red/Crimson
+            return {
+                from: 'from-red-500',
+                to: 'to-rose-600',
+                shadow: 'shadow-red-500/40',
+                tierName: 'ตำนาน',
+                tierColor: 'text-red-400'
+            };
+        } else if (memberCount >= 20) {
+            // 🟠 Epic - Orange/Gold
+            return {
+                from: 'from-amber-500',
+                to: 'to-orange-600',
+                shadow: 'shadow-amber-500/40',
+                tierName: 'อิทธิพล',
+                tierColor: 'text-amber-400'
+            };
+        } else if (memberCount >= 15) {
+            // 🟣 Rare - Purple
+            return {
+                from: 'from-purple-500',
+                to: 'to-violet-600',
+                shadow: 'shadow-purple-500/40',
+                tierName: 'เติบโต',
+                tierColor: 'text-purple-400'
+            };
+        } else if (memberCount >= 10) {
+            // 🟢 Uncommon - Green
+            return {
+                from: 'from-emerald-500',
+                to: 'to-green-600',
+                shadow: 'shadow-emerald-500/40',
+                tierName: 'ก่อร่าง',
+                tierColor: 'text-emerald-400'
+            };
+        }
+        // 🔵 Common - Blue (Default)
+        return {
+            from: 'from-blue-600',
+            to: 'to-indigo-600',
+            shadow: 'shadow-blue-500/30',
+            tierName: 'เริ่มต้น',
+            tierColor: 'text-blue-400'
+        };
+    };
+
+    const tierTheme = getGangTierTheme(members.length);
+
     // Theme Configuration (Primary/Blue - Matching InviteEarn)
     const theme = {
-        from: 'from-blue-600',
-        to: 'to-indigo-600',
+        from: tierTheme.from,
+        to: tierTheme.to,
         text: 'text-primary',
         bg: 'bg-primary',
         border: 'border-primary/20',
         ring: 'ring-primary',
-        glass: 'bg-muted/10 backdrop-blur-md border-white/5'
+        glass: 'bg-muted/10 backdrop-blur-md border-white/5',
+        shadow: tierTheme.shadow,
+        tierName: tierTheme.tierName,
+        tierColor: tierTheme.tierColor
     };
 
     useEffect(() => {
@@ -66,6 +120,9 @@ export default function GangManager({ userData }) {
         try {
             const res = await fetch(`/api/gang?_=${Date.now()}`, { cache: 'no-store' });
             const data = await res.json();
+
+            console.log('📦 Gang API Response:', data);
+            console.log('🖼️ Logo URL from API:', data.gang?.logo_url);
 
             if (data.gang) {
                 setGang(data.gang);
@@ -158,8 +215,11 @@ export default function GangManager({ userData }) {
             });
 
             if (res.ok) {
-                toast.success('Logo updated successfully!');
-                fetchGangData();
+                toast.success('อัพเดทโลโก้สำเร็จ!');
+                // Update gang state immediately with new logo
+                setGang(prev => prev ? { ...prev, logo_url: logoUrl } : prev);
+                // Then fetch fresh data
+                await fetchGangData();
             } else {
                 const data = await res.json();
                 toast.error(data.error || 'Failed to update logo');
@@ -414,7 +474,7 @@ export default function GangManager({ userData }) {
 
                         <div className="relative mb-6 inline-block group/avatar">
                             {/* Logo Container */}
-                            <div className={`relative w-28 h-28 rounded-2xl p-[3px] bg-gradient-to-br ${theme.from} ${theme.to} shadow-lg shadow-blue-500/30 group-hover/avatar:shadow-blue-500/50 transition-all duration-300`}>
+                            <div className={`relative w-28 h-28 rounded-2xl p-[3px] bg-gradient-to-br ${theme.from} ${theme.to} shadow-lg ${theme.shadow} group-hover/avatar:shadow-xl transition-all duration-300`}>
                                 {/* Inner Glow */}
                                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/20 to-transparent opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-300" />
 
@@ -435,6 +495,13 @@ export default function GangManager({ userData }) {
 
                                     {/* Overlay Shine Effect */}
                                     <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/10 to-transparent opacity-0 group-hover/avatar:opacity-100 transition-opacity duration-300" />
+                                </div>
+                            </div>
+
+                            {/* Tier Badge */}
+                            <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 z-10">
+                                <div className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-gradient-to-r ${theme.from} ${theme.to} text-white shadow-lg`}>
+                                    {theme.tierName}
                                 </div>
                             </div>
 
@@ -733,70 +800,125 @@ export default function GangManager({ userData }) {
                                     </div>
                                 </motion.button>
                             </DialogTrigger>
-                            <DialogContent className="bg-zinc-900/95 backdrop-blur-xl border-white/10 max-w-2xl">
+                            <DialogContent className="bg-zinc-950/98 backdrop-blur-xl border-white/10 max-w-2xl">
                                 <DialogHeader>
-                                    <DialogTitle className="text-2xl font-bold flex items-center gap-2">
-                                        <Trophy className="w-6 h-6 text-yellow-500" />
+                                    <DialogTitle className="text-2xl font-bold flex items-center gap-3">
+                                        <div className={`p-2 rounded-xl bg-gradient-to-br ${theme.from} ${theme.to}`}>
+                                            <Trophy className="w-6 h-6 text-white" />
+                                        </div>
                                         ความคืบหน้ารางวัลแก๊ง
                                     </DialogTitle>
                                     <DialogDescription>
-                                        รับสมาชิกเพิ่มเพื่อปลดล็อกสิทธิพิเศษและรางวัลของแก๊ง
+                                        ชวนสมาชิกเพิ่มเพื่อปลดล็อกสิทธิพิเศษและรางวัลของแก๊ง
                                     </DialogDescription>
                                 </DialogHeader>
 
-                                <div className="py-12 px-4">
+                                <div className="py-8 px-4">
+                                    {/* Current Stats */}
                                     <div className="flex items-center justify-between mb-12">
                                         <div className="text-center">
-                                            <div className="text-3xl font-bold text-white">{members.length}</div>
-                                            <div className="text-xs text-zinc-500 uppercase tracking-wider">สมาชิกปัจจุบัน</div>
+                                            <div className={`text-4xl font-bold bg-gradient-to-r ${theme.from} ${theme.to} bg-clip-text text-transparent`}>
+                                                {members.length}
+                                            </div>
+                                            <div className="text-xs text-zinc-500 uppercase tracking-wider mt-1">สมาชิกปัจจุบัน</div>
+                                        </div>
+                                        <div className={`px-4 py-2 rounded-full bg-gradient-to-r ${theme.from}/20 ${theme.to}/20 border ${theme.border}`}>
+                                            <span className={`font-bold ${theme.tierColor}`}>{theme.tierName}</span>
                                         </div>
                                         <div className="text-center">
-                                            <div className="text-3xl font-bold text-zinc-500">{gang.max_members || 25}</div>
-                                            <div className="text-xs text-zinc-500 uppercase tracking-wider">เป้าหมายสูงสุด</div>
+                                            <div className="text-4xl font-bold text-zinc-600">{gang.max_members || 25}</div>
+                                            <div className="text-xs text-zinc-500 uppercase tracking-wider mt-1">เป้าหมายสูงสุด</div>
                                         </div>
                                     </div>
 
                                     {/* Progress Bar Container */}
-                                    <div className="relative h-4 bg-black/40 rounded-full mb-8 mx-4">
-                                        {/* Progress Fill */}
+                                    <div className="relative h-3 bg-zinc-800/50 rounded-full mb-16 mx-2">
+                                        {/* Progress Fill with Glow */}
                                         <motion.div
                                             initial={{ width: 0 }}
                                             animate={{ width: `${(members.length / (gang.max_members || 25)) * 100}%` }}
                                             transition={{ duration: 1.5, ease: "easeOut" }}
-                                            className={`absolute top-0 left-0 h-full rounded-full bg-gradient-to-r ${theme.from} ${theme.to} shadow-[0_0_15px_rgba(59,130,246,0.5)]`}
+                                            className={`absolute top-0 left-0 h-full rounded-full bg-gradient-to-r ${theme.from} ${theme.to}`}
+                                            style={{ boxShadow: `0 0 20px rgba(59,130,246,0.5)` }}
                                         />
 
                                         {/* Milestones */}
-                                        {[10, 15, 20, 25].map((milestone) => {
+                                        {[
+                                            { value: 10, tier: 'ก่อร่าง', color: 'emerald' },
+                                            { value: 15, tier: 'เติบโต', color: 'purple' },
+                                            { value: 20, tier: 'อิทธิพล', color: 'amber' },
+                                            { value: 25, tier: 'ตำนาน', color: 'red' }
+                                        ].map(({ value: milestone, tier, color }) => {
                                             const isUnlocked = members.length >= milestone;
                                             const position = (milestone / (gang.max_members || 25)) * 100;
+
+                                            const colorClasses = {
+                                                emerald: { bg: 'bg-emerald-500', border: 'border-emerald-400', text: 'text-emerald-400', glow: 'shadow-emerald-500/50' },
+                                                purple: { bg: 'bg-purple-500', border: 'border-purple-400', text: 'text-purple-400', glow: 'shadow-purple-500/50' },
+                                                amber: { bg: 'bg-amber-500', border: 'border-amber-400', text: 'text-amber-400', glow: 'shadow-amber-500/50' },
+                                                red: { bg: 'bg-red-500', border: 'border-red-400', text: 'text-red-400', glow: 'shadow-red-500/50' },
+                                            }[color];
 
                                             return (
                                                 <div
                                                     key={milestone}
-                                                    className="absolute top-1/2 -translate-y-1/2 flex flex-col items-center group"
+                                                    className="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 flex flex-col items-center group cursor-pointer"
                                                     style={{ left: `${position}%` }}
                                                 >
-                                                    {/* Dot on line */}
-                                                    <div className={`w-4 h-4 rounded-full border-2 transition-all duration-500 z-10 ${isUnlocked ? `${theme.bg} border-white shadow-[0_0_10px_white]` : 'bg-zinc-900 border-zinc-700'}`} />
+                                                    {/* Milestone Dot */}
+                                                    <motion.div
+                                                        initial={{ scale: 0 }}
+                                                        animate={{ scale: 1 }}
+                                                        transition={{ delay: 0.5 + milestone * 0.05 }}
+                                                        className={`w-5 h-5 rounded-full border-2 transition-all duration-500 z-10 ${isUnlocked
+                                                            ? `${colorClasses.bg} ${colorClasses.border} shadow-lg ${colorClasses.glow}`
+                                                            : 'bg-zinc-800 border-zinc-600'
+                                                            }`}
+                                                    />
 
-                                                    {/* Label */}
-                                                    <div className={`absolute top-6 whitespace-nowrap text-xs font-bold transition-colors duration-500 ${isUnlocked ? 'text-white' : 'text-zinc-600'}`}>
+                                                    {/* Label Below */}
+                                                    <div className={`absolute top-8 whitespace-nowrap text-xs font-bold transition-colors duration-300 ${isUnlocked ? colorClasses.text : 'text-zinc-600'
+                                                        }`}>
                                                         {milestone}
                                                     </div>
 
-                                                    {/* Reward Box Icon */}
-                                                    <div className={`absolute bottom-6 p-2 rounded-lg border transition-all duration-500 ${isUnlocked ? `${theme.glass} border-yellow-500/50 text-yellow-400 shadow-[0_0_15px_rgba(234,179,8,0.2)]` : 'bg-black/40 border-white/5 text-zinc-700'}`}>
-                                                        <Hexagon className="w-5 h-5" />
+                                                    {/* Tier Name Above */}
+                                                    <div className={`absolute -top-8 whitespace-nowrap text-[10px] font-bold uppercase tracking-wider transition-all duration-300 ${isUnlocked ? colorClasses.text : 'text-zinc-600'
+                                                        }`}>
+                                                        {tier}
                                                     </div>
 
-                                                    {/* Tooltip (Hover) */}
-                                                    <div className="absolute bottom-16 opacity-0 group-hover:opacity-100 transition-opacity bg-black/90 border border-white/10 px-3 py-1 rounded-lg text-xs text-white whitespace-nowrap pointer-events-none transform translate-y-2 group-hover:translate-y-0 z-20">
-                                                        รางวัลระดับ {milestone}
+                                                    {/* Hover Tooltip */}
+                                                    <div className="absolute top-12 opacity-0 group-hover:opacity-100 transition-all duration-200 bg-zinc-900 border border-white/10 px-3 py-2 rounded-xl text-xs text-white whitespace-nowrap pointer-events-none z-20 shadow-xl">
+                                                        <div className="font-bold mb-1">{tier}</div>
+                                                        <div className={`${isUnlocked ? 'text-green-400' : 'text-zinc-400'}`}>
+                                                            {isUnlocked ? '✓ ปลดล็อกแล้ว' : `ต้องการ ${milestone} สมาชิก`}
+                                                        </div>
                                                     </div>
                                                 </div>
                                             );
                                         })}
+                                    </div>
+
+                                    {/* Current Progress Info */}
+                                    <div className={`p-4 rounded-2xl border ${theme.border} bg-gradient-to-r ${theme.from}/5 ${theme.to}/5`}>
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`w-10 h-10 rounded-xl bg-gradient-to-br ${theme.from} ${theme.to} flex items-center justify-center`}>
+                                                    <Shield className="w-5 h-5 text-white" />
+                                                </div>
+                                                <div>
+                                                    <div className="text-sm text-zinc-400">ระดับปัจจุบัน</div>
+                                                    <div className={`font-bold ${theme.tierColor}`}>{theme.tierName}</div>
+                                                </div>
+                                            </div>
+                                            <div className="text-right">
+                                                <div className="text-sm text-zinc-400">ความคืบหน้า</div>
+                                                <div className="font-bold text-white">
+                                                    {Math.round((members.length / (gang.max_members || 25)) * 100)}%
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </DialogContent>
