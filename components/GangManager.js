@@ -38,6 +38,11 @@ export default function GangManager({ userData }) {
     const [settingsName, setSettingsName] = useState('');
     const [settingsMotd, setSettingsMotd] = useState('');
 
+    // Join Request States
+    const [pendingRequests, setPendingRequests] = useState([]);
+    const [myPendingRequests, setMyPendingRequests] = useState([]);
+    const [processingRequest, setProcessingRequest] = useState(null);
+
     useEffect(() => {
         if (gang) {
             setSettingsName(gang.name);
@@ -121,16 +126,18 @@ export default function GangManager({ userData }) {
             const res = await fetch(`/api/gang?_=${Date.now()}`, { cache: 'no-store' });
             const data = await res.json();
 
-            console.log('📦 Gang API Response:', data);
-            console.log('🖼️ Logo URL from API:', data.gang?.logo_url);
-
             if (data.gang) {
                 setGang(data.gang);
                 setInviteCode(data.gang.invite_code);
                 setMembers(data.members || []);
                 setLogoUrl(data.gang.logo_url || '');
+                setPendingRequests(data.pendingRequests || []);
+                setMyPendingRequests([]);
             } else {
                 setGang(null);
+                setMembers([]);
+                setPendingRequests([]);
+                setMyPendingRequests(data.myPendingRequests || []);
             }
         } catch (error) {
             console.error('Error fetching gang:', error);
@@ -193,7 +200,12 @@ export default function GangManager({ userData }) {
 
             const data = await res.json();
             if (res.ok) {
-                toast.success('Joined gang successfully!');
+                if (data.pending) {
+                    toast.success(data.message || 'ส่งคำขอเข้าร่วมสำเร็จ! กรุณารอหัวหน้าอนุมัติ');
+                } else {
+                    toast.success('เข้าร่วมแก๊งสำเร็จ!');
+                }
+                setJoinCode('');
                 fetchGangData();
             } else {
                 toast.error(data.error || 'Failed to join gang');
@@ -202,6 +214,69 @@ export default function GangManager({ userData }) {
             toast.error('Something went wrong');
         } finally {
             setIsJoining(false);
+        }
+    };
+
+    const handleApproveRequest = async (requestId) => {
+        setProcessingRequest(requestId);
+        try {
+            const res = await fetch('/api/gang', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'approve_join', requestId }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                toast.success('อนุมัติคำขอเข้าร่วมแล้ว!');
+                fetchGangData();
+            } else {
+                toast.error(data.error || 'ไม่สามารถอนุมัติได้');
+            }
+        } catch (error) {
+            toast.error('เกิดข้อผิดพลาด');
+        } finally {
+            setProcessingRequest(null);
+        }
+    };
+
+    const handleRejectRequest = async (requestId) => {
+        setProcessingRequest(requestId);
+        try {
+            const res = await fetch('/api/gang', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'reject_join', requestId }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                toast.success('ปฏิเสธคำขอแล้ว');
+                fetchGangData();
+            } else {
+                toast.error(data.error || 'ไม่สามารถปฏิเสธได้');
+            }
+        } catch (error) {
+            toast.error('เกิดข้อผิดพลาด');
+        } finally {
+            setProcessingRequest(null);
+        }
+    };
+
+    const handleCancelRequest = async (gangId) => {
+        try {
+            const res = await fetch('/api/gang', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'cancel_request', gangId }),
+            });
+            const data = await res.json();
+            if (res.ok) {
+                toast.success('ยกเลิกคำขอแล้ว');
+                fetchGangData();
+            } else {
+                toast.error(data.error || 'ไม่สามารถยกเลิกได้');
+            }
+        } catch (error) {
+            toast.error('เกิดข้อผิดพลาด');
         }
     };
 
@@ -338,13 +413,6 @@ export default function GangManager({ userData }) {
 
     const isLeader = members.find(m => m.discord_id === userData?.discord_id)?.is_leader;
 
-    // Debug logging
-    console.log('GangManager Debug:', {
-        userData_discordId: userData?.discord_id,
-        members: members,
-        isLeader: isLeader
-    });
-
     if (loading) {
         return (
             <div className="flex items-center justify-center h-[60vh]">
@@ -385,11 +453,52 @@ export default function GangManager({ userData }) {
                                 </p>
                             </div>
 
-                            <Tabs defaultValue="join" className="w-full">
-                                <TabsList className="grid w-full grid-cols-2 mb-6">
+                            <Tabs defaultValue={myPendingRequests.length > 0 ? "pending" : "join"} className="w-full">
+                                <TabsList className={`grid w-full ${myPendingRequests.length > 0 ? 'grid-cols-3' : 'grid-cols-2'} mb-6`}>
+                                    {myPendingRequests.length > 0 && (
+                                        <TabsTrigger value="pending" className="relative">
+                                            รอการอนุมัติ
+                                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-amber-500 rounded-full text-[10px] font-bold flex items-center justify-center text-white">
+                                                {myPendingRequests.length}
+                                            </span>
+                                        </TabsTrigger>
+                                    )}
                                     <TabsTrigger value="join">เข้าร่วมแก๊ง</TabsTrigger>
                                     <TabsTrigger value="create">สร้างแก๊ง</TabsTrigger>
                                 </TabsList>
+
+                                {/* Tab แสดงคำขอที่รอดำเนินการ */}
+                                {myPendingRequests.length > 0 && (
+                                    <TabsContent value="pending" className="space-y-4">
+                                        <div className="text-center mb-4">
+                                            <div className="inline-flex items-center px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20">
+                                                <Loader2 className="w-4 h-4 mr-2 text-amber-500 animate-spin" />
+                                                <span className="text-sm text-amber-500">รอหัวหน้าแก๊งอนุมัติ</span>
+                                            </div>
+                                        </div>
+
+                                        {myPendingRequests.map((request) => (
+                                            <div key={request.id} className="p-4 rounded-xl bg-muted/30 border border-amber-500/20">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <p className="font-medium">{request.gang_name}</p>
+                                                        <p className="text-xs text-muted-foreground">
+                                                            ส่งเมื่อ {new Date(request.created_at).toLocaleString('th-TH')}
+                                                        </p>
+                                                    </div>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        className="border-red-500/30 text-red-500 hover:bg-red-500/10"
+                                                        onClick={() => handleCancelRequest(request.gang_id)}
+                                                    >
+                                                        ยกเลิก
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </TabsContent>
+                                )}
 
                                 <TabsContent value="join" className="space-y-4">
                                     <div className="space-y-2">
@@ -397,7 +506,7 @@ export default function GangManager({ userData }) {
                                             รหัสเชิญ
                                         </label>
                                         <Input
-                                            placeholder="G-XXXXXX"
+                                            placeholder="GANG-XXXX"
                                             value={joinCode}
                                             onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                                             className="font-mono uppercase text-center tracking-widest h-11"
@@ -409,8 +518,11 @@ export default function GangManager({ userData }) {
                                         disabled={!joinCode || isJoining}
                                     >
                                         {isJoining ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Users className="mr-2 h-4 w-4" />}
-                                        เข้าร่วมแก๊ง
+                                        ขอเข้าร่วมแก๊ง
                                     </Button>
+                                    <p className="text-xs text-center text-muted-foreground">
+                                        หลังกดขอเข้าร่วม หัวหน้าแก๊งจะต้องอนุมัติก่อน
+                                    </p>
                                 </TabsContent>
 
                                 <TabsContent value="create" className="space-y-4">
@@ -728,6 +840,75 @@ export default function GangManager({ userData }) {
                             </Dialog>
                         )}
                     </motion.div>
+
+                    {/* Pending Join Requests - สำหรับหัวหน้าแก๊งเท่านั้น */}
+                    {isLeader && pendingRequests.length > 0 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className={`${theme.glass} p-6 rounded-[2rem] border shadow-xl`}
+                        >
+                            <div className="flex items-center justify-between mb-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                                        <Users className="w-5 h-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-white">คำขอเข้าร่วม</h3>
+                                        <p className="text-xs text-zinc-400">{pendingRequests.length} คำขอรอดำเนินการ</p>
+                                    </div>
+                                </div>
+                                <span className="w-6 h-6 bg-amber-500 rounded-full text-[12px] font-bold flex items-center justify-center text-white animate-pulse">
+                                    {pendingRequests.length}
+                                </span>
+                            </div>
+
+                            <div className="space-y-3 max-h-[200px] overflow-y-auto pr-2">
+                                {pendingRequests.map((request) => (
+                                    <div key={request.id} className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/50 border border-amber-500/20">
+                                        <div className="flex items-center gap-3">
+                                            {request.avatar_url ? (
+                                                <img src={request.avatar_url} alt="" className="w-10 h-10 rounded-full" />
+                                            ) : (
+                                                <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-bold">
+                                                    {request.discord_name?.slice(0, 2).toUpperCase() || '??'}
+                                                </div>
+                                            )}
+                                            <div>
+                                                <p className="font-medium text-sm">{request.discord_name}</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {new Date(request.created_at).toLocaleDateString('th-TH')}
+                                                </p>
+                                            </div>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                size="sm"
+                                                className="bg-green-600 hover:bg-green-700 text-white h-8 px-3"
+                                                onClick={() => handleApproveRequest(request.id)}
+                                                disabled={processingRequest === request.id}
+                                            >
+                                                {processingRequest === request.id ? (
+                                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                                ) : (
+                                                    '✓'
+                                                )}
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="border-red-500/30 text-red-400 hover:bg-red-500/10 h-8 px-3"
+                                                onClick={() => handleRejectRequest(request.id)}
+                                                disabled={processingRequest === request.id}
+                                            >
+                                                ✕
+                                            </Button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </motion.div>
+                    )}
 
                     {/* Quick Actions */}
                     <div className="grid grid-cols-1 gap-4">
