@@ -245,15 +245,27 @@ export async function POST(request) {
 
                 const { name, motd } = body;
 
+                // [SECURITY] Validate name
+                const trimmedName = name?.trim();
+                if (!trimmedName) throw new Error('กรุณาใส่ชื่อแก๊ง');
+                if (trimmedName.length < 3) throw new Error('ชื่อแก๊งต้องมีอย่างน้อย 3 ตัวอักษร');
+                if (trimmedName.length > 20) throw new Error('ชื่อแก๊งต้องไม่เกิน 20 ตัวอักษร');
+                if (!/^[a-zA-Z0-9\s\u0E00-\u0E7F]+$/.test(trimmedName)) {
+                    throw new Error('ชื่อแก๊งใช้ได้เฉพาะตัวอักษร ตัวเลข และภาษาไทย');
+                }
+
+                // [SECURITY] Validate and sanitize MOTD (max 200 chars, strip HTML)
+                const sanitizedMotd = motd ? String(motd).slice(0, 200).replace(/<[^>]*>/g, '') : null;
+
                 // Verify Leader
                 const [gang] = await connection.query('SELECT leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
                 if (gang[0].leader_discord_id !== discordId) {
                     throw new Error('Only the leader can update settings');
                 }
 
-                await connection.query('UPDATE gangs SET name = ?, motd = ? WHERE id = ?', [name, motd, userCheck[0].gang_id]);
+                await connection.query('UPDATE gangs SET name = ?, motd = ? WHERE id = ?', [trimmedName, sanitizedMotd, userCheck[0].gang_id]);
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Settings updated' });
+                return NextResponse.json({ success: true, message: 'อัพเดทการตั้งค่าสำเร็จ' });
 
             } else if (action === 'dissolve') {
                 if (!userCheck[0].gang_id) throw new Error('You are not in a gang');
@@ -282,7 +294,7 @@ export async function POST(request) {
                 // Ensure string
                 targetDiscordId = String(targetDiscordId);
 
-                console.log(`[Gang] Kicking member: Leader=${discordId}, Target=${targetDiscordId}`);
+
 
                 // Verify Leader
                 const [gang] = await connection.query('SELECT leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
@@ -302,19 +314,19 @@ export async function POST(request) {
                 );
 
                 if (targetUser.length === 0) {
-                    console.log(`[Gang] Target user not found in DB: ${targetDiscordId}`);
+
                     throw new Error('Member not found in database');
                 }
 
                 if (targetUser[0].gang_id !== userCheck[0].gang_id) {
-                    console.log(`[Gang] Target user in different gang/no gang: ${targetUser[0].gang_id} vs ${userCheck[0].gang_id}`);
+
                     throw new Error('Member not found in your gang');
                 }
 
                 // Remove member from gang
                 const [result] = await connection.query('UPDATE preregistrations SET gang_id = NULL WHERE discord_id = ?', [targetDiscordId]);
 
-                console.log(`[Gang] Kick result: AffectedRows=${result.affectedRows}`);
+
 
                 if (result.affectedRows === 0) {
                     throw new Error('Failed to kick member (User not found or already kicked)');

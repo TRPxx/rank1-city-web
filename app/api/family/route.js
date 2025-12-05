@@ -205,15 +205,27 @@ export async function POST(request) {
 
                 const { name, motd } = body;
 
+                // [SECURITY] Validate name
+                const trimmedName = name?.trim();
+                if (!trimmedName) throw new Error('กรุณาใส่ชื่อครอบครัว');
+                if (trimmedName.length < 3) throw new Error('ชื่อครอบครัวต้องมีอย่างน้อย 3 ตัวอักษร');
+                if (trimmedName.length > 20) throw new Error('ชื่อครอบครัวต้องไม่เกิน 20 ตัวอักษร');
+                if (!/^[a-zA-Z0-9\s\u0E00-\u0E7F]+$/.test(trimmedName)) {
+                    throw new Error('ชื่อครอบครัวใช้ได้เฉพาะตัวอักษร ตัวเลข และภาษาไทย');
+                }
+
+                // [SECURITY] Validate and sanitize MOTD (max 200 chars, strip HTML)
+                const sanitizedMotd = motd ? String(motd).slice(0, 200).replace(/<[^>]*>/g, '') : null;
+
                 // Verify Leader
                 const [family] = await connection.query('SELECT leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
                 if (family[0].leader_discord_id !== discordId) {
                     throw new Error('Only the leader can update settings');
                 }
 
-                await connection.query('UPDATE families SET name = ?, motd = ? WHERE id = ?', [name, motd, userCheck[0].family_id]);
+                await connection.query('UPDATE families SET name = ?, motd = ? WHERE id = ?', [trimmedName, sanitizedMotd, userCheck[0].family_id]);
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Settings updated' });
+                return NextResponse.json({ success: true, message: 'อัพเดทการตั้งค่าสำเร็จ' });
 
             } else if (action === 'dissolve') {
                 if (!userCheck[0].family_id) throw new Error('You are not in a family');
