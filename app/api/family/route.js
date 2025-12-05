@@ -226,6 +226,12 @@ export async function POST(request) {
 
                 const requesterDiscordId = request[0].discord_id;
 
+                // ลบ record เก่าที่ approved/rejected ก่อน (ป้องกัน duplicate key)
+                await connection.query(
+                    'DELETE FROM family_join_requests WHERE family_id = ? AND discord_id = ? AND status IN ("approved", "rejected")',
+                    [userCheck[0].family_id, requesterDiscordId]
+                );
+
                 // อัพเดทคำขอเป็น approved
                 await connection.query(
                     'UPDATE family_join_requests SET status = "approved", processed_at = NOW(), processed_by = ? WHERE id = ?',

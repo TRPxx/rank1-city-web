@@ -841,73 +841,92 @@ export default function GangManager({ userData }) {
                         )}
                     </motion.div>
 
-                    {/* Pending Join Requests - สำหรับหัวหน้าแก๊งเท่านั้น */}
+                    {/* Pending Join Requests - ปุ่มกล่องจดหมาย */}
                     {isLeader && pendingRequests.length > 0 && (
-                        <motion.div
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className={`${theme.glass} p-6 rounded-[2rem] border shadow-xl`}
-                        >
-                            <div className="flex items-center justify-between mb-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
-                                        <Users className="w-5 h-5 text-white" />
+                        <Dialog>
+                            <DialogTrigger asChild>
+                                <motion.button
+                                    initial={{ opacity: 0, scale: 0.9 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    whileHover={{ scale: 1.02 }}
+                                    whileTap={{ scale: 0.98 }}
+                                    className={`${theme.glass} w-full p-4 rounded-2xl flex items-center justify-between hover:bg-amber-500/10 transition-all border border-amber-500/30 group cursor-pointer`}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className="relative">
+                                            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center shadow-lg shadow-amber-500/30">
+                                                <Users className="w-6 h-6 text-white" />
+                                            </div>
+                                            <span className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 rounded-full text-[11px] font-bold flex items-center justify-center text-white animate-bounce shadow-lg">
+                                                {pendingRequests.length}
+                                            </span>
+                                        </div>
+                                        <div className="text-left">
+                                            <h3 className="font-bold text-white group-hover:text-amber-400 transition-colors">คำขอเข้าร่วม</h3>
+                                            <p className="text-xs text-zinc-400">{pendingRequests.length} คำขอรอดำเนินการ</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="font-bold text-white">คำขอเข้าร่วม</h3>
-                                        <p className="text-xs text-zinc-400">{pendingRequests.length} คำขอรอดำเนินการ</p>
-                                    </div>
-                                </div>
-                                <span className="w-6 h-6 bg-amber-500 rounded-full text-[12px] font-bold flex items-center justify-center text-white animate-pulse">
-                                    {pendingRequests.length}
-                                </span>
-                            </div>
-
-                            <div className="space-y-3 max-h-[200px] overflow-y-auto pr-2">
-                                {pendingRequests.map((request) => (
-                                    <div key={request.id} className="flex items-center justify-between p-3 rounded-xl bg-zinc-900/50 border border-amber-500/20">
-                                        <div className="flex items-center gap-3">
-                                            {request.avatar_url ? (
-                                                <img src={request.avatar_url} alt="" className="w-10 h-10 rounded-full" />
-                                            ) : (
-                                                <div className="w-10 h-10 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-bold">
-                                                    {request.discord_name?.slice(0, 2).toUpperCase() || '??'}
+                                    <ArrowRight className="w-5 h-5 text-zinc-500 group-hover:text-amber-400 group-hover:translate-x-1 transition-all" />
+                                </motion.button>
+                            </DialogTrigger>
+                            <DialogContent className="bg-zinc-950/95 backdrop-blur-xl border-amber-500/20 max-w-md">
+                                <DialogHeader>
+                                    <DialogTitle className="text-xl font-bold flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                                            <Users className="w-5 h-5 text-white" />
+                                        </div>
+                                        คำขอเข้าร่วมแก๊ง
+                                    </DialogTitle>
+                                    <DialogDescription>
+                                        มี {pendingRequests.length} คำขอรอการอนุมัติ
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <div className="space-y-3 max-h-[400px] overflow-y-auto py-4 pr-2">
+                                    {pendingRequests.map((request) => (
+                                        <div key={request.id} className="flex items-center justify-between p-4 rounded-xl bg-zinc-900/70 border border-white/5 hover:border-amber-500/30 transition-colors">
+                                            <div className="flex items-center gap-3">
+                                                {request.avatar_url ? (
+                                                    <img src={request.avatar_url} alt="" className="w-12 h-12 rounded-full ring-2 ring-amber-500/30" />
+                                                ) : (
+                                                    <div className="w-12 h-12 rounded-full bg-zinc-700 flex items-center justify-center text-sm font-bold ring-2 ring-amber-500/30">
+                                                        {request.discord_name?.slice(0, 2).toUpperCase() || '??'}
+                                                    </div>
+                                                )}
+                                                <div>
+                                                    <p className="font-semibold text-white">{request.discord_name}</p>
+                                                    <p className="text-xs text-zinc-400">
+                                                        {new Date(request.created_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short' })}
+                                                    </p>
                                                 </div>
-                                            )}
-                                            <div>
-                                                <p className="font-medium text-sm">{request.discord_name}</p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {new Date(request.created_at).toLocaleDateString('th-TH')}
-                                                </p>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <Button
+                                                    size="sm"
+                                                    className="bg-green-600 hover:bg-green-700 text-white h-9 px-4 font-medium"
+                                                    onClick={() => handleApproveRequest(request.id)}
+                                                    disabled={processingRequest === request.id}
+                                                >
+                                                    {processingRequest === request.id ? (
+                                                        <Loader2 className="w-4 h-4 animate-spin" />
+                                                    ) : (
+                                                        '✓ อนุมัติ'
+                                                    )}
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="outline"
+                                                    className="border-red-500/50 text-red-400 hover:bg-red-500/20 h-9 px-3"
+                                                    onClick={() => handleRejectRequest(request.id)}
+                                                    disabled={processingRequest === request.id}
+                                                >
+                                                    ✕
+                                                </Button>
                                             </div>
                                         </div>
-                                        <div className="flex gap-2">
-                                            <Button
-                                                size="sm"
-                                                className="bg-green-600 hover:bg-green-700 text-white h-8 px-3"
-                                                onClick={() => handleApproveRequest(request.id)}
-                                                disabled={processingRequest === request.id}
-                                            >
-                                                {processingRequest === request.id ? (
-                                                    <Loader2 className="w-4 h-4 animate-spin" />
-                                                ) : (
-                                                    '✓'
-                                                )}
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="outline"
-                                                className="border-red-500/30 text-red-400 hover:bg-red-500/10 h-8 px-3"
-                                                onClick={() => handleRejectRequest(request.id)}
-                                                disabled={processingRequest === request.id}
-                                            >
-                                                ✕
-                                            </Button>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </motion.div>
+                                    ))}
+                                </div>
+                            </DialogContent>
+                        </Dialog>
                     )}
 
                     {/* Quick Actions */}
