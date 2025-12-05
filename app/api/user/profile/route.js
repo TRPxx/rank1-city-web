@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import pool from '@/lib/db';
+import { webDb } from '@/lib/db';
 
 import { rateLimit } from '@/lib/rate-limit';
 
@@ -40,6 +41,26 @@ export async function GET(request) {
 
         const user = rows[0];
 
+        // [AUTO SYNC] ซิงค์ firstname/lastname ไปยัง preregistrations (ถ้ามีชื่อใน Game DB)
+        if (user.firstname && user.lastname) {
+            try {
+                // เช็คว่า preregistrations มีชื่อหรือยัง (ถ้าไม่มีค่อย sync)
+                const [preregCheck] = await webDb.query(
+                    'SELECT firstname FROM preregistrations WHERE discord_id = ?',
+                    [rawDiscordId]
+                );
+
+                if (preregCheck.length > 0 && !preregCheck[0].firstname) {
+                    await webDb.query(
+                        'UPDATE preregistrations SET firstname = ?, lastname = ? WHERE discord_id = ?',
+                        [user.firstname, user.lastname, rawDiscordId]
+                    );
+                }
+            } catch (syncErr) {
+                // Silent fail - ไม่ต้อง error ถ้า sync ไม่ได้
+            }
+        }
+
         // Fetch Job Label separately (Safe Mode)
         let jobLabel = user.job;
         try {
@@ -51,7 +72,7 @@ export async function GET(request) {
                 jobLabel = jobRows[0].label;
             }
         } catch (err) {
-            console.warn("Failed to fetch job label:", err.message);
+            // Silent fail
         }
 
 
