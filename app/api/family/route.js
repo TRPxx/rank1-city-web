@@ -254,7 +254,7 @@ export async function POST(request) {
                 // Ensure string
                 targetDiscordId = String(targetDiscordId);
 
-                console.log(`[Family] Kicking member: Leader=${discordId}, Target=${targetDiscordId}`);
+
 
                 // Verify Leader
                 const [family] = await connection.query('SELECT leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
@@ -274,19 +274,17 @@ export async function POST(request) {
                 );
 
                 if (targetUser.length === 0) {
-                    console.log(`[Family] Target user not found in DB: ${targetDiscordId}`);
                     throw new Error('Member not found in database');
                 }
 
                 if (targetUser[0].family_id !== userCheck[0].family_id) {
-                    console.log(`[Family] Target user in different family/no family: ${targetUser[0].family_id} vs ${userCheck[0].family_id}`);
                     throw new Error('Member not found in your family');
                 }
 
                 // Remove member from family
                 const [result] = await connection.query('UPDATE preregistrations SET family_id = NULL WHERE discord_id = ?', [targetDiscordId]);
 
-                console.log(`[Family] Kick result: AffectedRows=${result.affectedRows}`);
+
 
                 if (result.affectedRows === 0) {
                     throw new Error('Failed to kick member (User not found or already kicked)');

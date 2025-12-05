@@ -398,7 +398,7 @@ export async function GET(request) {
             is_leader: Boolean(m.is_leader)
         }));
 
-        console.log('Gang members with is_leader:', membersWithBoolean);
+
 
         return NextResponse.json({
             hasGang: true,
