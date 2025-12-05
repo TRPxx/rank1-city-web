@@ -184,43 +184,154 @@ export async function POST(request) {
 
             } else if (action === 'join') {
                 const { inviteCode } = body;
-                if (!inviteCode) throw new Error('Gang code required');
+                if (!inviteCode) throw new Error('กรุณากรอกรหัสแก๊ง');
 
-                // [SECURITY FIX #1] Atomic UPDATE เพื่อป้องกัน Race Condition
-                // ใช้ UPDATE พร้อมเงื่อนไขใน SQL เดียว แทน SELECT แล้วเช็ค
-                const [updateResult] = await connection.query(
-                    `UPDATE gangs 
-                     SET member_count = member_count + 1 
-                     WHERE gang_code = ? AND member_count < max_members`,
+                // หาแก๊งจากรหัส
+                const [gangCheck] = await connection.query(
+                    'SELECT id, name, member_count, max_members FROM gangs WHERE gang_code = ?',
                     [inviteCode]
                 );
 
-                if (updateResult.affectedRows === 0) {
-                    // เช็คว่าไม่พบแก๊ง หรือ แก๊งเต็ม
-                    const [gangCheck] = await connection.query(
-                        'SELECT id, member_count, max_members FROM gangs WHERE gang_code = ?',
-                        [inviteCode]
-                    );
-                    if (gangCheck.length === 0) {
-                        throw new Error('ไม่พบแก๊ง');
-                    }
+                if (gangCheck.length === 0) {
+                    throw new Error('ไม่พบแก๊ง');
+                }
+
+                const gang = gangCheck[0];
+
+                if (gang.member_count >= gang.max_members) {
                     throw new Error('แก๊งเต็มแล้ว');
                 }
 
-                // ดึง gang_id สำหรับ update user
-                const [gang] = await connection.query(
-                    'SELECT id FROM gangs WHERE gang_code = ?',
-                    [inviteCode]
+                // เช็คว่ามีคำขอที่รอดำเนินการอยู่หรือไม่
+                const [existingRequest] = await connection.query(
+                    'SELECT id FROM gang_join_requests WHERE gang_id = ? AND discord_id = ? AND status = "pending"',
+                    [gang.id, discordId]
                 );
 
-                // Update User
+                if (existingRequest.length > 0) {
+                    throw new Error('คุณมีคำขอเข้าร่วมแก๊งนี้อยู่แล้ว กรุณารอหัวหน้าอนุมัติ');
+                }
+
+                // ดึงข้อมูลผู้ใช้
+                const [userInfo] = await connection.query(
+                    'SELECT discord_name, avatar_url FROM preregistrations WHERE discord_id = ?',
+                    [discordId]
+                );
+
+                // สร้างคำขอเข้าร่วม (ไม่เข้าร่วมทันที)
                 await connection.query(
-                    'UPDATE preregistrations SET gang_id = ? WHERE discord_id = ?',
-                    [gang[0].id, discordId]
+                    `INSERT INTO gang_join_requests (gang_id, discord_id, discord_name, avatar_url, status) 
+                     VALUES (?, ?, ?, ?, 'pending')`,
+                    [gang.id, discordId, userInfo[0]?.discord_name || 'Unknown', userInfo[0]?.avatar_url || null]
                 );
 
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'เข้าร่วมแก๊งสำเร็จ' });
+                return NextResponse.json({
+                    success: true,
+                    message: `ส่งคำขอเข้าร่วมแก๊ง "${gang.name}" สำเร็จ! กรุณารอหัวหน้าอนุมัติ`,
+                    pending: true
+                });
+
+            } else if (action === 'approve_join') {
+                // หัวหน้าอนุมัติคำขอ
+                if (!userCheck[0].gang_id) throw new Error('คุณไม่ได้อยู่ในแก๊ง');
+
+                const { requestId } = body;
+                if (!requestId) throw new Error('ไม่พบรหัสคำขอ');
+
+                // เช็คว่าเป็นหัวหน้าหรือไม่
+                const [gang] = await connection.query(
+                    'SELECT id, leader_discord_id, member_count, max_members FROM gangs WHERE id = ?',
+                    [userCheck[0].gang_id]
+                );
+
+                if (gang[0].leader_discord_id !== discordId) {
+                    throw new Error('เฉพาะหัวหน้าเท่านั้นที่สามารถอนุมัติได้');
+                }
+
+                // เช็คคำขอ
+                const [request] = await connection.query(
+                    'SELECT id, discord_id FROM gang_join_requests WHERE id = ? AND gang_id = ? AND status = "pending"',
+                    [requestId, userCheck[0].gang_id]
+                );
+
+                if (request.length === 0) {
+                    throw new Error('ไม่พบคำขอหรือคำขอถูกดำเนินการแล้ว');
+                }
+
+                // เช็คว่าแก๊งยังไม่เต็ม
+                if (gang[0].member_count >= gang[0].max_members) {
+                    throw new Error('แก๊งเต็มแล้ว ไม่สามารถอนุมัติได้');
+                }
+
+                const requesterDiscordId = request[0].discord_id;
+
+                // อัพเดทคำขอเป็น approved
+                await connection.query(
+                    'UPDATE gang_join_requests SET status = "approved", processed_at = NOW(), processed_by = ? WHERE id = ?',
+                    [discordId, requestId]
+                );
+
+                // เพิ่มสมาชิกเข้าแก๊ง
+                await connection.query(
+                    'UPDATE preregistrations SET gang_id = ? WHERE discord_id = ?',
+                    [userCheck[0].gang_id, requesterDiscordId]
+                );
+
+                // อัพเดทจำนวนสมาชิก
+                await connection.query(
+                    'UPDATE gangs SET member_count = member_count + 1 WHERE id = ?',
+                    [userCheck[0].gang_id]
+                );
+
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'อนุมัติคำขอเข้าร่วมสำเร็จ' });
+
+            } else if (action === 'reject_join') {
+                // หัวหน้าปฏิเสธคำขอ
+                if (!userCheck[0].gang_id) throw new Error('คุณไม่ได้อยู่ในแก๊ง');
+
+                const { requestId } = body;
+                if (!requestId) throw new Error('ไม่พบรหัสคำขอ');
+
+                // เช็คว่าเป็นหัวหน้าหรือไม่
+                const [gang] = await connection.query(
+                    'SELECT leader_discord_id FROM gangs WHERE id = ?',
+                    [userCheck[0].gang_id]
+                );
+
+                if (gang[0].leader_discord_id !== discordId) {
+                    throw new Error('เฉพาะหัวหน้าเท่านั้นที่สามารถปฏิเสธได้');
+                }
+
+                // อัพเดทคำขอเป็น rejected
+                const [result] = await connection.query(
+                    'UPDATE gang_join_requests SET status = "rejected", processed_at = NOW(), processed_by = ? WHERE id = ? AND gang_id = ? AND status = "pending"',
+                    [discordId, requestId, userCheck[0].gang_id]
+                );
+
+                if (result.affectedRows === 0) {
+                    throw new Error('ไม่พบคำขอหรือคำขอถูกดำเนินการแล้ว');
+                }
+
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'ปฏิเสธคำขอเข้าร่วมแล้ว' });
+
+            } else if (action === 'cancel_request') {
+                // ผู้ใช้ยกเลิกคำขอของตัวเอง
+                const { gangId } = body;
+
+                const [result] = await connection.query(
+                    'DELETE FROM gang_join_requests WHERE discord_id = ? AND gang_id = ? AND status = "pending"',
+                    [discordId, gangId]
+                );
+
+                if (result.affectedRows === 0) {
+                    throw new Error('ไม่พบคำขอที่รอดำเนินการ');
+                }
+
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'ยกเลิกคำขอแล้ว' });
 
             } else if (action === 'leave') {
                 if (!userCheck[0].gang_id) throw new Error('You are not in a gang');
@@ -370,7 +481,18 @@ export async function GET(request) {
         `, [discordId]);
 
         if (rows.length === 0) {
-            return NextResponse.json({ hasGang: false });
+            // ดึงคำขอที่ผู้ใช้ส่งไป (ถ้ามี)
+            const [myRequests] = await pool.query(`
+                SELECT jr.id, jr.gang_id, jr.status, jr.created_at, g.name as gang_name
+                FROM gang_join_requests jr
+                JOIN gangs g ON jr.gang_id = g.id
+                WHERE jr.discord_id = ? AND jr.status = 'pending'
+            `, [discordId]);
+
+            return NextResponse.json({
+                hasGang: false,
+                myPendingRequests: myRequests
+            });
         }
 
         const gang = rows[0];
@@ -398,12 +520,23 @@ export async function GET(request) {
             is_leader: Boolean(m.is_leader)
         }));
 
-
+        // ถ้าเป็นหัวหน้า ดึงคำขอที่รอดำเนินการ
+        let pendingRequests = [];
+        if (gang.leader_discord_id === discordId) {
+            const [requests] = await pool.query(`
+                SELECT id, discord_id, discord_name, avatar_url, created_at
+                FROM gang_join_requests
+                WHERE gang_id = ? AND status = 'pending'
+                ORDER BY created_at ASC
+            `, [gang.id]);
+            pendingRequests = requests;
+        }
 
         return NextResponse.json({
             hasGang: true,
             gang: gang,
-            members: membersWithBoolean
+            members: membersWithBoolean,
+            pendingRequests: pendingRequests
         });
 
     } catch (error) {

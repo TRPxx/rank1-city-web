@@ -144,43 +144,154 @@ export async function POST(request) {
 
             } else if (action === 'join') {
                 const { inviteCode } = body;
-                if (!inviteCode) throw new Error('Family code required');
+                if (!inviteCode) throw new Error('กรุณากรอกรหัสครอบครัว');
 
-                // [SECURITY FIX #2] Atomic UPDATE เพื่อป้องกัน Race Condition
-                // ใช้ UPDATE พร้อมเงื่อนไขใน SQL เดียว แทน SELECT แล้วเช็ค
-                const [updateResult] = await connection.query(
-                    `UPDATE families 
-                     SET member_count = member_count + 1 
-                     WHERE family_code = ? AND member_count < max_members`,
+                // หาครอบครัวจากรหัส
+                const [familyCheck] = await connection.query(
+                    'SELECT id, name, member_count, max_members FROM families WHERE family_code = ?',
                     [inviteCode]
                 );
 
-                if (updateResult.affectedRows === 0) {
-                    // เช็คว่าไม่พบครอบครัว หรือ ครอบครัวเต็ม
-                    const [familyCheck] = await connection.query(
-                        'SELECT id, member_count, max_members FROM families WHERE family_code = ?',
-                        [inviteCode]
-                    );
-                    if (familyCheck.length === 0) {
-                        throw new Error('ไม่พบครอบครัว');
-                    }
+                if (familyCheck.length === 0) {
+                    throw new Error('ไม่พบครอบครัว');
+                }
+
+                const family = familyCheck[0];
+
+                if (family.member_count >= family.max_members) {
                     throw new Error('ครอบครัวเต็มแล้ว');
                 }
 
-                // ดึง family_id สำหรับ update user
-                const [family] = await connection.query(
-                    'SELECT id FROM families WHERE family_code = ?',
-                    [inviteCode]
+                // เช็คว่ามีคำขอที่รอดำเนินการอยู่หรือไม่
+                const [existingRequest] = await connection.query(
+                    'SELECT id FROM family_join_requests WHERE family_id = ? AND discord_id = ? AND status = "pending"',
+                    [family.id, discordId]
                 );
 
-                // Update User
+                if (existingRequest.length > 0) {
+                    throw new Error('คุณมีคำขอเข้าร่วมครอบครัวนี้อยู่แล้ว กรุณารอหัวหน้าอนุมัติ');
+                }
+
+                // ดึงข้อมูลผู้ใช้
+                const [userInfo] = await connection.query(
+                    'SELECT discord_name, avatar_url FROM preregistrations WHERE discord_id = ?',
+                    [discordId]
+                );
+
+                // สร้างคำขอเข้าร่วม (ไม่เข้าร่วมทันที)
                 await connection.query(
-                    'UPDATE preregistrations SET family_id = ? WHERE discord_id = ?',
-                    [family[0].id, discordId]
+                    `INSERT INTO family_join_requests (family_id, discord_id, discord_name, avatar_url, status) 
+                     VALUES (?, ?, ?, ?, 'pending')`,
+                    [family.id, discordId, userInfo[0]?.discord_name || 'Unknown', userInfo[0]?.avatar_url || null]
                 );
 
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'เข้าร่วมครอบครัวสำเร็จ' });
+                return NextResponse.json({
+                    success: true,
+                    message: `ส่งคำขอเข้าร่วมครอบครัว "${family.name}" สำเร็จ! กรุณารอหัวหน้าอนุมัติ`,
+                    pending: true
+                });
+
+            } else if (action === 'approve_join') {
+                // หัวหน้าอนุมัติคำขอ
+                if (!userCheck[0].family_id) throw new Error('คุณไม่ได้อยู่ในครอบครัว');
+
+                const { requestId } = body;
+                if (!requestId) throw new Error('ไม่พบรหัสคำขอ');
+
+                // เช็คว่าเป็นหัวหน้าหรือไม่
+                const [family] = await connection.query(
+                    'SELECT id, leader_discord_id, member_count, max_members FROM families WHERE id = ?',
+                    [userCheck[0].family_id]
+                );
+
+                if (family[0].leader_discord_id !== discordId) {
+                    throw new Error('เฉพาะหัวหน้าเท่านั้นที่สามารถอนุมัติได้');
+                }
+
+                // เช็คคำขอ
+                const [request] = await connection.query(
+                    'SELECT id, discord_id FROM family_join_requests WHERE id = ? AND family_id = ? AND status = "pending"',
+                    [requestId, userCheck[0].family_id]
+                );
+
+                if (request.length === 0) {
+                    throw new Error('ไม่พบคำขอหรือคำขอถูกดำเนินการแล้ว');
+                }
+
+                // เช็คว่าครอบครัวยังไม่เต็ม
+                if (family[0].member_count >= family[0].max_members) {
+                    throw new Error('ครอบครัวเต็มแล้ว ไม่สามารถอนุมัติได้');
+                }
+
+                const requesterDiscordId = request[0].discord_id;
+
+                // อัพเดทคำขอเป็น approved
+                await connection.query(
+                    'UPDATE family_join_requests SET status = "approved", processed_at = NOW(), processed_by = ? WHERE id = ?',
+                    [discordId, requestId]
+                );
+
+                // เพิ่มสมาชิกเข้าครอบครัว
+                await connection.query(
+                    'UPDATE preregistrations SET family_id = ? WHERE discord_id = ?',
+                    [userCheck[0].family_id, requesterDiscordId]
+                );
+
+                // อัพเดทจำนวนสมาชิก
+                await connection.query(
+                    'UPDATE families SET member_count = member_count + 1 WHERE id = ?',
+                    [userCheck[0].family_id]
+                );
+
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'อนุมัติคำขอเข้าร่วมสำเร็จ' });
+
+            } else if (action === 'reject_join') {
+                // หัวหน้าปฏิเสธคำขอ
+                if (!userCheck[0].family_id) throw new Error('คุณไม่ได้อยู่ในครอบครัว');
+
+                const { requestId } = body;
+                if (!requestId) throw new Error('ไม่พบรหัสคำขอ');
+
+                // เช็คว่าเป็นหัวหน้าหรือไม่
+                const [family] = await connection.query(
+                    'SELECT leader_discord_id FROM families WHERE id = ?',
+                    [userCheck[0].family_id]
+                );
+
+                if (family[0].leader_discord_id !== discordId) {
+                    throw new Error('เฉพาะหัวหน้าเท่านั้นที่สามารถปฏิเสธได้');
+                }
+
+                // อัพเดทคำขอเป็น rejected
+                const [result] = await connection.query(
+                    'UPDATE family_join_requests SET status = "rejected", processed_at = NOW(), processed_by = ? WHERE id = ? AND family_id = ? AND status = "pending"',
+                    [discordId, requestId, userCheck[0].family_id]
+                );
+
+                if (result.affectedRows === 0) {
+                    throw new Error('ไม่พบคำขอหรือคำขอถูกดำเนินการแล้ว');
+                }
+
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'ปฏิเสธคำขอเข้าร่วมแล้ว' });
+
+            } else if (action === 'cancel_request') {
+                // ผู้ใช้ยกเลิกคำขอของตัวเอง
+                const { familyId } = body;
+
+                const [result] = await connection.query(
+                    'DELETE FROM family_join_requests WHERE discord_id = ? AND family_id = ? AND status = "pending"',
+                    [discordId, familyId]
+                );
+
+                if (result.affectedRows === 0) {
+                    throw new Error('ไม่พบคำขอที่รอดำเนินการ');
+                }
+
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'ยกเลิกคำขอแล้ว' });
 
             } else if (action === 'leave') {
                 if (!userCheck[0].family_id) throw new Error('You are not in a family');
@@ -328,7 +439,18 @@ export async function GET(request) {
         `, [discordId]);
 
         if (rows.length === 0) {
-            return NextResponse.json({ hasFamily: false });
+            // ดึงคำขอที่ผู้ใช้ส่งไป (ถ้ามี)
+            const [myRequests] = await pool.query(`
+                SELECT jr.id, jr.family_id, jr.status, jr.created_at, f.name as family_name
+                FROM family_join_requests jr
+                JOIN families f ON jr.family_id = f.id
+                WHERE jr.discord_id = ? AND jr.status = 'pending'
+            `, [discordId]);
+
+            return NextResponse.json({
+                hasFamily: false,
+                myPendingRequests: myRequests
+            });
         }
 
         const family = rows[0];
@@ -356,10 +478,23 @@ export async function GET(request) {
             is_leader: Boolean(m.is_leader)
         }));
 
+        // ถ้าเป็นหัวหน้า ดึงคำขอที่รอดำเนินการ
+        let pendingRequests = [];
+        if (family.leader_discord_id === discordId) {
+            const [requests] = await pool.query(`
+                SELECT id, discord_id, discord_name, avatar_url, created_at
+                FROM family_join_requests
+                WHERE family_id = ? AND status = 'pending'
+                ORDER BY created_at ASC
+            `, [family.id]);
+            pendingRequests = requests;
+        }
+
         return NextResponse.json({
             hasFamily: true,
             family: family,
-            members: membersWithBoolean
+            members: membersWithBoolean,
+            pendingRequests: pendingRequests
         });
 
     } catch (error) {
