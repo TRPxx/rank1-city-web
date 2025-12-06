@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { webDb, gameDb } from '@/lib/db';
+import { rateLimit } from '@/lib/rate-limit';
 
 // Simple In-Memory Cache for Stats
 let statsCache = {
@@ -12,6 +13,12 @@ const CACHE_DURATION = 60 * 1000; // 60 seconds
 
 export async function GET(request) {
     try {
+        // Rate Limit: 30 requests per minute for Admin API
+        const ip = request.headers.get("x-forwarded-for") || "unknown";
+        if (!rateLimit(`admin_${ip}`, 30, 60000)) {
+            return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+        }
+
         const session = await getServerSession(authOptions);
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 

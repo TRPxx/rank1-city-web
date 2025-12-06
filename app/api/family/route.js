@@ -219,8 +219,16 @@ export async function POST(request) {
                     throw new Error('ไม่พบคำขอหรือคำขอถูกดำเนินการแล้ว');
                 }
 
-                // เช็คว่าครอบครัวยังไม่เต็ม
-                if (family[0].member_count >= family[0].max_members) {
+                // [SECURITY FIX #1] ใช้ Atomic UPDATE ป้องกัน Race Condition
+                // อัพเดทจำนวนสมาชิกแบบ atomic พร้อมเช็คว่าไม่เกิน max
+                const [updateResult] = await connection.query(
+                    `UPDATE families 
+                     SET member_count = member_count + 1 
+                     WHERE id = ? AND member_count < max_members`,
+                    [userCheck[0].family_id]
+                );
+
+                if (updateResult.affectedRows === 0) {
                     throw new Error('ครอบครัวเต็มแล้ว ไม่สามารถอนุมัติได้');
                 }
 
@@ -244,9 +252,9 @@ export async function POST(request) {
                     [userCheck[0].family_id, requesterDiscordId]
                 );
 
-                // อัพเดทจำนวนสมาชิก
+                // [SYNC] Sync member_count จากข้อมูลจริง
                 await connection.query(
-                    'UPDATE families SET member_count = member_count + 1 WHERE id = ?',
+                    'CALL sp_update_family_member_count(?)',
                     [userCheck[0].family_id]
                 );
 
@@ -311,8 +319,11 @@ export async function POST(request) {
                 // Update User
                 await connection.query('UPDATE preregistrations SET family_id = NULL WHERE discord_id = ?', [discordId]);
 
-                // Update Family Count
-                await connection.query('UPDATE families SET member_count = member_count - 1 WHERE id = ?', [userCheck[0].family_id]);
+                // [SYNC] Sync member_count จากข้อมูลจริง
+                await connection.query(
+                    'CALL sp_update_family_member_count(?)',
+                    [userCheck[0].family_id]
+                );
 
                 await connection.commit();
                 return NextResponse.json({ success: true, message: 'Left family successfully' });
@@ -407,8 +418,11 @@ export async function POST(request) {
                     throw new Error('Failed to kick member (User not found or already kicked)');
                 }
 
-                // Update Family Count
-                await connection.query('UPDATE families SET member_count = member_count - 1 WHERE id = ?', [userCheck[0].family_id]);
+                // [SYNC] Sync member_count จากข้อมูลจริง
+                await connection.query(
+                    'CALL sp_update_family_member_count(?)',
+                    [userCheck[0].family_id]
+                );
 
                 await connection.commit();
                 return NextResponse.json({ success: true, message: 'Member kicked successfully' });

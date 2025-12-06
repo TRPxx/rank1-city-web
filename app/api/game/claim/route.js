@@ -2,10 +2,25 @@ import { NextResponse } from 'next/server';
 import { webDb as pool } from '@/lib/db';
 import { rateLimit } from '@/lib/rate-limit';
 
-// Security: In production, check for a specific Header or API Key!
-// const API_SECRET = process.env.GAME_API_SECRET;
+// Security: ตรวจสอบ API Secret จาก Game Server
+const GAME_API_SECRET = process.env.GAME_API_SECRET;
+
+function verifyGameApiAccess(request) {
+    // ถ้าไม่ได้ตั้งค่า GAME_API_SECRET ใน .env จะอนุญาตให้เข้าถึงได้ (development mode)
+    if (!GAME_API_SECRET) {
+        return true; // Warning: ควรตั้งค่าใน production
+    }
+
+    const authHeader = request.headers.get('x-game-api-secret') || request.headers.get('authorization');
+    return authHeader === GAME_API_SECRET || authHeader === `Bearer ${GAME_API_SECRET}`;
+}
 
 export async function GET(request) {
+    // ตรวจสอบ API Secret
+    if (!verifyGameApiAccess(request)) {
+        return NextResponse.json({ error: 'Unauthorized: Invalid API Secret' }, { status: 401 });
+    }
+
     const ip = request.headers.get("x-forwarded-for") || "unknown";
     if (!rateLimit(ip, 60, 60000)) { // 60 requests per minute (Game Server might poll)
         return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
@@ -29,6 +44,11 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
+    // ตรวจสอบ API Secret
+    if (!verifyGameApiAccess(request)) {
+        return NextResponse.json({ error: 'Unauthorized: Invalid API Secret' }, { status: 401 });
+    }
+
     const ip = request.headers.get("x-forwarded-for") || "unknown";
     if (!rateLimit(ip, 60, 60000)) {
         return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });

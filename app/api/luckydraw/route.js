@@ -71,20 +71,15 @@ export async function POST(request) {
                 [discordId, 'lucky_draw_spin', -1, `Won ${selectedItem.name}`]
             );
 
-            // PHASE 5: Add to Claim Queue
-            // Note: Table 'claim_queue' must be created via migration script (scripts/migrate_claim_queue.js)
-
-            console.log(`Inserting into claim_queue: DiscordID=${discordId}, ItemID=${selectedItem.id}, Name=${selectedItem.name}`);
+            // Add to Claim Queue (เพิ่มเข้าคิวรับของ)
+            // Note: Table 'claim_queue' must be created via migration script
 
             await connection.query(
                 'INSERT INTO claim_queue (discord_id, item_id, item_name, amount, status) VALUES (?, ?, ?, 1, "pending")',
                 [discordId, selectedItem.id, selectedItem.name]
             );
 
-            console.log('Claim queue insert successful');
-
             await connection.commit();
-            console.log('Transaction committed');
 
             return NextResponse.json({
                 success: true,

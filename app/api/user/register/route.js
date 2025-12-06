@@ -144,7 +144,7 @@ export async function POST(request) {
                 'UPDATE preregistrations SET firstname = ?, lastname = ? WHERE discord_id = ?',
                 [formattedFirstname, formattedLastname, rawDiscordId]
             );
-            console.log(`Synced name to preregistrations for ${rawDiscordId}`);
+            // Sync name สำเร็จ (ไม่ต้อง log ใน production)
         } catch (syncError) {
             console.error('Failed to sync to preregistrations:', syncError);
             // ไม่ throw error เพราะการลงทะเบียนสำเร็จแล้ว แค่ sync ไม่ได้

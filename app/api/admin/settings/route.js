@@ -4,6 +4,7 @@ import { NextResponse } from 'next/server';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { revalidatePath } from 'next/cache';
+import { rateLimit } from '@/lib/rate-limit';
 
 const isAdmin = (session) => {
     return session?.user?.isAdmin;
@@ -12,6 +13,12 @@ const isAdmin = (session) => {
 
 export async function GET(request) {
     try {
+        // Rate Limit: 30 requests per minute for Admin Settings
+        const ip = request.headers.get("x-forwarded-for") || "unknown";
+        if (!rateLimit(`admin_settings_${ip}`, 30, 60000)) {
+            return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
+        }
+
         const session = await getServerSession(authOptions);
         if (!isAdmin(session)) {
             return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });

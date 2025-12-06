@@ -72,7 +72,7 @@ export async function POST(request) {
 
                     if (ipCheck[0].count >= 3) {
                         // IP นี้มี referral มากเกินไป - ยังลงทะเบียนได้แต่ไม่นับ referral
-                        console.log(`[Security] Referral abuse detected from IP: ${ipAddress.slice(-8)} (${ipCheck[0].count} referrals)`);
+                        // Security: Referral abuse detected - ไม่นับ referral จาก IP นี้
                         validReferredBy = null;
                     } else {
                         validReferredBy = referralCodeInput;
@@ -110,7 +110,7 @@ export async function POST(request) {
                                         'INSERT INTO claim_queue (discord_id, item_id, item_name, amount, status) VALUES (?, ?, ?, 1, "pending")',
                                         [referrerDiscordId, rewardItemId, `Referral Reward: ${reward.name}`]
                                     );
-                                    console.log(`Awarded referral reward to ${referrerDiscordId}: ${reward.name}`);
+                                    // Awarded referral reward (ไม่ log ใน production)
                                 }
                             }
                         }
