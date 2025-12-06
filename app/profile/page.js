@@ -145,9 +145,9 @@ export default function ProfilePage() {
                                         </Avatar>
                                         <Badge className={cn(
                                             "absolute bottom-2 right-2 px-3 py-1 text-sm shadow-lg border-2 border-background",
-                                            gameData.sex === 'm' ? 'bg-blue-500' : 'bg-pink-500'
+                                            gameData.sex === 'ชาย' ? 'bg-blue-500' : gameData.sex === 'หญิง' ? 'bg-pink-500' : 'bg-purple-500'
                                         )}>
-                                            {gameData.sex === 'm' ? 'ชาย' : 'หญิง'}
+                                            {gameData.sex}
                                         </Badge>
                                     </div>
 

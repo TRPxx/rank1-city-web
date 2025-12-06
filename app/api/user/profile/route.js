@@ -121,7 +121,12 @@ export async function GET(request) {
             money: accounts.money || 0,
             bank: accounts.bank || 0,
             phone: user.phone_number || 'ไม่มีเบอร์โทรศัพท์',
-            sex: user.sex === 'm' ? 'ชาย' : 'หญิง',
+            sex: (() => {
+                const s = user.sex;
+                if (s === 'm' || s === 'M' || s === 0 || s === '0') return 'ชาย';
+                if (s === 'f' || s === 'F' || s === 1 || s === '1') return 'หญิง';
+                return 'เพศทางเลือก';
+            })(),
             dob: user.dateofbirth,
             job: user.job,
             job_grade: user.job_grade,
