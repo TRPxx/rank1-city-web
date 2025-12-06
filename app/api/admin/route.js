@@ -154,6 +154,37 @@ export async function GET(request) {
             });
         }
 
+        if (type === 'families') {
+            // Families Pagination Mode
+            let sql = `SELECT * FROM families`;
+            let countSql = `SELECT COUNT(*) as count FROM families`;
+            let params = [];
+            let countParams = [];
+
+            if (query) {
+                sql += ` WHERE name LIKE ? OR invite_code LIKE ?`;
+                countSql += ` WHERE name LIKE ? OR invite_code LIKE ?`;
+                params.push(`%${query}%`, `%${query}%`);
+                countParams.push(`%${query}%`, `%${query}%`);
+            }
+
+            sql += ` ORDER BY member_count DESC LIMIT ? OFFSET ?`;
+            params.push(limit, offset);
+
+            const [families] = await webDb.query(sql, params);
+            const [total] = await webDb.query(countSql, countParams);
+
+            return NextResponse.json({
+                families,
+                pagination: {
+                    page,
+                    limit,
+                    total: total[0].count,
+                    totalPages: Math.ceil(total[0].count / limit)
+                }
+            });
+        }
+
         if (type === 'leaderboard') {
             // Leaderboard Mode - Top Ticket Holders & Most Active Users
 
@@ -167,7 +198,7 @@ export async function GET(request) {
                     invite_count,
                     referral_code,
                     gang_id,
-                    created_at
+                    registered_at as created_at
                 FROM preregistrations
                 WHERE ticket_count > 0
                 ORDER BY ticket_count DESC
@@ -184,7 +215,7 @@ export async function GET(request) {
                     p.invite_count,
                     p.referral_code,
                     COUNT(ldh.id) as total_spins,
-                    p.created_at
+                    p.registered_at as created_at
                 FROM preregistrations p
                 INNER JOIN lucky_draw_history ldh ON p.discord_id = ldh.discord_id
                 GROUP BY p.discord_id
@@ -201,9 +232,10 @@ export async function GET(request) {
         if (query) {
             // Search Mode (No Cache)
             const [users] = await webDb.query(`
-                SELECT p.*, g.name as gang_name 
+                SELECT p.*, g.name as gang_name, f.name as family_name
                 FROM preregistrations p 
                 LEFT JOIN gangs g ON p.gang_id = g.id
+                LEFT JOIN families f ON p.family_id = f.id
                 WHERE p.discord_id LIKE ? OR p.referral_code LIKE ?
                 LIMIT 20
             `, [`%${query}%`, `%${query}%`]);
@@ -232,7 +264,7 @@ export async function GET(request) {
             const [webStats] = await webDb.query(`
                 SELECT 
                     (SELECT COUNT(*) FROM preregistrations) as total_users,
-                    (SELECT COUNT(*) FROM preregistrations WHERE DATE(created_at) = CURDATE()) as users_today,
+                    (SELECT COUNT(*) FROM preregistrations WHERE DATE(registered_at) = CURDATE()) as users_today,
                     (SELECT COUNT(*) FROM gangs) as total_gangs,
                     (SELECT SUM(ticket_count) FROM preregistrations) as tickets_holding,
                     (SELECT COUNT(*) FROM lucky_draw_history) as total_spins,
@@ -243,12 +275,14 @@ export async function GET(request) {
 
             // 2. Game DB Stats (Characters)
             let total_characters = 0;
+            /*
             try {
                 const [charRows] = await gameDb.query('SELECT COUNT(*) as count FROM users');
                 total_characters = charRows[0].count;
             } catch (e) {
                 console.error("Failed to fetch game stats", e);
             }
+            */
 
             const stats = webStats[0];
             stats.total_characters = total_characters;
@@ -265,9 +299,9 @@ export async function GET(request) {
 
             // Recent Registrations
             const [recentUsers] = await webDb.query(`
-                SELECT discord_id, referral_code, created_at 
+                SELECT discord_id, discord_name, referral_code, registered_at as created_at 
                 FROM preregistrations 
-                ORDER BY created_at DESC LIMIT 5
+                ORDER BY registered_at DESC LIMIT 5
             `);
 
             // Recent Lucky Draws (Rare items only)
@@ -279,10 +313,10 @@ export async function GET(request) {
 
             // Graph Data: Registrations (Last 7 Days)
             const [regGraph] = await webDb.query(`
-                SELECT DATE_FORMAT(created_at, '%Y-%m-%d') as date, COUNT(*) as count 
+                SELECT DATE_FORMAT(registered_at, '%Y-%m-%d') as date, COUNT(*) as count 
                 FROM preregistrations 
-                WHERE created_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-                GROUP BY DATE(created_at)
+                WHERE registered_at >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
+                GROUP BY DATE(registered_at)
                 ORDER BY date ASC
             `);
 

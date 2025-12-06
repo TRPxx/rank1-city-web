@@ -72,25 +72,40 @@ export default function AdminDashboard() {
     const [gangSearchQuery, setGangSearchQuery] = useState('');
     const [isLoadingGangs, setIsLoadingGangs] = useState(false);
 
+    // Families State
+    const [familiesList, setFamiliesList] = useState([]);
+    const [familiesPage, setFamiliesPage] = useState(1);
+    const [familiesTotalPages, setFamiliesTotalPages] = useState(1);
+    const [familySearchQuery, setFamilySearchQuery] = useState('');
+    const [isLoadingFamilies, setIsLoadingFamilies] = useState(false);
+
     // Recent Registrations Search
     const [recentRegSearchQuery, setRecentRegSearchQuery] = useState('');
 
     // Leaderboard State
     const [leaderboardData, setLeaderboardData] = useState({ topTickets: [], topActive: [] });
     const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(false);
-
     const [isInitialLoading, setIsInitialLoading] = useState(true);
     const [isSearching, setIsSearching] = useState(false);
 
     const fetchData = async () => {
         try {
             const res = await fetch('/api/admin');
+
             if (!res.ok) throw new Error('Failed to fetch data');
+
             const data = await res.json();
+
             setStats(data.stats);
             setRecentUsers(data.recentUsers);
             setRecentWins(data.recentWins);
-            setGraphs(data.graphs || { registrations: [], spins: [] });
+
+            // Process Graphs Data
+            const rawGraphs = data.graphs || { registrations: [], spins: [] };
+            setGraphs({
+                registrations: fillMissingDates(rawGraphs.registrations),
+                spins: fillMissingDates(rawGraphs.spins)
+            });
         } catch (error) {
             console.error(error);
         } finally {
@@ -136,6 +151,23 @@ export default function AdminDashboard() {
         }
     };
 
+    // Helper to fill missing dates for the last 7 days
+    const fillMissingDates = (data) => {
+        const result = [];
+        const today = new Date();
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            const dateStr = d.toISOString().split('T')[0];
+            const found = data.find(item => item.date === dateStr);
+            result.push({
+                date: dateStr,
+                count: found ? found.count : 0
+            });
+        }
+        return result;
+    };
+
     const fetchGangs = async (page, query = '') => {
         setIsLoadingGangs(true);
         try {
@@ -148,6 +180,21 @@ export default function AdminDashboard() {
             console.error(error);
         } finally {
             setIsLoadingGangs(false);
+        }
+    };
+
+    const fetchFamilies = async (page, query = '') => {
+        setIsLoadingFamilies(true);
+        try {
+            const res = await fetch(`/api/admin?type=families&page=${page}&limit=5&q=${query}`);
+            if (!res.ok) throw new Error('Failed to fetch families');
+            const data = await res.json();
+            setFamiliesList(data.families);
+            setFamiliesTotalPages(data.pagination.totalPages);
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setIsLoadingFamilies(false);
         }
     };
 
@@ -177,6 +224,10 @@ export default function AdminDashboard() {
         fetchGangs(gangsPage, gangSearchQuery);
     }, [gangsPage]);
 
+    useEffect(() => {
+        fetchFamilies(familiesPage, familySearchQuery);
+    }, [familiesPage]);
+
     // Refetch when date range changes
     useEffect(() => {
         if (dateRange?.from) {
@@ -197,6 +248,13 @@ export default function AdminDashboard() {
         if (gangSearchQuery.length > 0 && gangSearchQuery.length < 3) return;
         setGangsPage(1);
         fetchGangs(1, gangSearchQuery);
+    };
+
+    const handleFamilySearch = (e) => {
+        e.preventDefault();
+        if (familySearchQuery.length > 0 && familySearchQuery.length < 3) return;
+        setFamiliesPage(1);
+        fetchFamilies(1, familySearchQuery);
     };
 
     const handleWinnersSearch = (e) => {
@@ -259,6 +317,7 @@ export default function AdminDashboard() {
                 fetchWinners(1);
                 fetchTransactions(1);
                 fetchGangs(1);
+                fetchFamilies(1);
                 fetchLeaderboard();
             }
         }
@@ -574,9 +633,9 @@ export default function AdminDashboard() {
                                                 <div
                                                     key={index}
                                                     className={`flex items-center gap-3 p-3 rounded-xl transition-all hover:scale-[1.02] ${index === 0 ? 'bg-gradient-to-r from-amber-500/20 to-yellow-500/20 border-2 border-amber-500/30' :
-                                                            index === 1 ? 'bg-gradient-to-r from-gray-400/20 to-gray-500/20 border-2 border-gray-400/30' :
-                                                                index === 2 ? 'bg-gradient-to-r from-orange-600/20 to-amber-700/20 border-2 border-orange-600/30' :
-                                                                    'bg-muted/30 hover:bg-muted/50 border border-border/50'
+                                                        index === 1 ? 'bg-gradient-to-r from-gray-400/20 to-gray-500/20 border-2 border-gray-400/30' :
+                                                            index === 2 ? 'bg-gradient-to-r from-orange-600/20 to-amber-700/20 border-2 border-orange-600/30' :
+                                                                'bg-muted/30 hover:bg-muted/50 border border-border/50'
                                                         }`}
                                                 >
                                                     {/* Rank Badge */}
@@ -656,9 +715,9 @@ export default function AdminDashboard() {
                                                 <div
                                                     key={index}
                                                     className={`flex items-center gap-3 p-3 rounded-xl transition-all hover:scale-[1.02] ${index === 0 ? 'bg-gradient-to-r from-emerald-500/20 to-green-500/20 border-2 border-emerald-500/30' :
-                                                            index === 1 ? 'bg-gradient-to-r from-gray-400/20 to-gray-500/20 border-2 border-gray-400/30' :
-                                                                index === 2 ? 'bg-gradient-to-r from-orange-600/20 to-amber-700/20 border-2 border-orange-600/30' :
-                                                                    'bg-muted/30 hover:bg-muted/50 border border-border/50'
+                                                        index === 1 ? 'bg-gradient-to-r from-gray-400/20 to-gray-500/20 border-2 border-gray-400/30' :
+                                                            index === 2 ? 'bg-gradient-to-r from-orange-600/20 to-amber-700/20 border-2 border-orange-600/30' :
+                                                                'bg-muted/30 hover:bg-muted/50 border border-border/50'
                                                         }`}
                                                 >
                                                     {/* Rank Badge */}
@@ -866,6 +925,14 @@ export default function AdminDashboard() {
                                                                 <span className="text-sm">แก๊ง</span>
                                                                 {selectedUser.gang_name ? (
                                                                     <Badge className="bg-red-500 hover:bg-red-600">{selectedUser.gang_name}</Badge>
+                                                                ) : (
+                                                                    <span className="text-muted-foreground">-</span>
+                                                                )}
+                                                            </div>
+                                                            <div className="flex justify-between items-center">
+                                                                <span className="text-sm">ครอบครัว</span>
+                                                                {selectedUser.family_name ? (
+                                                                    <Badge className="bg-indigo-500 hover:bg-indigo-600">{selectedUser.family_name}</Badge>
                                                                 ) : (
                                                                     <span className="text-muted-foreground">-</span>
                                                                 )}
@@ -1108,120 +1175,220 @@ export default function AdminDashboard() {
                                     <h3 className="text-2xl font-bold">{stats?.gang_members?.toLocaleString() || 0}</h3>
                                 </div>
                             </div>
-                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4 opacity-60">
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
                                 <div className="p-3 bg-indigo-500/10 rounded-xl">
                                     <Home className="h-6 w-6 text-indigo-500" />
                                 </div>
                                 <div>
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-sm font-medium text-muted-foreground">ครอบครัว</p>
-                                        <Badge variant="outline" className="text-[10px] h-4 px-1">Soon</Badge>
-                                    </div>
+                                    <p className="text-sm font-medium text-muted-foreground">ครอบครัว</p>
                                     <h3 className="text-2xl font-bold">{stats?.total_families?.toLocaleString() || 0}</h3>
                                 </div>
                             </div>
-                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4 opacity-60">
+                            <div className="bg-card rounded-2xl p-5 border shadow-sm flex items-center gap-4">
                                 <div className="p-3 bg-pink-500/10 rounded-xl">
                                     <Users className="h-6 w-6 text-pink-500" />
                                 </div>
                                 <div>
-                                    <div className="flex items-center gap-2">
-                                        <p className="text-sm font-medium text-muted-foreground">สมาชิกครอบครัว</p>
-                                        <Badge variant="outline" className="text-[10px] h-4 px-1">Soon</Badge>
-                                    </div>
+                                    <p className="text-sm font-medium text-muted-foreground">สมาชิกครอบครัว</p>
                                     <h3 className="text-2xl font-bold">{stats?.family_members?.toLocaleString() || 0}</h3>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Gang List Table */}
-                        <Card className="rounded-[2rem] border shadow-sm overflow-hidden">
-                            <div className="p-6 border-b flex flex-col sm:flex-row justify-between items-center gap-4">
-                                <h3 className="text-lg font-bold flex items-center gap-2">
-                                    <ShieldAlert className="h-5 w-5 text-primary" /> รายชื่อแก๊ง
-                                </h3>
-                                <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
-                                    <form onSubmit={handleGangSearch} className="relative w-full sm:w-64">
-                                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="ค้นหาแก๊ง..."
-                                            className="pl-9 h-9 rounded-full bg-muted/50 border-none focus:ring-1 focus:ring-primary"
-                                            value={gangSearchQuery}
-                                            onChange={(e) => setGangSearchQuery(e.target.value)}
-                                        />
-                                    </form>
-                                    <div className="flex items-center gap-1">
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            onClick={() => setGangsPage(p => Math.max(1, p - 1))}
-                                            disabled={gangsPage === 1 || isLoadingGangs}
-                                            className="h-8 w-8 rounded-full"
-                                        >
-                                            <ChevronLeft className="h-4 w-4" />
-                                        </Button>
-                                        <span className="text-sm font-medium min-w-[3rem] text-center">
-                                            {gangsPage} / {gangsTotalPages}
-                                        </span>
-                                        <Button
-                                            variant="outline"
-                                            size="icon"
-                                            onClick={() => setGangsPage(p => Math.min(gangsTotalPages, p + 1))}
-                                            disabled={gangsPage === gangsTotalPages || isLoadingGangs}
-                                            className="h-8 w-8 rounded-full"
-                                        >
-                                            <ChevronRight className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="p-0 overflow-x-auto">
-                                <Table>
-                                    <TableHeader>
-                                        <TableRow className="hover:bg-transparent border-border/50">
-                                            <TableHead className="pl-6 whitespace-nowrap">ชื่อแก๊ง</TableHead>
-                                            <TableHead className="whitespace-nowrap">รหัสแก๊ง</TableHead>
-                                            <TableHead className="whitespace-nowrap">หัวหน้าแก๊ง</TableHead>
-                                            <TableHead className="whitespace-nowrap">สมาชิก</TableHead>
-                                            <TableHead className="text-right pr-6 whitespace-nowrap">วันที่สร้าง</TableHead>
-                                        </TableRow>
-                                    </TableHeader>
-                                    <TableBody>
-                                        {isLoadingGangs ? (
-                                            <TableRow>
-                                                <TableCell colSpan={5} className="h-24 text-center">
-                                                    <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
-                                                </TableCell>
-                                            </TableRow>
-                                        ) : (
-                                            gangsList.map((gang, i) => (
-                                                <TableRow key={i} className="hover:bg-muted/30 border-border/50">
-                                                    <TableCell className="font-bold pl-6 text-primary whitespace-nowrap">{gang.name}</TableCell>
-                                                    <TableCell>
-                                                        <Badge variant="secondary" className="font-mono">{gang.gang_code}</Badge>
-                                                    </TableCell>
-                                                    <TableCell className="font-mono text-xs text-muted-foreground">{gang.leader_discord_id}</TableCell>
-                                                    <TableCell>
-                                                        <div className="flex items-center gap-2 min-w-[120px]">
-                                                            <div className="w-full bg-muted rounded-full h-2.5 max-w-[100px] overflow-hidden">
-                                                                <div
-                                                                    className="bg-blue-500 h-2.5 rounded-full"
-                                                                    style={{ width: `${(gang.member_count / gang.max_members) * 100}%` }}
-                                                                ></div>
-                                                            </div>
-                                                            <span className="text-xs font-medium">{gang.member_count}/{gang.max_members}</span>
-                                                        </div>
-                                                    </TableCell>
-                                                    <TableCell className="text-right text-muted-foreground pr-6 text-xs whitespace-nowrap">
-                                                        {new Date(gang.created_at).toLocaleDateString('th-TH')}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))
-                                        )}
-                                    </TableBody>
-                                </Table>
-                            </div>
-                        </Card>
+                        <div className="mt-8">
+                            <Tabs defaultValue="gang-list" className="w-full">
+                                <TabsList className="mb-6 w-full sm:w-auto grid grid-cols-2 h-12 p-1 bg-muted/30 rounded-full">
+                                    <TabsTrigger value="gang-list" className="rounded-full data-[state=active]:bg-primary data-[state=active]:text-primary-foreground transition-all">
+                                        <ShieldAlert className="h-4 w-4 mr-2" /> รายชื่อแก๊ง
+                                    </TabsTrigger>
+                                    <TabsTrigger value="family-list" className="rounded-full data-[state=active]:bg-indigo-500 data-[state=active]:text-white transition-all">
+                                        <Home className="h-4 w-4 mr-2" /> รายชื่อครอบครัว
+                                    </TabsTrigger>
+                                </TabsList>
+
+                                <TabsContent value="gang-list" className="animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+                                    {/* Gang List Table */}
+                                    <Card className="rounded-[2rem] border shadow-sm overflow-hidden">
+                                        <div className="p-6 border-b flex flex-col sm:flex-row justify-between items-center gap-4">
+                                            <h3 className="text-lg font-bold flex items-center gap-2">
+                                                <ShieldAlert className="h-5 w-5 text-primary" /> รายชื่อแก๊ง
+                                            </h3>
+                                            <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                                                <form onSubmit={handleGangSearch} className="relative w-full sm:w-64">
+                                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                    <Input
+                                                        placeholder="ค้นหาแก๊ง..."
+                                                        className="pl-9 h-9 rounded-full bg-muted/50 border-none focus:ring-1 focus:ring-primary"
+                                                        value={gangSearchQuery}
+                                                        onChange={(e) => setGangSearchQuery(e.target.value)}
+                                                    />
+                                                </form>
+                                                <div className="flex items-center gap-1">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        onClick={() => setGangsPage(p => Math.max(1, p - 1))}
+                                                        disabled={gangsPage === 1 || isLoadingGangs}
+                                                        className="h-8 w-8 rounded-full"
+                                                    >
+                                                        <ChevronLeft className="h-4 w-4" />
+                                                    </Button>
+                                                    <span className="text-sm font-medium min-w-[3rem] text-center">
+                                                        {gangsPage} / {gangsTotalPages}
+                                                    </span>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        onClick={() => setGangsPage(p => Math.min(gangsTotalPages, p + 1))}
+                                                        disabled={gangsPage === gangsTotalPages || isLoadingGangs}
+                                                        className="h-8 w-8 rounded-full"
+                                                    >
+                                                        <ChevronRight className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="p-0 overflow-x-auto">
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow className="hover:bg-transparent border-border/50">
+                                                        <TableHead className="pl-6 whitespace-nowrap">ชื่อแก๊ง</TableHead>
+                                                        <TableHead className="whitespace-nowrap">รหัสแก๊ง</TableHead>
+                                                        <TableHead className="whitespace-nowrap">หัวหน้าแก๊ง</TableHead>
+                                                        <TableHead className="whitespace-nowrap">สมาชิก</TableHead>
+                                                        <TableHead className="text-right pr-6 whitespace-nowrap">วันที่สร้าง</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {isLoadingGangs ? (
+                                                        <TableRow>
+                                                            <TableCell colSpan={5} className="h-24 text-center">
+                                                                <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ) : (
+                                                        gangsList.map((gang, i) => (
+                                                            <TableRow key={i} className="hover:bg-muted/30 border-border/50">
+                                                                <TableCell className="font-bold pl-6 text-primary whitespace-nowrap">{gang.name}</TableCell>
+                                                                <TableCell>
+                                                                    <Badge variant="secondary" className="font-mono">{gang.gang_code}</Badge>
+                                                                </TableCell>
+                                                                <TableCell className="font-mono text-xs text-muted-foreground">{gang.leader_discord_id}</TableCell>
+                                                                <TableCell>
+                                                                    <div className="flex items-center gap-2 min-w-[120px]">
+                                                                        <div className="w-full bg-muted rounded-full h-2.5 max-w-[100px] overflow-hidden">
+                                                                            <div
+                                                                                className="bg-blue-500 h-2.5 rounded-full"
+                                                                                style={{ width: `${(gang.member_count / gang.max_members) * 100}%` }}
+                                                                            ></div>
+                                                                        </div>
+                                                                        <span className="text-xs font-medium">{gang.member_count}/{gang.max_members}</span>
+                                                                    </div>
+                                                                </TableCell>
+                                                                <TableCell className="text-right text-muted-foreground pr-6 text-xs whitespace-nowrap">
+                                                                    {new Date(gang.created_at).toLocaleDateString('th-TH')}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))
+                                                    )}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </Card>
+                                </TabsContent>
+
+                                <TabsContent value="family-list" className="animate-in fade-in-50 slide-in-from-bottom-2 duration-300">
+                                    {/* Family List Table */}
+                                    <Card className="rounded-[2rem] border shadow-sm overflow-hidden">
+                                        <div className="p-6 border-b flex flex-col sm:flex-row justify-between items-center gap-4">
+                                            <h3 className="text-lg font-bold flex items-center gap-2">
+                                                <Home className="h-5 w-5 text-indigo-500" /> รายชื่อครอบครัว
+                                            </h3>
+                                            <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                                                <form onSubmit={handleFamilySearch} className="relative w-full sm:w-64">
+                                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                    <Input
+                                                        placeholder="ค้นหาครอบครัว..."
+                                                        className="pl-9 h-9 rounded-full bg-muted/50 border-none focus:ring-1 focus:ring-primary"
+                                                        value={familySearchQuery}
+                                                        onChange={(e) => setFamilySearchQuery(e.target.value)}
+                                                    />
+                                                </form>
+                                                <div className="flex items-center gap-1">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        onClick={() => setFamiliesPage(p => Math.max(1, p - 1))}
+                                                        disabled={familiesPage === 1 || isLoadingFamilies}
+                                                        className="h-8 w-8 rounded-full"
+                                                    >
+                                                        <ChevronLeft className="h-4 w-4" />
+                                                    </Button>
+                                                    <span className="text-sm font-medium min-w-[3rem] text-center">
+                                                        {familiesPage} / {familiesTotalPages}
+                                                    </span>
+                                                    <Button
+                                                        variant="outline"
+                                                        size="icon"
+                                                        onClick={() => setFamiliesPage(p => Math.min(familiesTotalPages, p + 1))}
+                                                        disabled={familiesPage === familiesTotalPages || isLoadingFamilies}
+                                                        className="h-8 w-8 rounded-full"
+                                                    >
+                                                        <ChevronRight className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="p-0 overflow-x-auto">
+                                            <Table>
+                                                <TableHeader>
+                                                    <TableRow className="hover:bg-transparent border-border/50">
+                                                        <TableHead className="pl-6 whitespace-nowrap">ชื่อครอบครัว</TableHead>
+                                                        <TableHead className="whitespace-nowrap">รหัสเชิญ</TableHead>
+                                                        <TableHead className="whitespace-nowrap">หัวหน้า</TableHead>
+                                                        <TableHead className="whitespace-nowrap">สมาชิก</TableHead>
+                                                        <TableHead className="text-right pr-6 whitespace-nowrap">วันที่สร้าง</TableHead>
+                                                    </TableRow>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {isLoadingFamilies ? (
+                                                        <TableRow>
+                                                            <TableCell colSpan={5} className="h-24 text-center">
+                                                                <Loader2 className="h-6 w-6 animate-spin mx-auto text-primary" />
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ) : (
+                                                        familiesList.map((family, i) => (
+                                                            <TableRow key={i} className="hover:bg-muted/30 border-border/50">
+                                                                <TableCell className="font-bold pl-6 text-indigo-500 whitespace-nowrap">{family.name}</TableCell>
+                                                                <TableCell>
+                                                                    <Badge variant="secondary" className="font-mono bg-indigo-500/10 text-indigo-500 hover:bg-indigo-500/20">{family.invite_code}</Badge>
+                                                                </TableCell>
+                                                                <TableCell className="font-mono text-xs text-muted-foreground">{family.leader_discord_id}</TableCell>
+                                                                <TableCell>
+                                                                    <div className="flex items-center gap-2 min-w-[120px]">
+                                                                        <div className="w-full bg-muted rounded-full h-2.5 max-w-[100px] overflow-hidden">
+                                                                            <div
+                                                                                className="bg-indigo-500 h-2.5 rounded-full"
+                                                                                style={{ width: `${(family.member_count / 20) * 100}%` }}
+                                                                            ></div>
+                                                                        </div>
+                                                                        <span className="text-xs font-medium">{family.member_count} คน</span>
+                                                                    </div>
+                                                                </TableCell>
+                                                                <TableCell className="text-right text-muted-foreground pr-6 text-xs whitespace-nowrap">
+                                                                    {new Date(family.created_at).toLocaleDateString('th-TH')}
+                                                                </TableCell>
+                                                            </TableRow>
+                                                        ))
+                                                    )}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
+                                    </Card>
+                                </TabsContent>
+                            </Tabs>
+                        </div>
                     </TabsContent>
                 </Tabs>
             </div>

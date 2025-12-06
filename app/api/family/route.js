@@ -50,7 +50,7 @@ export async function POST(request) {
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         if (!PREREGISTER_CONFIG.features.enableGang) {
-            return NextResponse.json({ error: 'Family system is disabled' }, { status: 403 });
+            return NextResponse.json({ error: 'ระบบครอบครัวปิดปรับปรุงอยู่ ณ ขณะนี้' }, { status: 403 });
         }
 
         const discordId = session.user.id;
@@ -63,12 +63,12 @@ export async function POST(request) {
         try {
             // Check if user is already in a gang or family
             const [userCheck] = await connection.query(
-                'SELECT gang_id, family_id FROM preregistrations WHERE discord_id = ?',
+                'SELECT gang_id, family_id, family_cooldown_until FROM preregistrations WHERE discord_id = ?',
                 [discordId]
             );
 
             if (userCheck.length === 0) {
-                throw new Error('Please register first');
+                throw new Error('กรุณาลงทะเบียนเข้าสู่ระบบ Rank1 ก่อนใช้งาน');
             }
 
             // ⚠️ เงื่อนไข: ห้ามมีทั้งแก๊งและครอบครัว
@@ -77,7 +77,7 @@ export async function POST(request) {
             }
 
             if (action === 'update_logo') {
-                if (!userCheck[0].family_id) throw new Error('You are not in a family');
+                if (!userCheck[0].family_id) throw new Error('คุณไม่ได้อยู่ในครอบครัว');
 
                 // [SECURITY FIX #8] ตรวจสอบ URL ของโลโก้
                 if (!isValidImageUrl(logoUrl)) {
@@ -87,7 +87,7 @@ export async function POST(request) {
                 // Verify Leader
                 const [family] = await connection.query('SELECT leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
                 if (family[0].leader_discord_id !== discordId) {
-                    throw new Error('Only the leader can update the logo');
+                    throw new Error('เฉพาะหัวหน้าครอบครัวเท่านั้นที่สามารถเปลี่ยนโลโก้ได้');
                 }
 
                 await connection.query('UPDATE families SET logo_url = ? WHERE id = ?', [logoUrl, userCheck[0].family_id]);
@@ -95,11 +95,22 @@ export async function POST(request) {
                 return NextResponse.json({ success: true, message: 'อัพเดทโลโก้สำเร็จ' });
             }
 
-            if (userCheck[0].family_id) {
-                throw new Error('You are already in a family');
-            }
-
             if (action === 'create') {
+                // Check: ต้องยังไม่มี family
+                if (userCheck[0].family_id) {
+                    throw new Error('คุณมีครอบครัวอยู่แล้ว');
+                }
+
+                // Check: Cooldown 7 วันหลังยุบครอบครัว
+                if (userCheck[0].family_cooldown_until) {
+                    const cooldownUntil = new Date(userCheck[0].family_cooldown_until);
+                    const now = new Date();
+                    if (now < cooldownUntil) {
+                        const daysLeft = Math.ceil((cooldownUntil - now) / (1000 * 60 * 60 * 24));
+                        throw new Error(`คุณต้องรออีก ${daysLeft} วัน ก่อนสร้างครอบครัวใหม่ (หลังยุบครอบครัว)`);
+                    }
+                }
+
                 // [SECURITY FIX #9] ตรวจสอบชื่อครอบครัวอย่างละเอียด
                 const trimmedName = name?.trim();
                 if (!trimmedName) throw new Error('กรุณาใส่ชื่อครอบครัว');
@@ -140,9 +151,15 @@ export async function POST(request) {
                 );
 
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Family created', familyCode: newFamilyCode });
+                return NextResponse.json({ success: true, message: 'สร้างครอบครัวเรียบร้อยแล้ว', familyCode: newFamilyCode });
+
 
             } else if (action === 'join') {
+                // Check: ต้องยังไม่มี family
+                if (userCheck[0].family_id) {
+                    throw new Error('คุณมีครอบครัวอยู่แล้ว');
+                }
+
                 const { inviteCode } = body;
                 if (!inviteCode) throw new Error('กรุณากรอกรหัสครอบครัว');
 
@@ -308,12 +325,12 @@ export async function POST(request) {
                 return NextResponse.json({ success: true, message: 'ยกเลิกคำขอแล้ว' });
 
             } else if (action === 'leave') {
-                if (!userCheck[0].family_id) throw new Error('You are not in a family');
+                if (!userCheck[0].family_id) throw new Error('คุณไม่ได้อยู่ในครอบครัว');
 
                 // Check if leader
                 const [family] = await connection.query('SELECT id, leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
                 if (family[0].leader_discord_id === discordId) {
-                    throw new Error('Leader cannot leave. You must dissolve the family.');
+                    throw new Error('หัวหน้าครอบครัวไม่สามารถกดออกได้ ต้องทำการยุบครอบครัวเท่านั้น');
                 }
 
                 // Update User
@@ -326,10 +343,11 @@ export async function POST(request) {
                 );
 
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Left family successfully' });
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'ออกจากครอบครัวสำเร็จ' });
 
             } else if (action === 'update_settings') {
-                if (!userCheck[0].family_id) throw new Error('You are not in a family');
+                if (!userCheck[0].family_id) throw new Error('คุณไม่ได้อยู่ในครอบครัว');
 
                 const { name, motd } = body;
 
@@ -348,7 +366,7 @@ export async function POST(request) {
                 // Verify Leader
                 const [family] = await connection.query('SELECT leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
                 if (family[0].leader_discord_id !== discordId) {
-                    throw new Error('Only the leader can update settings');
+                    throw new Error('เฉพาะหัวหน้าครอบครัวเท่านั้นที่สามารถตั้งค่าได้');
                 }
 
                 await connection.query('UPDATE families SET name = ?, motd = ? WHERE id = ?', [trimmedName, sanitizedMotd, userCheck[0].family_id]);
@@ -356,43 +374,88 @@ export async function POST(request) {
                 return NextResponse.json({ success: true, message: 'อัพเดทการตั้งค่าสำเร็จ' });
 
             } else if (action === 'dissolve') {
-                if (!userCheck[0].family_id) throw new Error('You are not in a family');
+                if (!userCheck[0].family_id) throw new Error('คุณไม่ได้อยู่ในครอบครัว');
 
                 // Verify Leader
                 const [family] = await connection.query('SELECT leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
                 if (family[0].leader_discord_id !== discordId) {
-                    throw new Error('Only the leader can dissolve the family');
+                    throw new Error('เฉพาะหัวหน้าครอบครัวเท่านั้นที่สามารถยุบครอบครัวได้');
                 }
 
-                // Remove all members
-                await connection.query('UPDATE preregistrations SET family_id = NULL WHERE family_id = ?', [userCheck[0].family_id]);
+                // Set 7-day cooldown for leader
+                const cooldownDate = new Date();
+                cooldownDate.setDate(cooldownDate.getDate() + 7);
+                await connection.query(
+                    'UPDATE preregistrations SET family_id = NULL, family_cooldown_until = ? WHERE discord_id = ?',
+                    [cooldownDate, discordId]
+                );
+
+                // Set 3-day cooldown for members
+                const memberCooldownDate = new Date();
+                memberCooldownDate.setDate(memberCooldownDate.getDate() + 3);
+                await connection.query(
+                    'UPDATE preregistrations SET family_id = NULL, family_cooldown_until = ? WHERE family_id = ? AND discord_id != ?',
+                    [memberCooldownDate, userCheck[0].family_id, discordId]
+                );
 
                 // Delete Family
                 await connection.query('DELETE FROM families WHERE id = ?', [userCheck[0].family_id]);
 
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Family dissolved' });
+                return NextResponse.json({ success: true, message: 'ยุบครอบครัวแล้ว คุณสามารถสร้างครอบครัวใหม่ได้หลังจาก 7 วัน' });
 
             } else if (action === 'kick_member') {
-                if (!userCheck[0].family_id) throw new Error('You are not in a family');
+                if (!userCheck[0].family_id) throw new Error('คุณไม่ได้อยู่ในครอบครัว');
 
                 let { targetDiscordId } = body;
-                if (!targetDiscordId) throw new Error('Target member ID required');
+                if (!targetDiscordId) throw new Error('ไม่พบรหัสสมาชิกที่ต้องการ');
 
                 // Ensure string
                 targetDiscordId = String(targetDiscordId);
 
+            } else if (action === 'transfer_leadership') {
+                if (!userCheck[0].family_id) throw new Error('คุณไม่ได้อยู่ในครอบครัว');
+
+                let { targetDiscordId } = body;
+                if (!targetDiscordId) throw new Error('ไม่พบรหัสสมาชิกที่ต้องการ');
+                targetDiscordId = String(targetDiscordId);
+
+                // Validation
+                if (targetDiscordId === discordId) throw new Error('คุณเป็นหัวหน้าอยู่แล้ว');
+
+                // Verify Current Leader
+                const [family] = await connection.query('SELECT leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
+                if (family[0].leader_discord_id !== discordId) {
+                    throw new Error('เฉพาะหัวหน้าครอบครัวเท่านั้นที่สามารถโอนตำแหน่งได้');
+                }
+
+                // Verify Target Member
+                const [targetMember] = await connection.query(
+                    'SELECT discord_id FROM preregistrations WHERE family_id = ? AND discord_id = ?',
+                    [userCheck[0].family_id, targetDiscordId]
+                );
+
+                if (targetMember.length === 0) {
+                    throw new Error('สมาชิกคนนี้ไม่ได้อยู่ในครอบครัวของคุณ');
+                }
+
+                // Execute Transfer
+                await connection.query('UPDATE families SET leader_discord_id = ? WHERE id = ?', [targetDiscordId, userCheck[0].family_id]);
+
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'โอนตำแหน่งหัวหน้าครอบครัวสำเร็จ' });
+
 
 
                 // Verify Leader
-                const [family] = await connection.query('SELECT leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
-                if (family[0].leader_discord_id !== discordId) {
-                    throw new Error('Only the leader can kick members');
+                const [familyCheck] = await connection.query('SELECT leader_discord_id FROM families WHERE id = ?', [userCheck[0].family_id]);
+                if (familyCheck[0].leader_discord_id !== discordId) {
+                    throw new Error('เฉพาะหัวหน้าครอบครัวเท่านั้นที่สามารถเตะสมาชิกได้');
                 }
 
                 // Prevent leader from kicking themselves
                 if (targetDiscordId === discordId) {
-                    throw new Error('Leader cannot kick themselves');
+                    throw new Error('คุณไม่สามารถเตะตัวเองออกจากครอบครัวได้');
                 }
 
                 // Check if target is in the same family
@@ -402,11 +465,11 @@ export async function POST(request) {
                 );
 
                 if (targetUser.length === 0) {
-                    throw new Error('Member not found in database');
+                    throw new Error('ไม่พบข้อมูลสมาชิกในระบบ');
                 }
 
                 if (targetUser[0].family_id !== userCheck[0].family_id) {
-                    throw new Error('Member not found in your family');
+                    throw new Error('สมาชิกคนนี้ไม่ได้อยู่ในครอบครัวของคุณ');
                 }
 
                 // Remove member from family
@@ -415,7 +478,7 @@ export async function POST(request) {
 
 
                 if (result.affectedRows === 0) {
-                    throw new Error('Failed to kick member (User not found or already kicked)');
+                    throw new Error('ไม่สามารถเตะสมาชิกได้ (ไม่พบผู้ใช้หรือถูกเตะไปแล้ว)');
                 }
 
                 // [SYNC] Sync member_count จากข้อมูลจริง
@@ -425,10 +488,10 @@ export async function POST(request) {
                 );
 
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Member kicked successfully' });
+                return NextResponse.json({ success: true, message: 'เตะสมาชิกออกจากครอบครัวสำเร็จ' });
             }
 
-            throw new Error('Invalid action');
+            throw new Error('การกระทำไม่ถูกต้อง (Invalid action)');
 
         } catch (err) {
             await connection.rollback();
@@ -439,7 +502,7 @@ export async function POST(request) {
 
     } catch (error) {
         console.error('Family API Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' }, { status: 500 });
     }
 }
 
@@ -519,6 +582,6 @@ export async function GET(request) {
 
     } catch (error) {
         console.error('Error in GET /api/family:', error);
-        return NextResponse.json({ error: 'Internal Server Error', details: error.message }, { status: 500 });
+        return NextResponse.json({ error: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์', details: error.message }, { status: 500 });
     }
 }

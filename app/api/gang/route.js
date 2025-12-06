@@ -51,7 +51,7 @@ export async function POST(request) {
         if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
         if (!PREREGISTER_CONFIG.features.enableGang) {
-            return NextResponse.json({ error: 'Gang system is disabled' }, { status: 403 });
+            return NextResponse.json({ error: 'ระบบแก๊งปิดปรับปรุงอยู่ ณ ขณะนี้' }, { status: 403 });
         }
 
         const discordId = session.user.id;
@@ -64,12 +64,12 @@ export async function POST(request) {
         try {
             // Check if user is already in a gang or family
             const [userCheck] = await connection.query(
-                'SELECT gang_id, family_id FROM preregistrations WHERE discord_id = ?',
+                'SELECT gang_id, family_id, gang_cooldown_until FROM preregistrations WHERE discord_id = ?',
                 [discordId]
             );
 
             if (userCheck.length === 0) {
-                throw new Error('Please register first');
+                throw new Error('กรุณาลงทะเบียนเข้าสู่ระบบ Rank1 ก่อนใช้งาน');
             }
 
             // ⚠️ เงื่อนไข: ห้ามมีทั้งแก๊งและครอบครัว
@@ -78,7 +78,7 @@ export async function POST(request) {
             }
 
             if (action === 'update_logo') {
-                if (!userCheck[0].gang_id) throw new Error('You are not in a gang');
+                if (!userCheck[0].gang_id) throw new Error('คุณไม่ได้อยู่ในแก๊ง');
 
                 // [SECURITY FIX #8] ตรวจสอบ URL ของโลโก้
                 if (!isValidImageUrl(logoUrl)) {
@@ -88,7 +88,7 @@ export async function POST(request) {
                 // Verify Leader
                 const [gang] = await connection.query('SELECT leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
                 if (gang[0].leader_discord_id !== discordId) {
-                    throw new Error('Only the leader can update the logo');
+                    throw new Error('เฉพาะหัวหน้าแก๊งเท่านั้นที่สามารถเปลี่ยนโลโก้ได้');
                 }
 
                 await connection.query('UPDATE gangs SET logo_url = ? WHERE id = ?', [logoUrl, userCheck[0].gang_id]);
@@ -99,12 +99,23 @@ export async function POST(request) {
             // For create and join, user must NOT be in a gang
             if (['create', 'join'].includes(action)) {
                 if (userCheck[0].gang_id) {
-                    throw new Error('You are already in a gang');
+                    throw new Error('คุณมีแก๊งอยู่แล้ว');
                 }
             }
 
             if (action === 'create') {
                 // [SECURITY FIX #9] ตรวจสอบชื่อแก๊งอย่างละเอียด
+
+                // Check: Cooldown 7 วันหลังยุบแก๊ง
+                if (userCheck[0].gang_cooldown_until) {
+                    const cooldownUntil = new Date(userCheck[0].gang_cooldown_until);
+                    const now = new Date();
+                    if (now < cooldownUntil) {
+                        const daysLeft = Math.ceil((cooldownUntil - now) / (1000 * 60 * 60 * 24));
+                        throw new Error(`คุณต้องรออีก ${daysLeft} วัน ก่อนสร้างแก๊งใหม่ (หลังยุบแก๊ง)`);
+                    }
+                }
+
                 const trimmedName = name?.trim();
                 if (!trimmedName) throw new Error('กรุณาใส่ชื่อแก๊ง');
                 if (trimmedName.length < 3) throw new Error('ชื่อแก๊งต้องมีอย่างน้อย 3 ตัวอักษร');
@@ -176,7 +187,7 @@ export async function POST(request) {
 
                 return NextResponse.json({
                     success: true,
-                    message: 'Gang created',
+                    message: 'สร้างแก๊งเรียบร้อยแล้ว',
                     gangCode: newGangCode,
                     gang: gangData,
                     members: membersData
@@ -353,7 +364,7 @@ export async function POST(request) {
                 // Check if leader
                 const [gang] = await connection.query('SELECT id, leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
                 if (gang[0].leader_discord_id === discordId) {
-                    throw new Error('Leader cannot leave. You must dissolve the gang.');
+                    throw new Error('หัวหน้าแก๊งไม่สามารถกดออกได้ ต้องทำการยุบแก๊งเท่านั้น');
                 }
 
                 // Update User
@@ -366,10 +377,10 @@ export async function POST(request) {
                 );
 
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Left gang successfully' });
+                return NextResponse.json({ success: true, message: 'ออกจากแก๊งสำเร็จ' });
 
             } else if (action === 'update_settings') {
-                if (!userCheck[0].gang_id) throw new Error('You are not in a gang');
+                if (!userCheck[0].gang_id) throw new Error('คุณไม่ได้อยู่ในแก๊ง');
 
                 const { name, motd } = body;
 
@@ -388,7 +399,7 @@ export async function POST(request) {
                 // Verify Leader
                 const [gang] = await connection.query('SELECT leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
                 if (gang[0].leader_discord_id !== discordId) {
-                    throw new Error('Only the leader can update settings');
+                    throw new Error('เฉพาะหัวหน้าแก๊งเท่านั้นที่สามารถตั้งค่าได้');
                 }
 
                 await connection.query('UPDATE gangs SET name = ?, motd = ? WHERE id = ?', [trimmedName, sanitizedMotd, userCheck[0].gang_id]);
@@ -396,43 +407,88 @@ export async function POST(request) {
                 return NextResponse.json({ success: true, message: 'อัพเดทการตั้งค่าสำเร็จ' });
 
             } else if (action === 'dissolve') {
-                if (!userCheck[0].gang_id) throw new Error('You are not in a gang');
+                if (!userCheck[0].gang_id) throw new Error('คุณไม่ได้อยู่ในแก๊ง');
 
                 // Verify Leader
                 const [gang] = await connection.query('SELECT leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
                 if (gang[0].leader_discord_id !== discordId) {
-                    throw new Error('Only the leader can dissolve the gang');
+                    throw new Error('เฉพาะหัวหน้าแก๊งเท่านั้นที่สามารถยุบแก๊งได้');
                 }
 
-                // Remove all members
-                await connection.query('UPDATE preregistrations SET gang_id = NULL WHERE gang_id = ?', [userCheck[0].gang_id]);
+                // Set 7-day cooldown for leader
+                const cooldownDate = new Date();
+                cooldownDate.setDate(cooldownDate.getDate() + 7);
+                await connection.query(
+                    'UPDATE preregistrations SET gang_id = NULL, gang_cooldown_until = ? WHERE discord_id = ?',
+                    [cooldownDate, discordId]
+                );
+
+                // Set 3-day cooldown for members
+                const memberCooldownDate = new Date();
+                memberCooldownDate.setDate(memberCooldownDate.getDate() + 3);
+                await connection.query(
+                    'UPDATE preregistrations SET gang_id = NULL, gang_cooldown_until = ? WHERE gang_id = ? AND discord_id != ?',
+                    [memberCooldownDate, userCheck[0].gang_id, discordId]
+                );
 
                 // Delete Gang
                 await connection.query('DELETE FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
 
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Gang dissolved' });
+                return NextResponse.json({ success: true, message: 'ยุบแก๊งแล้ว คุณสามารถสร้างแก๊งใหม่ได้หลังจาก 7 วัน' });
 
             } else if (action === 'kick_member') {
-                if (!userCheck[0].gang_id) throw new Error('You are not in a gang');
+                if (!userCheck[0].gang_id) throw new Error('คุณไม่ได้อยู่ในแก๊ง');
 
                 let { targetDiscordId } = body;
-                if (!targetDiscordId) throw new Error('Target member ID required');
+                if (!targetDiscordId) throw new Error('ไม่พบรหัสสมาชิกที่ต้องการ');
 
                 // Ensure string
                 targetDiscordId = String(targetDiscordId);
 
+            } else if (action === 'transfer_leadership') {
+                if (!userCheck[0].gang_id) throw new Error('คุณไม่ได้อยู่ในแก๊ง');
+
+                let { targetDiscordId } = body;
+                if (!targetDiscordId) throw new Error('ไม่พบรหัสสมาชิกที่ต้องการ');
+                targetDiscordId = String(targetDiscordId);
+
+                // Validation
+                if (targetDiscordId === discordId) throw new Error('คุณเป็นหัวหน้าอยู่แล้ว');
+
+                // Verify Current Leader
+                const [gang] = await connection.query('SELECT leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
+                if (gang[0].leader_discord_id !== discordId) {
+                    throw new Error('เฉพาะหัวหน้าแก๊งเท่านั้นที่สามารถโอนตำแหน่งได้');
+                }
+
+                // Verify Target Member
+                const [targetMember] = await connection.query(
+                    'SELECT discord_id FROM preregistrations WHERE gang_id = ? AND discord_id = ?',
+                    [userCheck[0].gang_id, targetDiscordId]
+                );
+
+                if (targetMember.length === 0) {
+                    throw new Error('สมาชิกคนนี้ไม่ได้อยู่ในแก๊งของคุณ');
+                }
+
+                // Execute Transfer
+                await connection.query('UPDATE gangs SET leader_discord_id = ? WHERE id = ?', [targetDiscordId, userCheck[0].gang_id]);
+
+                await connection.commit();
+                return NextResponse.json({ success: true, message: 'โอนตำแหน่งหัวหน้าแก๊งสำเร็จ' });
+
 
 
                 // Verify Leader
-                const [gang] = await connection.query('SELECT leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
-                if (gang[0].leader_discord_id !== discordId) {
-                    throw new Error('Only the leader can kick members');
+                const [gangCheck] = await connection.query('SELECT leader_discord_id FROM gangs WHERE id = ?', [userCheck[0].gang_id]);
+                if (gangCheck[0].leader_discord_id !== discordId) {
+                    throw new Error('เฉพาะหัวหน้าแก๊งเท่านั้นที่สามารถเตะสมาชิกได้');
                 }
 
                 // Prevent leader from kicking themselves
                 if (targetDiscordId === discordId) {
-                    throw new Error('Leader cannot kick themselves');
+                    throw new Error('คุณไม่สามารถเตะตัวเองออกจากแก๊งได้');
                 }
 
                 // Check if target is in the same gang
@@ -443,12 +499,12 @@ export async function POST(request) {
 
                 if (targetUser.length === 0) {
 
-                    throw new Error('Member not found in database');
+                    throw new Error('ไม่พบข้อมูลสมาชิกในระบบ');
                 }
 
                 if (targetUser[0].gang_id !== userCheck[0].gang_id) {
 
-                    throw new Error('Member not found in your gang');
+                    throw new Error('สมาชิกคนนี้ไม่ได้อยู่ในแก๊งของคุณ');
                 }
 
                 // Remove member from gang
@@ -457,7 +513,7 @@ export async function POST(request) {
 
 
                 if (result.affectedRows === 0) {
-                    throw new Error('Failed to kick member (User not found or already kicked)');
+                    throw new Error('ไม่สามารถเตะสมาชิกได้ (ไม่พบผู้ใช้หรือถูกเตะไปแล้ว)');
                 }
 
                 // [SYNC] Sync member_count จากข้อมูลจริง
@@ -467,10 +523,10 @@ export async function POST(request) {
                 );
 
                 await connection.commit();
-                return NextResponse.json({ success: true, message: 'Member kicked successfully' });
+                return NextResponse.json({ success: true, message: 'เตะสมาชิกออกจากแก๊งสำเร็จ' });
             }
 
-            throw new Error('Invalid action');
+            throw new Error('การกระทำไม่ถูกต้อง (Invalid action)');
 
         } catch (err) {
             await connection.rollback();
@@ -481,7 +537,7 @@ export async function POST(request) {
 
     } catch (error) {
         console.error('Gang API Error:', error);
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' }, { status: 500 });
     }
 }
 
@@ -560,6 +616,6 @@ export async function GET(request) {
         });
 
     } catch (error) {
-        return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+        return NextResponse.json({ error: 'เกิดข้อผิดพลาดภายในเซิร์ฟเวอร์' }, { status: 500 });
     }
 }
