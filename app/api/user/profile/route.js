@@ -28,7 +28,7 @@ export async function GET(request) {
 
         // Query ข้อมูลจากตาราง users โดยใช้ discord_id
         const [rows] = await pool.query(
-            `SELECT identifier, firstname, lastname, accounts, phone_number, sex, dateofbirth, job, job_grade, inventory, loadout 
+            `SELECT identifier, firstname, lastname, accounts, phone_number, sex, dateofbirth, job, job_grade, inventory, loadout, ssn 
        FROM users 
        WHERE discord_id = ? 
        LIMIT 1`,
@@ -131,6 +131,7 @@ export async function GET(request) {
             job: user.job,
             job_grade: user.job_grade,
             job_label: jobLabel,
+            citizenid: user.ssn || 'ไม่มีข้อมูล',
             inventory: inventory,
             loadout: loadout
         };

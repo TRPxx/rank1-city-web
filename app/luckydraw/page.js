@@ -5,8 +5,7 @@ import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import LuckyDraw from '@/components/LuckyDraw';
-import WinnerTicker from '@/components/luckydraw/WinnerTicker';
-import PrizeShowcase from '@/components/luckydraw/PrizeShowcase';
+import LiveWinners from '@/components/luckydraw/LiveWinners';
 import DrawHistory from '@/components/luckydraw/DrawHistory';
 import { Loader2, Ticket, Users, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -75,12 +74,7 @@ export default function LuckyDrawPage() {
             <div className="relative z-10 flex flex-col min-h-screen">
                 <Navbar />
 
-                {/* Winner Ticker */}
-                <div className="pt-16">
-                    <WinnerTicker />
-                </div>
-
-                <div className="flex-1 container max-w-7xl mx-auto py-8 px-4">
+                <div className="flex-1 container max-w-7xl mx-auto py-8 px-4 pt-24">
                     {/* Header */}
                     <div className="relative text-center mb-10 space-y-2">
                         <div className="absolute right-0 top-0 hidden md:block z-50">
@@ -133,11 +127,11 @@ export default function LuckyDrawPage() {
                             </div>
                         </div>
 
-                        {/* Right Column: Showcase (4 cols) */}
+                        {/* Right Column: Live Winners (4 cols) */}
                         <div className="lg:col-span-4 space-y-6">
-                            {/* Prize Showcase */}
+                            {/* Live Winners */}
                             <div className="bg-card/30 backdrop-blur-xl border border-white/10 rounded-3xl p-6 shadow-xl sticky top-24">
-                                <PrizeShowcase />
+                                <LiveWinners />
                             </div>
                         </div>
                     </div>

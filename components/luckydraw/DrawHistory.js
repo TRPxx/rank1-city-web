@@ -32,11 +32,19 @@ export default function DrawHistory({ refreshTrigger }) {
         }
     };
 
+    // Fetch only when dialog opens (lazy load)
     useEffect(() => {
-        if (isOpen || refreshTrigger > 0) {
+        if (isOpen) {
             fetchHistory();
         }
-    }, [refreshTrigger, isOpen]);
+    }, [isOpen]);
+
+    // Also refetch when refreshTrigger changes AND dialog is already open
+    useEffect(() => {
+        if (isOpen && refreshTrigger > 0) {
+            fetchHistory();
+        }
+    }, [refreshTrigger]);
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>

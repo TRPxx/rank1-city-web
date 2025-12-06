@@ -1,5 +1,7 @@
 'use client';
 
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -9,6 +11,7 @@ import { Ticket, Sparkles, Gift, Zap, Loader2, History, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
 import { useLuckyDraw } from '@/hooks/useLuckyDraw';
+import PrizeInfoButton from '@/components/luckydraw/PrizeInfoButton';
 
 // Rarity Colors & Styles (Subtle & Clean for Shadcn)
 const getRarityColor = (rarity) => {
@@ -42,115 +45,121 @@ export default function LuckyDraw({ ticketCount, onDrawComplete, showHistory = t
     } = useLuckyDraw({ onDrawComplete });
 
     const CARD_GAP = 16;
-    const WIN_INDEX = 40; // Needed for rendering logic if we want to highlight the winner during spin, though the hook handles the animation.
-    // Actually, the hook handles the ref manipulation, but we need to render the items.
-    // The original code used WIN_INDEX in the render loop to add a ring class.
-    // We should probably export WIN_INDEX from the hook or just hardcode it here too as it's a visual constant.
-    // Let's keep it consistent.
+    const WIN_INDEX = 40;
 
-    return (
-        <div className={showHistory ? "w-full max-w-6xl mx-auto p-4 space-y-6 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6" : "w-full max-w-full mx-auto p-4 space-y-6"}>
+    // For Portal
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
-            {/* Winner Dialog (Responsive) */}
-            <AnimatePresence>
-                {showWinnerModal && winItem && (
-                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
-                        {/* Backdrop */}
+    // Winner Modal Content
+    const winnerModal = (
+        <AnimatePresence>
+            {showWinnerModal && winItem && (
+                <>
+                    {/* Backdrop */}
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        onClick={() => setShowWinnerModal(false)}
+                        className="fixed inset-0 z-[100] bg-black/60 backdrop-blur-sm"
+                    />
+
+                    {/* Modal Container */}
+                    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pointer-events-none">
                         <motion.div
-                            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-                            onClick={() => setShowWinnerModal(false)}
-                            className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-                        />
-
-                        {/* Modal Content */}
-                        <motion.div
-                            initial={{ opacity: 0, scale: 0.95, y: 10 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: 0.95, y: 10 }}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
                             transition={{ duration: 0.2, ease: "easeOut" }}
-                            className="relative w-full max-w-sm sm:max-w-md rounded-lg border bg-background p-6 shadow-lg"
+                            className="w-full max-w-sm sm:max-w-md pointer-events-auto"
                         >
-                            {/* Close Button */}
-                            <div className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground p-2 -m-2 cursor-pointer">
-                                <X className="h-6 w-6" onClick={() => setShowWinnerModal(false)} />
-                                <span className="sr-only">ปิด</span>
-                            </div>
+                            <div className="relative rounded-2xl border bg-card p-6 shadow-2xl">
+                                {/* Close Button */}
+                                <button
+                                    onClick={() => setShowWinnerModal(false)}
+                                    className="absolute right-4 top-4 p-2 rounded-lg hover:bg-accent transition-colors text-muted-foreground hover:text-foreground"
+                                >
+                                    <X className="h-5 w-5" />
+                                </button>
 
-                            <div className="flex flex-col items-center text-center space-y-6">
-                                {/* Header */}
-                                <div className="space-y-2">
-                                    <h2 className="text-lg font-semibold leading-none tracking-tight">ยินดีด้วย!</h2>
-                                    <p className="text-sm text-muted-foreground">
-                                        คุณได้รับไอเทมใหม่
-                                    </p>
-                                </div>
+                                <div className="flex flex-col items-center text-center space-y-6">
+                                    {/* Header */}
+                                    <div className="space-y-2">
+                                        <h2 className="text-xl font-bold">ยินดีด้วย!</h2>
+                                        <p className="text-sm text-muted-foreground">คุณได้รับไอเทมใหม่</p>
+                                    </div>
 
-                                {/* Item Display */}
-                                <div className="relative flex flex-col items-center justify-center py-6">
-                                    {/* Subtle Glow Background */}
-                                    <div className={`absolute inset-0 rounded-full blur-3xl opacity-20 ${winItem.rarity === 'LEGENDARY' ? 'bg-yellow-500' :
-                                        winItem.rarity === 'EPIC' ? 'bg-purple-500' :
-                                            winItem.rarity === 'RARE' ? 'bg-blue-500' : 'bg-slate-500'
-                                        }`} />
+                                    {/* Item Display */}
+                                    <div className="relative flex flex-col items-center justify-center py-4">
+                                        <div className={`absolute inset-0 rounded-full blur-3xl opacity-20 ${winItem.rarity === 'LEGENDARY' ? 'bg-yellow-500' :
+                                            winItem.rarity === 'EPIC' ? 'bg-purple-500' :
+                                                winItem.rarity === 'RARE' ? 'bg-blue-500' : 'bg-slate-500'
+                                            }`} />
 
-                                    {/* Item Icon/Image */}
-                                    <motion.div
-                                        initial={{ scale: 0.8, opacity: 0 }}
-                                        animate={{ scale: 1, opacity: 1 }}
-                                        transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 20 }}
-                                        className="relative z-10"
-                                    >
-                                        <div className={`flex h-32 w-32 items-center justify-center rounded-2xl border-2 bg-card shadow-sm ${getRarityColor(winItem.rarity)}`}>
-                                            {winItem.image ? (
-                                                <div className="relative w-24 h-24">
-                                                    <Image
-                                                        src={winItem.image}
-                                                        alt={winItem.name}
-                                                        fill
-                                                        sizes="96px"
-                                                        className="object-contain"
-                                                    />
-                                                </div>
-                                            ) : (
-                                                winItem.rarity === 'LEGENDARY' ? <Sparkles className="h-16 w-16" /> :
-                                                    winItem.rarity === 'EPIC' ? <Zap className="h-16 w-16" /> :
-                                                        <Gift className="h-16 w-16" />
-                                            )}
-                                        </div>
-                                    </motion.div>
-                                </div>
+                                        <motion.div
+                                            initial={{ scale: 0.8, opacity: 0 }}
+                                            animate={{ scale: 1, opacity: 1 }}
+                                            transition={{ delay: 0.1, type: "spring", stiffness: 200, damping: 20 }}
+                                            className="relative z-10"
+                                        >
+                                            <div className={`flex h-28 w-28 items-center justify-center rounded-2xl border-2 bg-card shadow-sm ${getRarityColor(winItem.rarity)}`}>
+                                                {winItem.image ? (
+                                                    <div className="relative w-20 h-20">
+                                                        <Image src={winItem.image} alt={winItem.name} fill sizes="80px" className="object-contain" />
+                                                    </div>
+                                                ) : (
+                                                    winItem.rarity === 'LEGENDARY' ? <Sparkles className="h-14 w-14" /> :
+                                                        winItem.rarity === 'EPIC' ? <Zap className="h-14 w-14" /> :
+                                                            <Gift className="h-14 w-14" />
+                                                )}
+                                            </div>
+                                        </motion.div>
+                                    </div>
 
-                                {/* Item Details */}
-                                <div className="space-y-2 w-full">
-                                    <h3 className="font-medium text-xl break-words">{winItem.name}</h3>
-                                    <div className="flex justify-center">
-                                        <Badge variant="secondary" className="px-3 py-1 text-xs font-medium uppercase tracking-wider">
+                                    {/* Item Details */}
+                                    <div className="space-y-2 w-full">
+                                        <h3 className="font-bold text-lg">{winItem.name}</h3>
+                                        <Badge variant="secondary" className="px-3 py-1 text-xs font-medium uppercase">
                                             {winItem.rarity}
                                         </Badge>
                                     </div>
-                                </div>
 
-                                {/* Footer Actions */}
-                                <div className="flex w-full gap-3 pt-4 flex-col-reverse sm:flex-row">
-                                    <Button variant="outline" className="flex-1" onClick={() => setShowWinnerModal(false)}>
-                                        ปิด
-                                    </Button>
-                                    <Button className="flex-1" onClick={() => spin(ticketCount)} disabled={ticketCount <= 0}>
-                                        สุ่มอีกครั้ง
-                                    </Button>
+                                    {/* Footer Actions */}
+                                    <div className="flex w-full gap-3 pt-2">
+                                        <Button variant="outline" className="flex-1" onClick={() => setShowWinnerModal(false)}>
+                                            ปิด
+                                        </Button>
+                                        <Button className="flex-1" onClick={() => spin(ticketCount)} disabled={ticketCount <= 0}>
+                                            สุ่มอีกครั้ง
+                                        </Button>
+                                    </div>
                                 </div>
                             </div>
                         </motion.div>
                     </div>
-                )}
-            </AnimatePresence>
+                </>
+            )}
+        </AnimatePresence>
+    );
+
+    return (
+        <div className={showHistory ? "w-full max-w-6xl mx-auto p-4 space-y-6 lg:space-y-0 lg:grid lg:grid-cols-3 lg:gap-6" : "w-full max-w-full mx-auto p-4 space-y-6"}>
+
+            {/* Winner Modal - rendered via Portal */}
+            {mounted && createPortal(winnerModal, document.body)}
 
             {/* Main Game Area */}
             <div className={showHistory ? "lg:col-span-2 space-y-6" : "w-full space-y-6"}>
                 <div className="overflow-hidden rounded-3xl bg-muted/10 p-6 sm:p-8">
-                    <div className="mb-6">
-                        <h3 className="text-xl font-bold mb-1">Lucky Draw</h3>
-                        <p className="text-muted-foreground text-sm">หมุนวงล้อเพื่อลุ้นรับรางวัลพิเศษ</p>
+                    <div className="mb-6 flex items-start justify-between">
+                        <div>
+                            <h3 className="text-xl font-bold mb-1">Lucky Draw</h3>
+                            <p className="text-muted-foreground text-sm">หมุนวงล้อเพื่อลุ้นรับรางวัลพิเศษ</p>
+                        </div>
+                        <PrizeInfoButton />
                     </div>
 
                     {/* Tape Container */}

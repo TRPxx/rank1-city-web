@@ -136,24 +136,20 @@ export default function ProfilePage() {
                                 <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-primary/10 to-transparent" />
 
                                 <div className="relative flex flex-col items-center text-center">
+                                    {/* Avatar Section */}
                                     <div className="relative mb-6">
-                                        <Avatar className="h-40 w-40 border-4 border-background shadow-2xl">
-                                            <AvatarImage src={`https://nui-img/${gameData.citizenid}`} alt={gameData.firstname} />
-                                            <AvatarFallback className="text-5xl bg-muted">
-                                                {gameData.firstname?.[0]}
+                                        <Avatar className="h-32 w-32 ring-4 ring-border/50 shadow-xl">
+                                            <AvatarImage src={session?.user?.image} alt={gameData.firstname} />
+                                            <AvatarFallback className="text-4xl bg-gradient-to-br from-primary/20 to-primary/5 text-primary font-bold">
+                                                {gameData.firstname?.[0]}{gameData.lastname?.[0]}
                                             </AvatarFallback>
                                         </Avatar>
-                                        <Badge className={cn(
-                                            "absolute bottom-2 right-2 px-3 py-1 text-sm shadow-lg border-2 border-background",
-                                            gameData.sex === 'ชาย' ? 'bg-blue-500' : gameData.sex === 'หญิง' ? 'bg-pink-500' : 'bg-purple-500'
-                                        )}>
-                                            {gameData.sex}
-                                        </Badge>
                                     </div>
 
-                                    <h3 className="text-3xl font-bold mb-2 tracking-tight">{gameData.firstname} {gameData.lastname}</h3>
+                                    <h3 className="text-3xl font-bold mb-3 tracking-tight">{gameData.firstname} {gameData.lastname}</h3>
 
-                                    <div className="mb-8">
+                                    {/* Job & Gender Badges */}
+                                    <div className="flex items-center gap-2 mb-8 flex-wrap justify-center">
                                         <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-background/50 backdrop-blur-sm border border-border/50 text-sm font-medium text-foreground/80">
                                             {(() => {
                                                 const job = gameData.job?.toLowerCase() || '';
@@ -165,6 +161,16 @@ export default function ProfilePage() {
                                                 return <Briefcase className="w-4 h-4 mr-2 text-gray-500" />;
                                             })()}
                                             {gameData.job_label}
+                                        </div>
+
+                                        {/* Gender Badge */}
+                                        <div className={cn(
+                                            "px-3 py-1.5 rounded-full text-xs font-semibold",
+                                            gameData.sex === 'ชาย' ? 'bg-blue-500/10 text-blue-500 border border-blue-500/20' :
+                                                gameData.sex === 'หญิง' ? 'bg-pink-500/10 text-pink-500 border border-pink-500/20' :
+                                                    'bg-purple-500/10 text-purple-500 border border-purple-500/20'
+                                        )}>
+                                            {gameData.sex}
                                         </div>
                                     </div>
 
