@@ -17,7 +17,7 @@ export async function POST(request) {
         const discordId = session.user.id;
 
         // Rate Limit by User ID (not IP)
-        if (!rateLimit(discordId, 5, 60000)) { // 5 requests per minute per user
+        if (!rateLimit(discordId, 20, 60000)) { // 20 requests per minute per user
             return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
         }
 

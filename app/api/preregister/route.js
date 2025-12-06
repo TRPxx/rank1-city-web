@@ -19,7 +19,7 @@ import { rateLimit } from '@/lib/rate-limit';
 export async function POST(request) {
     try {
         const ip = request.headers.get("x-forwarded-for") || "unknown";
-        if (!rateLimit(ip, 5, 60000)) { // 5 requests per minute
+        if (!rateLimit(ip, 20, 60000)) { // 20 requests per minute
             return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
         }
 

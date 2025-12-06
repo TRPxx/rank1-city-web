@@ -8,7 +8,7 @@ export async function POST(request) {
     try {
         // Rate Limit: 5 requests per minute (ป้องกัน spam check-in)
         const ip = request.headers.get("x-forwarded-for") || "unknown";
-        if (!rateLimit(ip, 5, 60000)) {
+        if (!rateLimit(ip, 20, 60000)) { // 20 requests per minute
             return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
         }
 

@@ -14,7 +14,7 @@ export async function POST(request) {
         const discordId = session.user.id;
 
         // Rate Limit by User ID (not IP) to support Internet Cafes
-        if (!rateLimit(discordId, 10, 60000)) { // 10 spins per minute per user
+        if (!rateLimit(discordId, 20, 60000)) { // 20 spins per minute per user
             return NextResponse.json({ error: 'Too Many Requests' }, { status: 429 });
         }
 

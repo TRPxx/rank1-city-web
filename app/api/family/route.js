@@ -42,7 +42,7 @@ export async function POST(request) {
     try {
         // [SECURITY FIX #7] Rate Limiting - 10 requests ต่อนาที
         const ip = request.headers.get("x-forwarded-for") || "unknown";
-        if (!rateLimit(ip, 10, 60000)) {
+        if (!rateLimit(ip, 20, 60000)) { // 20 requests per minute
             return NextResponse.json({ error: 'คำขอมากเกินไป กรุณารอสักครู่' }, { status: 429 });
         }
 
